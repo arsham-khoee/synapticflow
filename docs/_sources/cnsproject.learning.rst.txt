@@ -1,0 +1,29 @@
+learning package
+================
+
+Submodules
+----------
+
+cnsproject.learning.learning\_rules module
+------------------------------------------
+
+.. automodule:: cnsproject.learning.learning_rules
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+cnsproject.learning.rewards module
+----------------------------------
+
+.. automodule:: cnsproject.learning.rewards
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: cnsproject.learning
+   :members:
+   :undoc-members:
+   :show-inheritance:

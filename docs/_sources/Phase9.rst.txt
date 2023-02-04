@@ -1,0 +1,17 @@
+Phase 9
+=======
+.. raw:: html
+
+    <embed>
+        <iframe src="_downloads/Project-09.pdf" width="100%" height="1000px">
+    </iframe>
+    </embed>
+
+
+Code Manual
+-----------
+You will have to fill in the **ConvolutionalConnection** and **PoolingConnection** classes in `cnsproject.network.conne\
+ction module`. In **PoolingConnection**, it said to consider an attribute for specifying type of pooling (i.e. max pool \
+or average pool). You may ignore that and only implement the max pooling functionality. You will also add an attribute \
+in **ConvolutionalConnection** to specify the filter and use the functions/classes from previous phase. You might \
+need to reconsider *update* of your learning rules.

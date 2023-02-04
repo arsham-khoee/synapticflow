@@ -1,0 +1,12 @@
+Project Template
+================
+
+.. toctree::
+   :maxdepth: 4
+
+   cnsproject
+   cnsproject.network
+   cnsproject.learning
+   cnsproject.decision
+   cnsproject.encoding
+   cnsproject.plotting

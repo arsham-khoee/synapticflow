@@ -1,0 +1,21 @@
+plotting package
+================
+
+Submodules
+----------
+
+cnsproject.plotting.plotting module
+-----------------------------------
+
+.. automodule:: cnsproject.plotting.plotting
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: cnsproject.plotting
+   :members:
+   :undoc-members:
+   :show-inheritance:

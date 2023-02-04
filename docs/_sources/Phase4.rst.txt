@@ -1,0 +1,28 @@
+Phase 4
+=======
+.. raw:: html
+
+    <embed>
+        <iframe src="_downloads/Project-04.pdf" width="100%" height="1000px">
+    </iframe>
+    </embed>
+
+
+Code Manual
+-----------
+To complete this project, you will have to make modifications in **DenseConnection** and **RandomConnection** in \
+`cnsproject.network.connections module`. Make sure to read the documentation provided in **AbstractConnection** \
+beforehand. You can also define more modules inheriting **AbstractConnection** and defining different patterns \
+of connectivity, if desired. You may ignore *update* method as it will be required in case of learning.
+
+Furthermore, you might need to modify *forward* method of your neural populations to be able to handle input from \
+other populations. In other words, you will need to consider how to convert pre-synaptic spikes into current or make \
+changes to support spike as input to *forward*.
+
+A simple network is constructed from the components you are already familiar with, i.e. neural populations, \
+the connections among them, and monitor objects. So, instead of writing a long script everytime to run a simulation, \
+you can implement *run* method of **Network** in `cnsproject.network.network module`. Read the documentation provided \
+in **Network** class and see how it can reduce the amount of code you will have to write everytime. You will need \
+to complete this method in future to include other computations as well.
+
+Do not forget to implement the required visualization functions/classes. Use monitor to record the desired variables.

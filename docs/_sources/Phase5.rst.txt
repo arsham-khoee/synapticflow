@@ -1,0 +1,14 @@
+Phase 5
+=======
+.. raw:: html
+
+    <embed>
+        <iframe src="_downloads/Project-05.pdf" width="100%" height="1000px">
+    </iframe>
+    </embed>
+
+
+Code Manual
+-----------
+You will need to modify the `cnsproject.encoding.encoders module`. Make sure to read the documentation provided in \
+the parent class, **AbstractEncoder** and then jump into implementing the desired encoders.

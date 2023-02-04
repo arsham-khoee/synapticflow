@@ -1,0 +1,19 @@
+Phase 10
+========
+.. raw:: html
+
+    <embed>
+        <iframe src="_downloads/Project-10.pdf" width="100%" height="1000px">
+    </iframe>
+    </embed>
+
+
+Code Manual
+-----------
+Complete **WinnerTakeAllDecision** class in `cnsproject.decision.decision module`. You should also implement lateral \
+inhibition mechanism. It is suggested to place it in `utils.py` but you can implement it in any other file you like. \
+You will need to use **InputPopulation** for first layer to feed the filtered image into the network. You may also \
+need to modify network to handle the decision object and computations.
+
+In case you have not implemented any visualization utility for plotting the convolutional weights, you will need to \
+do so in this phase represent the extracted features.

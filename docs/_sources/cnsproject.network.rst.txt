@@ -1,0 +1,45 @@
+network package
+===============
+
+Submodules
+----------
+
+cnsproject.network.connections module
+-------------------------------------
+
+.. automodule:: cnsproject.network.connections
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+cnsproject.network.monitors module
+----------------------------------
+
+.. automodule:: cnsproject.network.monitors
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+cnsproject.network.network module
+---------------------------------
+
+.. automodule:: cnsproject.network.network
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+cnsproject.network.neural\_populations module
+---------------------------------------------
+
+.. automodule:: cnsproject.network.neural_populations
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: cnsproject.network
+   :members:
+   :undoc-members:
+   :show-inheritance:

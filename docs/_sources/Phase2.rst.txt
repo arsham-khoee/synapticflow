@@ -1,0 +1,31 @@
+Phase 2
+=======
+.. raw:: html
+
+    <embed>
+        <iframe src="_downloads/Project-02.pdf" width="100%" height="1000px">
+    </iframe>
+    </embed>
+
+
+Code Manual
+-----------
+For this phase, you will need to complete **ELIFPopulation** and **AELIFPopulation** in \
+`cnsproject.network.neural\_populations module`. You can ignore the following attributes in this phase:
+
+* spike_trace
+* additive_spike_trace
+* tau_s
+* trace_scale
+* is_inhibitory
+* learning
+
+The first four parameters are responsible for spike traces. You can simply call *forward* and *compute_decay* of the \
+parent class at the end of the corresponding method in **ELIFPopulation** and **AELIFPopulation**. You can change \
+their parent to **LIFPopulation** as well but more care might be needed for spike trace computation (Since the parent \
+contains more computation procedures than just a single spike trace update).
+
+Make sure to read the documentation provided in **NeuralPopulation** class before getting started.
+You will also need an object of **Monitor** to record parameters of the neuron through time. The class is located in \
+`cnsproject.network.monitors module`. Read the documentation and instruction provided in its file for further details.
+Implement all your visualization functions and classes in `plotting module`.

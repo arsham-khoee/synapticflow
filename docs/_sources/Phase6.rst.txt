@@ -1,0 +1,21 @@
+Phase 6
+=======
+.. raw:: html
+
+    <embed>
+        <iframe src="_downloads/Project-06.pdf" width="100%" height="1000px">
+    </iframe>
+    </embed>
+
+
+Code Manual
+-----------
+You will need to complete the body of **STDP** and **FlatSTDP** classes in `cnsproject.learning.learning_rules module`. \
+Read the documentation provided in **LearningRule** before getting started.
+
+To move further in the project, you will have to make a dense connection between an instance of **InputPopulation** \
+and an instance of one of the neural populations you have implemented in phases 1 and 2. The **InputPopulation** will \
+take care of input spikes and you will not need to modify unless you wish it to have a different behavior. You can \
+also add other modules and functions if you like. You will also need to modify *run* method of **Network** accordingly. \
+Also do not forget to complete *update* and *compute* in **Connection classes** in case you left them intact or \
+incomplete in previous projects.
