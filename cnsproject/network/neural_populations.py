@@ -346,7 +346,7 @@ class IFPopulation(NeuralPopulation):
         2. Fill the body accordingly.
         """
 
-    def forward(self, traces: torch.Tensor) -> None:
+    def forward(self, x: torch.Tensor) -> None:
         """
         TODO.
 
@@ -434,7 +434,7 @@ class LIFPopulation(NeuralPopulation):
         2. Fill the body accordingly.
         """
 
-    def forward(self, traces: torch.Tensor) -> None:
+    def forward(self, x: torch.Tensor) -> None:
         """
         TODO.
 
@@ -523,7 +523,7 @@ class ELIFPopulation(NeuralPopulation):
         2. Fill the body accordingly.
         """
 
-    def forward(self, traces: torch.Tensor) -> None:
+    def forward(self, x: torch.Tensor) -> None:
         """
         TODO.
 
@@ -613,7 +613,7 @@ class AELIFPopulation(NeuralPopulation):
         2. Fill the body accordingly.
         """
 
-    def forward(self, traces: torch.Tensor) -> None:
+    def forward(self, x: torch.Tensor) -> None:
         """
         TODO.
 
