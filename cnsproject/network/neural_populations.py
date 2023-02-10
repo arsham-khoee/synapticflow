@@ -534,16 +534,16 @@ class LIFPopulation(NeuralPopulation):
         shape: Optional[Iterable[int]] = None,
         spike_trace: bool = False,
         additive_spike_trace: bool = False,
-        tau_s: Union[float, torch.Tensor] = 10.,
+        tau_s: Union[float, torch.Tensor] = 20.,
         threshold: Union[float, torch.Tensor] = -52.,
         rest_pot: Union[float, torch.Tensor] = -62.,
         refrac_length: Union[float, torch.Tensor] = 5,
-        dt: float = 0.1,
+        dt: float = 1,
         lower_bound: float = None,
         sum_input: bool = False,
         trace_scale: Union[float, torch.Tensor] = 1.,
         is_inhibitory: bool = False,
-        tau_decay: Union[float, torch.Tensor] = 100.0,
+        tau_decay: Union[float, torch.Tensor] = 5.0,
         learning: bool = True,
         **kwargs
     ) -> None:
@@ -628,26 +628,14 @@ class LIFPopulation(NeuralPopulation):
         """
         Compute new potential of neuron by given input tensor x and refrac_count
         """
-        if self.decay:
-            if self.reset_pot is None or self.reset_pot == 0:
-                self.v = self.v + (x - v) / self.tau_m * self.dt
-            else:
-                self.v = self.v + (x - (self.v - self.reset_pot)) / self.tau_m * self.dt
-        
-        else:
-            if self.reset_pot is None or self.reset_pot == 0:
-                self.v = self.v * (1. -1. / self.tau_m) * self.dt + x;
-            else:
-                self.v = self.v - (self.v - self.reset_pot) / self.tau_m * self.dt + x
-                
         # Compute new potential with decay voltages.
-        # self.v = self.decay * (self.v - self.rest_pot) + self.rest_pot
+        self.v = self.decay * (self.v - self.rest_pot) + self.rest_pot
 
         # Integrate inputs.
-        # x.masked_fill_(self.refrac_count > 0, 0.0)
+        x.masked_fill_(self.refrac_count > 0, 0.0)
 
         # interlaced
-        # self.v += x 
+        self.v += x 
 
 
     def compute_spike(self) -> None:
@@ -655,7 +643,7 @@ class LIFPopulation(NeuralPopulation):
         Compute spike condition and make changes directly on spike tensor
         """
         # Check for spiking neuron
-        self.s = self.v >= self.pot_threshold
+        self.s = self.v >= self.threshold
 
 
     @abstractmethod
