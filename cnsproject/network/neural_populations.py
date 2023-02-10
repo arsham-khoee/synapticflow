@@ -319,15 +319,45 @@ class IFPopulation(NeuralPopulation):
     def __init__(
         self,
         shape: Iterable[int],
-        spike_trace: bool = True,
-        additive_spike_trace: bool = True,
+        spike_trace: bool = False,
+        additive_spike_trace: bool = False,
         tau_s: Union[float, torch.Tensor] = 10.,
+        threshold: Union[float, torch.Tensor] = -52.,
+        rest_pot: Union[float, torch.Tensor] = -62.,
+        refrac_length: Union[float, torch.Tensor] = 5,
+        lower_bound: float = None,
         sum_input: bool = False,
         trace_scale: Union[float, torch.Tensor] = 1.,
         is_inhibitory: bool = False,
         learning: bool = True,
         **kwargs
     ) -> None:
+        """
+        Arguments
+        ---------
+        shape : Iterable of int
+            Define the topology of neurons in the population.
+        spike_trace : bool, Optional
+            Specify whether to record spike traces. The default is False.
+        additive_spike_trace : bool, Optional
+            Specify whether to record spike traces additively. The default is False.
+        tau_s : float or torch.Tensor, Optional
+            Time constant of spike trace decay. The default is 10.0.
+        threshold : float or torch.Tensor, Optional
+            Threshold potential to spike. The default is -52.0v.
+        rest_pot : float or torch.Tensor, Optional
+            Rest potential for spike. The default is -62.0v.
+        refrac_length : float or torch.Tensor, Optional
+            Neuron refractor interval length. The default is 5 time steps.
+        lower_bound : float, Optional
+            Lower bound for neuron potential. The default is None.
+        trace_scale : float or torch.Tensor, Optional
+            The scaling factor of spike traces. The default is 1.0.
+        is_inhibitory : False, Optional
+            Whether the neurons are inhibitory or excitatory. The default is False.
+        learning : bool, Optional
+            Define the training mode. The default is True.
+        """
         super().__init__(
             shape=shape,
             spike_trace=spike_trace,
@@ -339,12 +369,12 @@ class IFPopulation(NeuralPopulation):
             learning=learning,
         )
 
-        """
-        TODO.
-
-        1. Add the required parameters.
-        2. Fill the body accordingly.
-        """
+        self.register_buffer("rest_pot", torch.tensor(rest_pot, dtype=torch.float))
+        self.register_buffer("pot_threshold", torch.tensor(threshold, dtype=torch.float))
+        self.register_buffer("refrac_length", torch.tensor(refrac_length))
+        self.register_buffer("u", torch.FloatTensor()) # Neuron's potential
+        self.register_buffer("refrac_count", torch.FloatTensor()) # Refractor counter
+        self.lower_bound = lower_bound
 
     def forward(self, x: torch.Tensor) -> None:
         """
