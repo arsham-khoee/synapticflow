@@ -964,7 +964,7 @@ class QLIFPopulation(NeuralPopulation):
         Compute new potential of neuron by given input tensor x and refrac_count
         """
         # Compute new potential of neuron
-        self.v += (self.refrac_count <= 0).float() * (x + self.a0 * (self.v - self.rest_pot) * (self.v - self.critical_pot)) / self.tau_m
+        self.v += (self.refrac_count <= 0).float() * (x + self.a0 * (self.v - self.rest_pot) * (self.v - self.critical_pot)) / self.tau_s
 
     def compute_spike(self) -> None:
         """
