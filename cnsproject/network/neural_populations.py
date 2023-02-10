@@ -629,7 +629,7 @@ class LIFPopulation(NeuralPopulation):
         Compute new potential of neuron by given input tensor x and refrac_count
         """
         # Compute new potential with decay voltages.
-        self.v = self.decay * (self.v - self.rest) + self.rest
+        self.v = self.decay * (self.v - self.rest_pot) + self.rest_pot
 
         # Integrate inputs.
         x.masked_fill_(self.refrac_count > 0, 0.0)
