@@ -60,6 +60,8 @@ class NeuralPopulation(torch.nn.Module):
 
     Arguments
     ---------
+    n : int, Optional
+        Number of neurons in the population
     shape : Iterable of int
         Define the topology of neurons in the population.
     spike_trace : bool, Optional
@@ -79,7 +81,8 @@ class NeuralPopulation(torch.nn.Module):
 
     def __init__(
         self,
-        shape: Iterable[int],
+        n: Optional[int] = None,
+        shape: Optional[Iterable[int]] = None,
         spike_trace: bool = True,
         additive_spike_trace: bool = True,
         tau_s: Union[float, torch.Tensor] = 15.,
@@ -91,6 +94,20 @@ class NeuralPopulation(torch.nn.Module):
     ) -> None:
         super().__init__()
 
+        assert (n is not None or shape is not None), "Must provide either number of neurons or shape of layer"
+        
+        if n is None:
+            self.n = reduce(mul, shape) # Number of neurons product of shape
+        else:
+            self.n = n # Number of neurons
+            
+        if shape is None:
+            self.shape = [self.n] # Shape is equal to the of the layer
+        else:
+            self.shape = shape # Shape is passed in as an argument
+        
+        assert self.n == reduce(mul, self.shape), "Number of neurons and shape do not match"
+        
         self.shape = shape
         self.n = reduce(mul, self.shape)
         self.spike_trace = spike_trace
@@ -243,6 +260,8 @@ class InputPopulation(NeuralPopulation):
 
     Arguments
     ---------
+    n : int, Optional
+        Number of neurons in the population.
     shape : Iterable of int
         Define the topology of neurons in the population.
     spike_trace : bool, Optional
@@ -260,7 +279,8 @@ class InputPopulation(NeuralPopulation):
 
     def __init__(
         self,
-        shape: Iterable[int],
+        n: Optional[int] = None,
+        shape: Optional[Iterable[int]] = None,
         spike_trace: bool = True,
         additive_spike_trace: bool = True,
         tau_s: Union[float, torch.Tensor] = 10.,
@@ -270,6 +290,7 @@ class InputPopulation(NeuralPopulation):
         **kwargs
     ) -> None:
         super().__init__(
+            n = n,
             shape=shape,
             spike_trace=spike_trace,
             additive_spike_trace=additive_spike_trace,
@@ -318,7 +339,8 @@ class IFPopulation(NeuralPopulation):
 
     def __init__(
         self,
-        shape: Iterable[int],
+        n: Optional[int] = None,
+        shape: Optional[Iterable[int]] = None,
         spike_trace: bool = False,
         additive_spike_trace: bool = False,
         tau_s: Union[float, torch.Tensor] = 10.,
@@ -336,6 +358,8 @@ class IFPopulation(NeuralPopulation):
         """
         Arguments
         ---------
+        n : int, Optional
+            Number of neurons in the population.
         shape : Iterable of int
             Define the topology of neurons in the population.
         spike_trace : bool, Optional
@@ -378,6 +402,7 @@ class IFPopulation(NeuralPopulation):
         self.register_buffer("v", torch.FloatTensor()) # Neuron's potential
         self.register_buffer("refrac_count", torch.FloatTensor()) # Refractor counter
         self.compute_decay(dt) # Compute decays and set time steps
+        self.reset_state_variables()
         self.lower_bound = lower_bound
         
 
@@ -389,20 +414,11 @@ class IFPopulation(NeuralPopulation):
            responsible for one step of neuron simulation.
         2. You might need to call the method from parent class.
         """
-        # Compute new potential
-        self.v += (self.refrac_count <= 0).float() * x
+        self.compute_potential(x) # Compute new potential
         
-        # Check for spiking neuron
-        self.s = (self.v >= self.pot_threshold)
+        self.compute_spike() # Check if neuron is spiking
         
-        # Decrease refactor count by time step length
-        self.refrac_count -= self.dt
-        
-        # Set refrac_count equal to refrac_length if spiking is occurred.
-        self.refrac_count.masked_fill_(self.s, self.refrac_length)
-        
-        # Set potential of neuron to rest potential if spiking is occurred.
-        self.v.mask_fill_(self.s, self.rest_pot)
+        self.refractory_and_reset() # Applies refractory and reset conditions
         
         # Check lower bound condition for neuron.
         if self.lower_bound is not None:
@@ -488,7 +504,8 @@ class LIFPopulation(NeuralPopulation):
 
     def __init__(
         self,
-        shape: Iterable[int],
+        n: Optional[int] = None,
+        shape: Optional[Iterable[int]] = None,
         spike_trace: bool = True,
         additive_spike_trace: bool = True,
         tau_s: Union[float, torch.Tensor] = 10.,
@@ -498,6 +515,7 @@ class LIFPopulation(NeuralPopulation):
         **kwargs
     ) -> None:
         super().__init__(
+            n=n,
             shape=shape,
             spike_trace=spike_trace,
             additive_spike_trace=additive_spike_trace,
@@ -577,7 +595,8 @@ class ELIFPopulation(NeuralPopulation):
 
     def __init__(
         self,
-        shape: Iterable[int],
+        n: Optional[int] = None,
+        shape: Optional[Iterable[int]] = None,
         spike_trace: bool = True,
         additive_spike_trace: bool = True,
         tau_s: Union[float, torch.Tensor] = 10.,
@@ -587,6 +606,7 @@ class ELIFPopulation(NeuralPopulation):
         **kwargs
     ) -> None:
         super().__init__(
+            n=n,
             shape=shape,
             spike_trace=spike_trace,
             additive_spike_trace=additive_spike_trace,
@@ -667,7 +687,8 @@ class AELIFPopulation(NeuralPopulation):
 
     def __init__(
         self,
-        shape: Iterable[int],
+        n: Optional[int] = None,
+        shape: Optional[Iterable[int]] = None,
         spike_trace: bool = True,
         additive_spike_trace: bool = True,
         tau_s: Union[float, torch.Tensor] = 10.,
@@ -677,6 +698,7 @@ class AELIFPopulation(NeuralPopulation):
         **kwargs
     ) -> None:
         super().__init__(
+            n=n,
             shape=shape,
             spike_trace=spike_trace,
             additive_spike_trace=additive_spike_trace,
