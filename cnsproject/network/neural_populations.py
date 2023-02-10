@@ -108,8 +108,6 @@ class NeuralPopulation(torch.nn.Module):
         
         assert self.n == reduce(mul, self.shape), "Number of neurons and shape do not match"
         
-        self.shape = shape
-        self.n = reduce(mul, self.shape)
         self.spike_trace = spike_trace
         self.additive_spike_trace = additive_spike_trace
         self.sum_input = sum_input # Whether to sum all inputs
@@ -130,7 +128,7 @@ class NeuralPopulation(torch.nn.Module):
 
         # You can use `torch.Tensor()` instead of `torch.zeros(*shape, dtype=torch.bool)` if \
         # `reset_state_variables` is intended to be called before every simulation.
-        self.register_buffer("s", torch.zeros(*self.shape, dtype=torch.bool))
+        self.register_buffer("s", torch.ByteTensor())
         
         # Add summed property to sum all given inputs
         if self.sum_input:
@@ -251,6 +249,21 @@ class NeuralPopulation(torch.nn.Module):
         self.learning = mode
         return super().train(mode)
 
+    def set_batch_size(self, batch_size) -> None:
+        """
+        Sets mini-batch size. Called when layer is added to a network.
+        
+        Parameters
+        ----------
+        batch_size : int,
+            Mini-batch size
+            
+        Returns
+        -------
+        None
+        """
+        self.batch_size = batch_size
+        self.s = torch.zeros(batch_size, *self.shape, device=self.s.device, dtype=torch.bool)
 
 class InputPopulation(NeuralPopulation):
     """
@@ -386,6 +399,7 @@ class IFPopulation(NeuralPopulation):
             Define the training mode. The default is True.
         """
         super().__init__(
+            n=n,
             shape=shape,
             spike_trace=spike_trace,
             additive_spike_trace=additive_spike_trace,
@@ -422,7 +436,7 @@ class IFPopulation(NeuralPopulation):
         
         # Check lower bound condition for neuron.
         if self.lower_bound is not None:
-            self.v.mask_fill_(self.lower_bound > self.v, self.lower_bound)
+            self.v.masked_fill_(self.lower_bound > self.v, self.lower_bound)
             
         super().forward(x)
         
@@ -458,7 +472,7 @@ class IFPopulation(NeuralPopulation):
         self.refrac_count.masked_fill_(self.s, self.refrac_length)
         
         # Set potential of neuron to rest potential if spiking is occurred.
-        self.v.mask_fill_(self.s, self.rest_pot)
+        self.v.masked_fill_(self.s, self.rest_pot)
         
 
     @abstractmethod
@@ -493,6 +507,18 @@ class IFPopulation(NeuralPopulation):
         self.v.fill_(self.rest_pot) # Reset neuron voltages
         self.refrac_count.zero_() # Refractory period reset
 
+    def set_batch_size(self, batch_size: int) -> None:
+        """
+        Sets mini-batch size. Called when layer is added to a network.
+        
+        Parameters
+        ----------
+        batch_size: int,
+            Mini-batch size.
+        """
+        super().set_batch_size(batch_size=batch_size)
+        self.v = self.rest_pot * torch.ones(batch_size, *self.shape, device=self.v.device)
+        self.refrac_count = torch.zeros_like(self.v, device=self.refrac_count.device)
 
 class LIFPopulation(NeuralPopulation):
     """
