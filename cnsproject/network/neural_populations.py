@@ -128,7 +128,7 @@ class NeuralPopulation(torch.nn.Module):
 
         Parameters
         ----------
-        traces : torch.Tensor
+        x : torch.Tensor
             Input spike trace.
 
         Returns
@@ -264,6 +264,7 @@ class InputPopulation(NeuralPopulation):
         spike_trace: bool = True,
         additive_spike_trace: bool = True,
         tau_s: Union[float, torch.Tensor] = 10.,
+        sum_input: bool = False,
         trace_scale: Union[float, torch.Tensor] = 1.,
         learning: bool = True,
         **kwargs
@@ -273,17 +274,18 @@ class InputPopulation(NeuralPopulation):
             spike_trace=spike_trace,
             additive_spike_trace=additive_spike_trace,
             tau_s=tau_s,
+            sum_input=sum_input,
             trace_scale=trace_scale,
             learning=learning,
         )
 
-    def forward(self, traces: torch.Tensor) -> None:
+    def forward(self, x: torch.Tensor) -> None:
         """
         Simulate the neural population for a single step.
 
         Parameters
         ----------
-        traces : torch.Tensor
+        x : torch.Tensor
             Input spike trace.
 
         Returns
@@ -291,9 +293,9 @@ class InputPopulation(NeuralPopulation):
         None
 
         """
-        self.s = traces
+        self.s = x
 
-        super().forward(traces)
+        super().forward(x)
 
     def reset_state_variables(self) -> None:
         """
@@ -305,6 +307,95 @@ class InputPopulation(NeuralPopulation):
 
         """
         super().reset_state_variables()
+
+class IFPopulation(NeuralPopulation):
+    """
+    Layer of Integrate and Fire neurons.
+
+    Implement IF neural dynamics(Parameters of the model must be modifiable).\
+    Follow the template structure of NeuralPopulation class for consistency.
+    """
+
+    def __init__(
+        self,
+        shape: Iterable[int],
+        spike_trace: bool = True,
+        additive_spike_trace: bool = True,
+        tau_s: Union[float, torch.Tensor] = 10.,
+        sum_input: bool = False,
+        trace_scale: Union[float, torch.Tensor] = 1.,
+        is_inhibitory: bool = False,
+        learning: bool = True,
+        **kwargs
+    ) -> None:
+        super().__init__(
+            shape=shape,
+            spike_trace=spike_trace,
+            additive_spike_trace=additive_spike_trace,
+            tau_s=tau_s,
+            sum_input=sum_input,
+            trace_scale=trace_scale,
+            is_inhibitory=is_inhibitory,
+            learning=learning,
+        )
+
+        """
+        TODO.
+
+        1. Add the required parameters.
+        2. Fill the body accordingly.
+        """
+
+    def forward(self, traces: torch.Tensor) -> None:
+        """
+        TODO.
+
+        1. Make use of other methods to fill the body. This is the main method\
+           responsible for one step of neuron simulation.
+        2. You might need to call the method from parent class.
+        """
+        pass
+
+    def compute_potential(self) -> None:
+        """
+        TODO.
+
+        Implement the neural dynamics for computing the potential of LIF\
+        neurons. The method can either make changes to attributes directly or\
+        return the result for further use.
+        """
+        pass
+
+    def compute_spike(self) -> None:
+        """
+        TODO.
+
+        Implement the spike condition. The method can either make changes to\
+        attributes directly or return the result for further use.
+        """
+        pass
+
+    @abstractmethod
+    def refractory_and_reset(self) -> None:
+        """
+        TODO.
+
+        Implement the refractory and reset conditions. The method can either\
+        make changes to attributes directly or return the computed value for\
+        further use.
+        """
+        pass
+
+    @abstractmethod
+    def compute_decay(self) -> None:
+        """
+        TODO.
+
+        Implement the dynamics of decays. You might need to call the method from
+        parent class.
+        """
+        pass
+
 
 
 class LIFPopulation(NeuralPopulation):
