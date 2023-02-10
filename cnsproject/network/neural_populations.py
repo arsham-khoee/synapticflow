@@ -325,6 +325,7 @@ class IFPopulation(NeuralPopulation):
         threshold: Union[float, torch.Tensor] = -52.,
         rest_pot: Union[float, torch.Tensor] = -62.,
         refrac_length: Union[float, torch.Tensor] = 5,
+        dt: float = 0.1,
         lower_bound: float = None,
         sum_input: bool = False,
         trace_scale: Union[float, torch.Tensor] = 1.,
@@ -349,6 +350,8 @@ class IFPopulation(NeuralPopulation):
             Rest potential for spike. The default is -62.0v.
         refrac_length : float or torch.Tensor, Optional
             Neuron refractor interval length. The default is 5 time steps.
+        dt : float, Optional
+            Length of each time step.
         lower_bound : float, Optional
             Lower bound for neuron potential. The default is None.
         trace_scale : float or torch.Tensor, Optional
@@ -372,9 +375,11 @@ class IFPopulation(NeuralPopulation):
         self.register_buffer("rest_pot", torch.tensor(rest_pot, dtype=torch.float))
         self.register_buffer("pot_threshold", torch.tensor(threshold, dtype=torch.float))
         self.register_buffer("refrac_length", torch.tensor(refrac_length))
-        self.register_buffer("u", torch.FloatTensor()) # Neuron's potential
+        self.register_buffer("v", torch.FloatTensor()) # Neuron's potential
         self.register_buffer("refrac_count", torch.FloatTensor()) # Refractor counter
+        self.compute_decay(dt) # Compute decays and set time steps
         self.lower_bound = lower_bound
+        
 
     def forward(self, x: torch.Tensor) -> None:
         """
@@ -384,48 +389,93 @@ class IFPopulation(NeuralPopulation):
            responsible for one step of neuron simulation.
         2. You might need to call the method from parent class.
         """
-        pass
+        # Compute new potential
+        self.v += (self.refrac_count <= 0).float() * x
+        
+        # Check for spiking neuron
+        self.s = (self.v >= self.pot_threshold)
+        
+        # Decrease refactor count by time step length
+        self.refrac_count -= self.dt
+        
+        # Set refrac_count equal to refrac_length if spiking is occurred.
+        self.refrac_count.masked_fill_(self.s, self.refrac_length)
+        
+        # Set potential of neuron to rest potential if spiking is occurred.
+        self.v.mask_fill_(self.s, self.rest_pot)
+        
+        # Check lower bound condition for neuron.
+        if self.lower_bound is not None:
+            self.v.mask_fill_(self.lower_bound > self.v, self.lower_bound)
+            
+        super().forward(x)
+        
 
-    def compute_potential(self) -> None:
+    def compute_potential(self, x: torch.Tensor) -> None:
         """
-        TODO.
-
-        Implement the neural dynamics for computing the potential of LIF\
-        neurons. The method can either make changes to attributes directly or\
-        return the result for further use.
+        Compute new potential of neuron by given input tensor x and refrac_count
         """
-        pass
+        # Compute new potential
+        self.v += (self.refrac_count <= 0).float() * x
 
     def compute_spike(self) -> None:
         """
-        TODO.
-
-        Implement the spike condition. The method can either make changes to\
-        attributes directly or return the result for further use.
+        Compute spike condition and make changes directly on spike tensor
         """
-        pass
+        # Check for spiking neuron
+        self.s = (self.v >= self.pot_threshold)
 
     @abstractmethod
     def refractory_and_reset(self) -> None:
         """
-        TODO.
-
-        Implement the refractory and reset conditions. The method can either\
-        make changes to attributes directly or return the computed value for\
-        further use.
+        In this function, three things will be done:
+            1 - decrease refrac_count by time step size
+            2 - Set refrac_count to refrac_length if spiking is occurred
+            3 - Set neuron potential to rest_pot if spiking is occurred
         """
-        pass
+        super().refractory_and_reset()
+        
+        # Decrease refactor count by time step length
+        self.refrac_count -= self.dt
+        
+        # Set refrac_count equal to refrac_length if spiking is occurred.
+        self.refrac_count.masked_fill_(self.s, self.refrac_length)
+        
+        # Set potential of neuron to rest potential if spiking is occurred.
+        self.v.mask_fill_(self.s, self.rest_pot)
+        
 
     @abstractmethod
-    def compute_decay(self) -> None:
+    def compute_decay(self, dt: float) -> None:
         """
-        TODO.
+        Set the decays.
 
-        Implement the dynamics of decays. You might need to call the method from
-        parent class.
+        Parameters
+        ----------
+        dt : float,
+            Length of time steps.
+
+        Returns
+        -------
+        None
+
         """
-        pass
+        self.dt = dt
+        super().compute_decay()
 
+
+    def reset_state_variables(self) -> None:
+        """
+        Reset all internal state variables.
+
+        Returns
+        -------
+        None
+
+        """
+        super().reset_state_variables()
+        self.v.fill_(self.rest_pot) # Reset neuron voltages
+        self.refrac_count.zero_() # Refractory period reset
 
 
 class LIFPopulation(NeuralPopulation):
