@@ -84,6 +84,7 @@ class NeuralPopulation(torch.nn.Module):
         additive_spike_trace: bool = True,
         tau_s: Union[float, torch.Tensor] = 15.,
         trace_scale: Union[float, torch.Tensor] = 1.,
+        sum_input: bool = False,
         is_inhibitory: bool = False,
         learning: bool = True,
         **kwargs
@@ -94,6 +95,7 @@ class NeuralPopulation(torch.nn.Module):
         self.n = reduce(mul, self.shape)
         self.spike_trace = spike_trace
         self.additive_spike_trace = additive_spike_trace
+        self.sum_input = sum_input # Whether to sum all inputs
 
         if self.spike_trace:
             # You can use `torch.Tensor()` instead of `torch.zeros(*shape)` if `reset_state_variables`
@@ -112,10 +114,15 @@ class NeuralPopulation(torch.nn.Module):
         # You can use `torch.Tensor()` instead of `torch.zeros(*shape, dtype=torch.bool)` if \
         # `reset_state_variables` is intended to be called before every simulation.
         self.register_buffer("s", torch.zeros(*self.shape, dtype=torch.bool))
+        
+        # Add summed property to sum all given inputs
+        if self.sum_input:
+            self.register_buffer("summed", torch.FloatTensor()) # Inputs summation
+        
         self.dt = None
 
     @abstractmethod
-    def forward(self, traces: torch.Tensor) -> None:
+    def forward(self, x: torch.Tensor) -> None:
         """
         Simulate the neural population for a single step.
 
@@ -136,6 +143,10 @@ class NeuralPopulation(torch.nn.Module):
                 self.traces += self.trace_scale * self.s.float()
             else:
                 self.traces.masked_fill_(self.s, 1)
+        
+        # Add current recent input tensor to previous ones
+        if self.sum_input:
+            self.summed += x.float()
 
     @abstractmethod
     def compute_potential(self) -> None:
