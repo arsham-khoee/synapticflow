@@ -5,7 +5,7 @@ Module for neuronal dynamics and populations.
 from functools import reduce
 from abc import abstractmethod
 from operator import mul
-from typing import Union, Iterable
+from typing import Union, Iterable, Optional
 
 import torch
 
