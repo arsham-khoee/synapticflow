@@ -197,7 +197,7 @@ class NeuralPopulation(torch.nn.Module):
         self.dt = torch.tensor(self.dt)
 
         if self.spike_trace:
-            self.trace_decay = torch.exp(-self.dt/self.tau_s)
+            self.trace_decay = torch.exp(-self.dt/self.tau_s)  # Spike trace decay (per timestep).
 
     def reset_state_variables(self) -> None:
         """
@@ -212,6 +212,9 @@ class NeuralPopulation(torch.nn.Module):
 
         if self.spike_trace:
             self.traces.zero_()
+
+        if self.sum_input:
+            self.summed.zero_()  # Inputs summation.
 
     def train(self, mode: bool = True) -> "NeuralPopulation":
         """
