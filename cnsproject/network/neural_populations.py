@@ -652,9 +652,10 @@ class ELIFPopulation(NeuralPopulation):
         )
 
         self.register_buffer("rest_pot", torch.tensor(rest_pot, dtype=torch.float)) # Rest potential
+        self.register_buffer("tau_s", torch.tensor(tau_s, dtype=torch.float)) # Tau_s
         self.register_buffer("reset_pot", torch.tensor(reset_pot, dtype=torch.float)) # Reset potential
         self.register_buffer("theta_rh", torch.tensor(theta_rh, dtype=torch.float)) # Theta_rh potential
-        self.register_buffer("delta_T". torch.tensor(delta_T, dtype=torch.float)) # Delta_T : sharpness
+        self.register_buffer("delta_T", torch.tensor(delta_T, dtype=torch.float)) # Delta_T : sharpness
         self.register_buffer("pot_threshold", torch.tensor(threshold, dtype=torch.float)) # Spiking Threshold
         self.register_buffer("refrac_length", torch.tensor(refrac_length)) # Refractor length
         self.register_buffer("v", torch.FloatTensor()) # Neuron's potential
@@ -692,7 +693,8 @@ class ELIFPopulation(NeuralPopulation):
         Compute new potential of neuron by given input tensor x and refrac_count
         """
         # Compute new potential of neuron
-        self.v = self.v + (x + self.rest_pot - self.v + self.delta_T * torch.exp((self.v - self.theta_rh)/ self.delta_T) / self.tau_s)
+        if (self.refrac_count <= 0):
+            self.v = self.v + (x + self.rest_pot - self.v + self.delta_T * torch.exp((self.v - self.theta_rh)/ self.delta_T)) / self.tau_s * self.dt
 
     def compute_spike(self) -> None:
         """
