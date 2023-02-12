@@ -888,6 +888,170 @@ class ELIFPopulation(NeuralPopulation):
         self.v.fill_(self.reset_pot) # Reset neuron voltages
         self.refrac_count.zero_() # Refractory period reset
 
+class QLIFPopulation(NeuralPopulation):
+    """
+    Layer of Exponential Leaky Integrate and Fire neurons.
+
+    Implement ELIF neural dynamics(Parameters of the model must be modifiable).\
+    Follow the template structure of NeuralPopulation class for consistency.
+
+    Note: You can use LIFPopulation as parent class as well.
+    """
+
+    def __init__(
+        self,
+        n: Optional[int] = None,
+        shape: Optional[Iterable[int]] = None,
+        spike_trace: bool = False,
+        additive_spike_trace: bool = False,
+        tau_s: Union[float, torch.Tensor] = 10.,
+        threshold: Union[float, torch.Tensor] = -52.,
+        theta_rh: Union[float, torch.Tensor] = -60.,
+        delta_T: Union[float, torch.Tensor] = 1.,
+        a0: Union[float, torch.Tensor] = 1,
+        critical_pot: Union[float, torch.Tensor] = 0.8,
+        rest_pot: Union[float, torch.Tensor] = -62.,
+        reset_pot: Union[float, torch.Tensor] = -62.,
+        refrac_length: Union[float, torch.Tensor] = 5,
+        dt: float = 0.1,
+        lower_bound: float = None,
+        sum_input: bool = False,
+        trace_scale: Union[float, torch.Tensor] = 1.,
+        is_inhibitory: bool = False,
+        learning: bool = True,
+        **kwargs
+    ) -> None:
+        super().__init__(
+            n=n,
+            shape=shape,
+            spike_trace=spike_trace,
+            additive_spike_trace=additive_spike_trace,
+            tau_s=tau_s,
+            trace_scale=trace_scale,
+            is_inhibitory=is_inhibitory,
+            learning=learning,
+        )
+
+        self.register_buffer("rest_pot", torch.tensor(rest_pot, dtype=torch.float)) # Rest potential
+        self.register_buffer("tau_s", torch.tensor(tau_s, dtype=torch.float)) # Tau_s
+        self.register_buffer("reset_pot", torch.tensor(reset_pot, dtype=torch.float)) # Reset potential
+        self.register_buffer("theta_rh", torch.tensor(theta_rh, dtype=torch.float)) # Theta_rh potential
+        self.register_buffer("delta_T", torch.tensor(delta_T, dtype=torch.float)) # Delta_T : sharpness
+        self.register_buffer("pot_threshold", torch.tensor(threshold, dtype=torch.float)) # Spiking Threshold
+        self.register_buffer("a0", torch.tensor(a0, dtype=torch.float))
+        self.register_buffer("critical_pot", torch.tensor(critical_pot, dtype=torch.float))
+        self.register_buffer("refrac_length", torch.tensor(refrac_length)) # Refractor length
+        self.register_buffer("v", torch.FloatTensor()) # Neuron's potential
+        self.register_buffer("refrac_count", torch.FloatTensor()) # Refractor counter
+        self.compute_decay(dt) # Compute decays and set time steps
+        self.reset_state_variables()
+        self.lower_bound = lower_bound
+
+    def forward(self, x: torch.Tensor) -> None:
+        """
+        Simulate one step of a neuron
+        Parameters
+        ----------
+        x : Tensor,
+            Input current.
+            
+        Returns
+        -------
+        None
+        """
+        self.compute_potential(x) # Compute new potential
+        
+        self.compute_spike() # Check if neuron is spiking
+        
+        self.refractory_and_reset() # Applies refractory and reset conditions
+        
+        # Check lower bound condition for neuron.
+        if self.lower_bound is not None:
+            self.v.masked_fill_(self.lower_bound > self.v, self.lower_bound)
+            
+        super().forward(x)
+
+    def compute_potential(self, x: torch.Tensor) -> None:
+        """
+        Compute new potential of neuron by given input tensor x and refrac_count
+        """
+        # Compute new potential of neuron
+        self.v += (self.refrac_count <= 0).float() * (x + self.a0 * (self.v - self.rest_pot) * (self.v - self.critical_pot)) / self.tau_s
+
+    def compute_spike(self) -> None:
+        """
+        Compute spike condition and make changes directly on spike tensor
+        """
+        # Check if neuron is spiking or not
+        self.s = (self.v >= self.pot_threshold)
+
+    @abstractmethod
+    def refractory_and_reset(self) -> None:
+        """
+        In this function, three things will be done:
+            1 - decrease refrac_count by time step size
+            2 - Set refrac_count to refrac_length if spiking is occurred
+            3 - Set neuron potential to rest_pot if spiking is occurred
+        """
+        super().refractory_and_reset()
+        
+        # Decrease refactor count by time step length
+        self.refrac_count -= self.dt
+        
+        # Set refrac_count equal to refrac_length if spiking is occurred.
+        self.refrac_count.masked_fill_(self.s, self.refrac_length)
+        
+        # Set potential of neuron to rest potential if spiking is occurred.
+        self.v.masked_fill_(self.s, self.reset_pot)
+
+    @abstractmethod
+    def compute_decay(self, dt: float) -> None:
+        """
+        Set the decays.
+
+        Parameters
+        ----------
+        dt : float,
+            Length of time steps.
+
+        Returns
+        -------
+        None
+
+        """
+        self.dt = dt
+        super().compute_decay()
+        
+    def set_batch_size(self, batch_size: int) -> None:
+        """
+        Sets mini-batch size. Called when layer is added to a network.
+        
+        Parameters
+        ----------
+        batch_size: int,
+            Mini-batch size.
+        
+        Returns
+        -------
+        None
+        """
+        super().set_batch_size(batch_size=batch_size)
+        self.v = self.reset_pot * torch.ones(batch_size, *self.shape, device=self.v.device)
+        self.refrac_count = torch.zeros_like(self.v, device=self.refrac_count.device)
+
+    def reset_state_variables(self) -> None:
+        """
+        Reset all internal state variables.
+
+        Returns
+        -------
+        None
+
+        """
+        super().reset_state_variables()
+        self.v.fill_(self.reset_pot) # Reset neuron voltages
+        self.refrac_count.zero_() # Refractory period reset
+
 class AELIFPopulation(NeuralPopulation):
     """
     Layer of Adaptive Exponential Leaky Integrate and Fire neurons.
