@@ -716,8 +716,9 @@ class LIFPopulation(NeuralPopulation):
 
 
 class BoostedLIFPopulation(NeuralPopulation):
+    # Same as LIFNodes, faster: no rest, no reset, no lbound
     """
-    Layer of Leaky Integrate and Fire neurons.
+    Layer of Boosted Leaky Integrate and Fire neurons.
 
     Implement LIF neural dynamics(Parameters of the model must be modifiable).\
     Follow the template structure of NeuralPopulation class for consistency.
@@ -786,7 +787,6 @@ class BoostedLIFPopulation(NeuralPopulation):
             learning=learning,
         )
 
-        self.register_buffer("rest_pot", torch.tensor(rest_pot, dtype=torch.float))
         self.register_buffer("pot_threshold", torch.tensor(threshold, dtype=torch.float))
         self.register_buffer("refrac_length", torch.tensor(refrac_length))
         self.register_buffer("v", torch.FloatTensor()) # Neuron's potential
@@ -825,13 +825,15 @@ class BoostedLIFPopulation(NeuralPopulation):
         """
                 
         # Compute new potential with decay voltages.
-        self.v = self.decay * (self.v - self.rest_pot) + self.rest_pot
+        self.v *= self.decay
 
         # Integrate inputs.
-        x.masked_fill_(self.refrac_count > 0, 0.0)
+        if x is not None:
+            x.masked_fill_(self.refrac_count > 0, 0.0)
 
         # interlaced
-        self.v += x 
+        if x is not None:
+            self.v += x 
 
 
     def compute_spike(self) -> None:
@@ -859,7 +861,7 @@ class BoostedLIFPopulation(NeuralPopulation):
         self.refrac_count.masked_fill_(self.s, self.refrac_length)
         
         # Set potential of neuron to rest potential if spiking is occurred.
-        self.v.masked_fill_(self.s, self.rest_pot)
+        self.v.masked_fill_(self.s, 0)
         
 
     @abstractmethod
@@ -893,7 +895,7 @@ class BoostedLIFPopulation(NeuralPopulation):
 
         """
         super().reset_state_variables()
-        self.v.fill_(self.rest_pot) # Reset neuron voltages
+        self.v.fill_(0) # Reset neuron voltages
         self.refrac_count.zero_() # Refractory period reset
 
     def set_batch_size(self, batch_size: int) -> None:
@@ -906,7 +908,7 @@ class BoostedLIFPopulation(NeuralPopulation):
             Mini-batch size.
         """
         super().set_batch_size(batch_size=batch_size)
-        self.v = self.rest_pot * torch.ones(batch_size, *self.shape, device=self.v.device)
+        self.v = torch.zeros(batch_size, *self.shape, device=self.v.device)
         self.refrac_count = torch.zeros_like(self.v, device=self.refrac_count.device)
 
 
