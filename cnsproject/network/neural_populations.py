@@ -537,6 +537,7 @@ class LIFPopulation(NeuralPopulation):
         tau_s: Union[float, torch.Tensor] = 10.,
         threshold: Union[float, torch.Tensor] = -52.,
         rest_pot: Union[float, torch.Tensor] = -62.,
+        reset_pot: Union[float, torch.Tensor] = -62.,
         refrac_length: Union[float, torch.Tensor] = 5,
         dt: float = 0.1,
         lower_bound: float = None,
@@ -564,6 +565,8 @@ class LIFPopulation(NeuralPopulation):
             Threshold potential to spike. The default is -52.0v.
         rest_pot : float or torch.Tensor, Optional
             Rest potential for spike. The default is -62.0v.
+        reset_pot : float or torch.Tensor, Optional
+            Reset potential for spike. The default is -62.0v.
         refrac_length : float or torch.Tensor, Optional
             Neuron refractor interval length. The default is 5 time steps.
         dt : float, Optional
@@ -592,6 +595,7 @@ class LIFPopulation(NeuralPopulation):
         )
 
         self.register_buffer("rest_pot", torch.tensor(rest_pot, dtype=torch.float))
+        self.register_buffer("reset_pot", torch.tensor(reset_pot, dtype=torch.float))
         self.register_buffer("pot_threshold", torch.tensor(threshold, dtype=torch.float))
         self.register_buffer("refrac_length", torch.tensor(refrac_length))
         self.register_buffer("v", torch.FloatTensor()) # Neuron's potential
@@ -664,7 +668,7 @@ class LIFPopulation(NeuralPopulation):
         self.refrac_count.masked_fill_(self.s, self.refrac_length)
         
         # Set potential of neuron to rest potential if spiking is occurred.
-        self.v.masked_fill_(self.s, self.rest_pot)
+        self.v.masked_fill_(self.s, self.reset_pot)
         
 
     @abstractmethod
