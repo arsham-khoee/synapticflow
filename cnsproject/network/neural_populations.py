@@ -628,26 +628,15 @@ class LIFPopulation(NeuralPopulation):
         """
         Compute new potential of neuron by given input tensor x and refrac_count
         """
-        if self.decay:
-            if self.reset_pot is None or self.reset_pot == 0:
-                self.v = self.v + (x - v) / self.tau_m * self.dt
-            else:
-                self.v = self.v + (x - (self.v - self.reset_pot)) / self.tau_m * self.dt
-        
-        else:
-            if self.reset_pot is None or self.reset_pot == 0:
-                self.v = self.v * (1. -1. / self.tau_m) * self.dt + x;
-            else:
-                self.v = self.v - (self.v - self.reset_pot) / self.tau_m * self.dt + x
                 
         # Compute new potential with decay voltages.
-        # self.v = self.decay * (self.v - self.rest_pot) + self.rest_pot
+        self.v = self.decay * (self.v - self.rest_pot) + self.rest_pot
 
         # Integrate inputs.
-        # x.masked_fill_(self.refrac_count > 0, 0.0)
+        x.masked_fill_(self.refrac_count > 0, 0.0)
 
         # interlaced
-        # self.v += x 
+        self.v += x 
 
 
     def compute_spike(self) -> None:
