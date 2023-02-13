@@ -1068,8 +1068,8 @@ class CLIFPopulation(NeuralPopulation):
         additive_spike_trace: bool = False,
         tau_s: Union[float, torch.Tensor] = 10.,
         threshold: Union[float, torch.Tensor] = -52.,
-        rest_pot: Union[float, torch.Tensor] = -62.,
-        reset_pot: Union[float, torch.Tensor] = -62.,
+        rest_pot: Union[float, torch.Tensor] = -65.,
+        reset_pot: Union[float, torch.Tensor] = -65.,
         refrac_length: Union[float, torch.Tensor] = 5,
         dt: float = 0.1,
         tc_decay: Union[float,torch.Tensor] = 100.0,
@@ -1097,9 +1097,9 @@ class CLIFPopulation(NeuralPopulation):
         threshold : float or torch.Tensor, Optional
             Threshold potential to spike. The default is -52.0v.
         rest_pot : float or torch.Tensor, Optional
-            Rest potential for spike. The default is -62.0v.
+            Rest potential for spike. The default is -65.0v.
         reset_pot: float or torch.Tensor, Optional
-            Reset potential for spike. The default is -62.0v.
+            Reset potential for spike. The default is -65.0v.
         refrac_length : float or torch.Tensor, Optional
             Neuron refractor interval length. The default is 5 time steps.
         dt : float, Optional
@@ -1132,6 +1132,7 @@ class CLIFPopulation(NeuralPopulation):
         self.register_buffer("pot_threshold", torch.tensor(threshold, dtype=torch.float))
         self.register_buffer("refrac_length", torch.tensor(refrac_length))
         self.register_buffer("v", torch.FloatTensor()) # Neuron's potential
+        self.register_buffer("i", torch.FloatTensor()) # Neuron's current'
         self.register_buffer("refrac_count", torch.FloatTensor()) # Refractor counter
         self.register_buffer("tc_decay", torch.tensor(tc_decay, dtype=torch.float)) # Time constant neuron voltage decay
         self.register_buffer("tc_i_decay", torch.tensor(tc_i_decay, dtype=torch.float)) # Time constant input current decay
