@@ -730,16 +730,15 @@ class BoostedLIFPopulation(NeuralPopulation):
         shape: Optional[Iterable[int]] = None,
         spike_trace: bool = False,
         additive_spike_trace: bool = False,
-        tau_s: Union[float, torch.Tensor] = 10.,
-        threshold: Union[float, torch.Tensor] = -52.,
-        rest_pot: Union[float, torch.Tensor] = -62.,
-        refrac_length: Union[float, torch.Tensor] = 5,
+        tau_s: Union[float, torch.Tensor] = 10.0,
+        threshold: Union[float, torch.Tensor] = 40.0,
+        refrac_length: Union[float, torch.Tensor] = 5.0,
         dt: float = 0.1,
         lower_bound: float = None,
         sum_input: bool = False,
-        trace_scale: Union[float, torch.Tensor] = 1.,
+        trace_scale: Union[float, torch.Tensor] = 1.0,
         is_inhibitory: bool = False,
-        tau_decay: Union[float, torch.Tensor] = 100.0,
+        tau_decay: Union[float, torch.Tensor] = 1,
         learning: bool = True,
         **kwargs
     ) -> None:
@@ -757,9 +756,7 @@ class BoostedLIFPopulation(NeuralPopulation):
         tau_s : float or torch.Tensor, Optional
             Time constant of spike trace decay. The default is 10.0.
         threshold : float or torch.Tensor, Optional
-            Threshold potential to spike. The default is -52.0v.
-        rest_pot : float or torch.Tensor, Optional
-            Rest potential for spike. The default is -62.0v.
+            Threshold potential to spike. The default is 40.0v.
         refrac_length : float or torch.Tensor, Optional
             Neuron refractor interval length. The default is 5 time steps.
         dt : float, Optional
@@ -771,7 +768,7 @@ class BoostedLIFPopulation(NeuralPopulation):
         is_inhibitory : bool, Optional
             Whether the neurons are inhibitory or excitatory. The default is False.
         tau_decay: 
-            Time constant of neuron voltage decay. The default is 100.0.
+            Time constant of neuron voltage decay. The default is 1.0.
         learning : bool, Optional
             Define the training mode. The default is True.
         """
@@ -812,10 +809,6 @@ class BoostedLIFPopulation(NeuralPopulation):
         
         self.refractory_and_reset() # Applies refractory and reset conditions
         
-        # Check lower bound condition for neuron.
-        if self.lower_bound is not None:
-            self.v.masked_fill_(self.lower_bound > self.v, self.lower_bound)
-            
         super().forward(x)
         
 
