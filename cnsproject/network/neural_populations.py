@@ -90,6 +90,7 @@ class NeuralPopulation(torch.nn.Module):
         sum_input: bool = False,
         is_inhibitory: bool = False,
         learning: bool = True,
+        dt: Union[float, torch.Tensor] = 0.1,
         **kwargs
     ) -> None:
         super().__init__()
@@ -134,7 +135,7 @@ class NeuralPopulation(torch.nn.Module):
         if self.sum_input:
             self.register_buffer("summed", torch.FloatTensor()) # Inputs summation
         
-        self.dt = None
+        self.dt = dt
 
     @abstractmethod
     def forward(self, x: torch.Tensor) -> None:
@@ -408,6 +409,7 @@ class IFPopulation(NeuralPopulation):
             trace_scale=trace_scale,
             is_inhibitory=is_inhibitory,
             learning=learning,
+            dt=dt
         )
 
         self.register_buffer("rest_pot", torch.tensor(rest_pot, dtype=torch.float))
@@ -415,7 +417,7 @@ class IFPopulation(NeuralPopulation):
         self.register_buffer("refrac_length", torch.tensor(refrac_length))
         self.register_buffer("v", torch.FloatTensor()) # Neuron's potential
         self.register_buffer("refrac_count", torch.FloatTensor()) # Refractor counter
-        self.compute_decay(dt) # Compute decays and set time steps
+        self.compute_decay() # Compute decays and set time steps
         self.reset_state_variables()
         self.lower_bound = lower_bound
         
@@ -476,7 +478,7 @@ class IFPopulation(NeuralPopulation):
         
 
     @abstractmethod
-    def compute_decay(self, dt: float) -> None:
+    def compute_decay(self) -> None:
         """
         Set the decays.
 
@@ -490,7 +492,6 @@ class IFPopulation(NeuralPopulation):
         None
 
         """
-        self.dt = dt
         super().compute_decay()
 
 
@@ -592,6 +593,7 @@ class LIFPopulation(NeuralPopulation):
             trace_scale=trace_scale,
             is_inhibitory=is_inhibitory,
             learning=learning,
+            dt=dt
         )
 
         self.register_buffer("rest_pot", torch.tensor(rest_pot, dtype=torch.float))
@@ -602,7 +604,7 @@ class LIFPopulation(NeuralPopulation):
         self.register_buffer("refrac_count", torch.FloatTensor()) # Refractor counter
         self.register_buffer("tau_decay", torch.tensor(tau_decay, dtype=torch.float))  # Time constant of neuron voltage decay.
         self.register_buffer("decay", torch.zeros(*self.shape))  # Set in compute_decays.
-        self.compute_decay(dt) # Compute decays and set time steps
+        self.compute_decay() # Compute decays and set time steps
         self.reset_state_variables()
         self.lower_bound = lower_bound
 
@@ -672,7 +674,7 @@ class LIFPopulation(NeuralPopulation):
         
 
     @abstractmethod
-    def compute_decay(self, dt: float) -> None:
+    def compute_decay(self) -> None:
         """
         Set the decays.
 
@@ -686,7 +688,6 @@ class LIFPopulation(NeuralPopulation):
         None
 
         """
-        self.dt = dt
         super().compute_decay()
         self.decay = torch.exp(-self.dt / self.tau_decay)  # Neuron voltage decay (per timestep).
 
@@ -771,7 +772,7 @@ class ELIFPopulation(NeuralPopulation):
         self.register_buffer("refrac_length", torch.tensor(refrac_length)) # Refractor length
         self.register_buffer("v", torch.FloatTensor()) # Neuron's potential
         self.register_buffer("refrac_count", torch.FloatTensor()) # Refractor counter
-        self.compute_decay(dt) # Compute decays and set time steps
+        self.compute_decay() # Compute decays and set time steps
         self.reset_state_variables()
         self.lower_bound = lower_bound
 
@@ -834,7 +835,7 @@ class ELIFPopulation(NeuralPopulation):
         self.v.masked_fill_(self.s, self.reset_pot)
 
     @abstractmethod
-    def compute_decay(self, dt: float) -> None:
+    def compute_decay(self) -> None:
         """
         Set the decays.
 
@@ -848,7 +849,6 @@ class ELIFPopulation(NeuralPopulation):
         None
 
         """
-        self.dt = dt
         super().compute_decay()
         
     def set_batch_size(self, batch_size: int) -> None:
@@ -936,7 +936,7 @@ class QLIFPopulation(NeuralPopulation):
         self.register_buffer("refrac_length", torch.tensor(refrac_length)) # Refractor length
         self.register_buffer("v", torch.FloatTensor()) # Neuron's potential
         self.register_buffer("refrac_count", torch.FloatTensor()) # Refractor counter
-        self.compute_decay(dt) # Compute decays and set time steps
+        self.compute_decay() # Compute decays and set time steps
         self.reset_state_variables()
         self.lower_bound = lower_bound
 
@@ -998,7 +998,7 @@ class QLIFPopulation(NeuralPopulation):
         self.v.masked_fill_(self.s, self.reset_pot)
 
     @abstractmethod
-    def compute_decay(self, dt: float) -> None:
+    def compute_decay(self) -> None:
         """
         Set the decays.
 
@@ -1012,7 +1012,6 @@ class QLIFPopulation(NeuralPopulation):
         None
 
         """
-        self.dt = dt
         super().compute_decay()
         
     def set_batch_size(self, batch_size: int) -> None:
@@ -1131,7 +1130,7 @@ class CLIFPopulation(NeuralPopulation):
         self.register_buffer("tc_i_decay", torch.tensor(tc_i_decay, dtype=torch.float)) # Time constant input current decay
         self.register_buffer("decay", torch.empty_like(self.tc_decay)) # Main decay which applies to neuron voltage
         self.register_buffer("i_decay", torch.empty_like(self.tc_i_decay)) # Main current decay which applies to input current
-        self.compute_decay(dt) # Compute decays and set time steps
+        self.compute_decay() # Compute decays and set time steps
         self.reset_state_variables()
         self.lower_bound = lower_bound
 
@@ -1193,7 +1192,7 @@ class CLIFPopulation(NeuralPopulation):
         
 
     @abstractmethod
-    def compute_decay(self, dt: float) -> None:
+    def compute_decay(self) -> None:
         """
         Set the decays.
 
@@ -1207,7 +1206,6 @@ class CLIFPopulation(NeuralPopulation):
         None
 
         """
-        self.dt = dt
         super().compute_decay()
         self.decay = torch.exp(-self.dt / self.tc_decay)  # Neuron voltage decay (per timestep).
         self.i_decay = torch.exp(-self.dt / self.tc_i_decay) # Neuron current decay
@@ -1263,6 +1261,7 @@ class AELIFPopulation(NeuralPopulation):
         trace_scale: Union[float, torch.Tensor] = 1.,
         is_inhibitory: bool = False,
         learning: bool = True,
+        dt: float = 0.1,
         **kwargs
     ) -> None:
         super().__init__(
