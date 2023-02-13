@@ -1098,6 +1098,8 @@ class CLIFPopulation(NeuralPopulation):
             Threshold potential to spike. The default is -52.0v.
         rest_pot : float or torch.Tensor, Optional
             Rest potential for spike. The default is -62.0v.
+        reset_pot: float or torch.Tensor, Optional
+            Reset potential for spike. The default is -62.0v.
         refrac_length : float or torch.Tensor, Optional
             Neuron refractor interval length. The default is 5 time steps.
         dt : float, Optional
@@ -1142,11 +1144,7 @@ class CLIFPopulation(NeuralPopulation):
 
     def forward(self, x: torch.Tensor) -> None:
         """
-        TODO.
-
-        1. Make use of other methods to fill the body. This is the main method\
-           responsible for one step of neuron simulation.
-        2. You might need to call the method from parent class.
+        Simulate one step of neuron 
         """
         self.compute_potential(x) # Compute new potential
         
@@ -1163,7 +1161,7 @@ class CLIFPopulation(NeuralPopulation):
 
     def compute_potential(self, x: torch.Tensor) -> None:
         """
-        Compute new potential of neuron by given input tensor x and refrac_count
+        Compute new potential of neuron by given input tensor x , recent current i and refrac_count
         """
         self.v = self.decay * (self.v - self.rest_pot) + self.rest_pot # Compute voltage with respect to recent potential and rest potential
         self.i *= self.i_decay # Compute input current
