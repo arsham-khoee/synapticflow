@@ -719,8 +719,6 @@ class LIFPopulation(NeuralPopulation):
         self.v = self.rest_pot * torch.ones(batch_size, *self.shape, device=self.v.device)
         self.refrac_count = torch.zeros_like(self.v, device=self.refrac_count.device)
 
-
-
 class ELIFPopulation(NeuralPopulation):
     """
     Layer of Exponential Leaky Integrate and Fire neurons.
