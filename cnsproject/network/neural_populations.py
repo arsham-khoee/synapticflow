@@ -732,6 +732,7 @@ class AdaptiveLIFPopulation(NeuralPopulation):
         tau_s: Union[float, torch.Tensor] = 10.,
         threshold: Union[float, torch.Tensor] = -52.,
         rest_pot: Union[float, torch.Tensor] = -62.,
+        reset_pot: Union[float, torch.Tensor] = -62.,
         refrac_length: Union[float, torch.Tensor] = 5,
         dt: float = 0.1,
         lower_bound: float = None,
@@ -759,6 +760,8 @@ class AdaptiveLIFPopulation(NeuralPopulation):
             Threshold potential to spike. The default is -52.0v.
         rest_pot : float or torch.Tensor, Optional
             Rest potential for spike. The default is -62.0v.
+        reset_pot : float or torch.Tensor, Optional
+            Reset potential for spike. The default is -62.0v.
         refrac_length : float or torch.Tensor, Optional
             Neuron refractor interval length. The default is 5 time steps.
         dt : float, Optional
@@ -784,27 +787,33 @@ class AdaptiveLIFPopulation(NeuralPopulation):
             trace_scale=trace_scale,
             is_inhibitory=is_inhibitory,
             learning=learning,
+            dt=dt
         )
 
         self.register_buffer("rest_pot", torch.tensor(rest_pot, dtype=torch.float))
+        self.register_buffer("reset_pot", torch.tensor(reset_pot, dtype=torch.float))
         self.register_buffer("pot_threshold", torch.tensor(threshold, dtype=torch.float))
         self.register_buffer("refrac_length", torch.tensor(refrac_length))
         self.register_buffer("v", torch.FloatTensor()) # Neuron's potential
         self.register_buffer("refrac_count", torch.FloatTensor()) # Refractor counter
         self.register_buffer("tau_decay", torch.tensor(tau_decay, dtype=torch.float))  # Time constant of neuron voltage decay.
         self.register_buffer("decay", torch.zeros(*self.shape))  # Set in compute_decays.
-        self.compute_decay(dt) # Compute decays and set time steps
+        self.compute_decay() # Compute decays and set time steps
         self.reset_state_variables()
         self.lower_bound = lower_bound
 
 
     def forward(self, x: torch.Tensor) -> None:
         """
-        TODO.
-
-        1. Make use of other methods to fill the body. This is the main method\
-           responsible for one step of neuron simulation.
-        2. You might need to call the method from parent class.
+        Simulate one step of a neuron
+        Parameters
+        ----------
+        x : Tensor,
+            Input current.
+            
+        Returns
+        -------
+        None
         """
         self.compute_potential(x) # Compute new potential
         
@@ -848,7 +857,7 @@ class AdaptiveLIFPopulation(NeuralPopulation):
         In this function, three things will be done:
             1 - decrease refrac_count by time step size
             2 - Set refrac_count to refrac_length if spiking is occurred
-            3 - Set neuron potential to rest_pot if spiking is occurred
+            3 - Set neuron potential to reset_pot if spiking is occurred
         """
         super().refractory_and_reset()
         
@@ -859,11 +868,11 @@ class AdaptiveLIFPopulation(NeuralPopulation):
         self.refrac_count.masked_fill_(self.s, self.refrac_length)
         
         # Set potential of neuron to rest potential if spiking is occurred.
-        self.v.masked_fill_(self.s, self.rest_pot)
+        self.v.masked_fill_(self.s, self.reset_pot)
         
 
     @abstractmethod
-    def compute_decay(self, dt: float) -> None:
+    def compute_decay(self) -> None:
         """
         Set the decays.
 
@@ -877,7 +886,6 @@ class AdaptiveLIFPopulation(NeuralPopulation):
         None
 
         """
-        self.dt = dt
         super().compute_decay()
         self.decay = torch.exp(-self.dt / self.tau_decay)  # Neuron voltage decay (per timestep).
 
@@ -908,7 +916,6 @@ class AdaptiveLIFPopulation(NeuralPopulation):
         super().set_batch_size(batch_size=batch_size)
         self.v = self.rest_pot * torch.ones(batch_size, *self.shape, device=self.v.device)
         self.refrac_count = torch.zeros_like(self.v, device=self.refrac_count.device)
-
 
 class ELIFPopulation(NeuralPopulation):
     """
