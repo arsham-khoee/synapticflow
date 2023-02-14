@@ -605,11 +605,15 @@ class LIFPopulation(NeuralPopulation):
 
     def forward(self, x: torch.Tensor) -> None:
         """
-        TODO.
-
-        1. Make use of other methods to fill the body. This is the main method\
-           responsible for one step of neuron simulation.
-        2. You might need to call the method from parent class.
+        Simulate one step of a neuron
+        Parameters
+        ----------
+        x : Tensor,
+            Input current.
+            
+        Returns
+        -------
+        None
         """
         self.compute_potential(x) # Compute new potential
         
@@ -720,7 +724,7 @@ class BoostedLIFPopulation(NeuralPopulation):
     """
     Layer of Boosted Leaky Integrate and Fire neurons.
 
-    Implement LIF neural dynamics(Parameters of the model must be modifiable).\
+    Implement Boosted LIF neural dynamics(Parameters of the model must be modifiable).\
     Follow the template structure of NeuralPopulation class for consistency.
     """
 
@@ -738,7 +742,7 @@ class BoostedLIFPopulation(NeuralPopulation):
         sum_input: bool = False,
         trace_scale: Union[float, torch.Tensor] = 1.0,
         is_inhibitory: bool = False,
-        tau_decay: Union[float, torch.Tensor] = 1,
+        tau_decay: Union[float, torch.Tensor] = 100.0,
         learning: bool = True,
         **kwargs
     ) -> None:
@@ -797,11 +801,15 @@ class BoostedLIFPopulation(NeuralPopulation):
 
     def forward(self, x: torch.Tensor) -> None:
         """
-        TODO.
-
-        1. Make use of other methods to fill the body. This is the main method\
-           responsible for one step of neuron simulation.
-        2. You might need to call the method from parent class.
+        Simulate one step of a neuron
+        Parameters
+        ----------
+        x : Tensor,
+            Input current.
+            
+        Returns
+        -------
+        None
         """
         self.compute_potential(x) # Compute new potential
         
@@ -821,12 +829,10 @@ class BoostedLIFPopulation(NeuralPopulation):
         self.v *= self.decay
 
         # Integrate inputs.
-        if x is not None:
-            x.masked_fill_(self.refrac_count > 0, 0.0)
+        x.masked_fill_(self.refrac_count > 0, 0.0)
 
         # interlaced
-        if x is not None:
-            self.v += x 
+        self.v += x 
 
 
     def compute_spike(self) -> None:
@@ -843,7 +849,7 @@ class BoostedLIFPopulation(NeuralPopulation):
         In this function, three things will be done:
             1 - decrease refrac_count by time step size
             2 - Set refrac_count to refrac_length if spiking is occurred
-            3 - Set neuron potential to rest_pot if spiking is occurred
+            3 - Set neuron potential to zero if spiking is occurred
         """
         super().refractory_and_reset()
         
