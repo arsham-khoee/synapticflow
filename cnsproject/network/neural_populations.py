@@ -611,11 +611,15 @@ class LIFPopulation(NeuralPopulation):
 
     def forward(self, x: torch.Tensor) -> None:
         """
-        TODO.
-
-        1. Make use of other methods to fill the body. This is the main method\
-           responsible for one step of neuron simulation.
-        2. You might need to call the method from parent class.
+        Simulate one step of a neuron
+        Parameters
+        ----------
+        x : Tensor,
+            Input current.
+            
+        Returns
+        -------
+        None
         """
         self.compute_potential(x) # Compute new potential
         
@@ -659,7 +663,7 @@ class LIFPopulation(NeuralPopulation):
         In this function, three things will be done:
             1 - decrease refrac_count by time step size
             2 - Set refrac_count to refrac_length if spiking is occurred
-            3 - Set neuron potential to rest_pot if spiking is occurred
+            3 - Set neuron potential to reset_pot if spiking is occurred
         """
         super().refractory_and_reset()
         
