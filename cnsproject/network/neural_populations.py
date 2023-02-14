@@ -721,6 +721,9 @@ class AdaptiveLIFPopulation(NeuralPopulation):
 
     Implement Adaptive LIF neural dynamics(Parameters of the model must be modifiable).\
     Follow the template structure of NeuralPopulation class for consistency.
+
+    Note: Layer of leaky integrate-and-fire (LIF) neurons with adaptive thresholds. A neuron's voltage threshold is increased
+    by some constant each time it spikes; otherwise, it is decaying back to its default value.
     """
 
     def __init__(
@@ -739,6 +742,8 @@ class AdaptiveLIFPopulation(NeuralPopulation):
         sum_input: bool = False,
         trace_scale: Union[float, torch.Tensor] = 1.,
         is_inhibitory: bool = False,
+        theta_plus: Union[float, torch.Tensor] = 0.05,
+        tau_theta_decay: Union[float, torch.Tensor] = 1e7,
         tau_decay: Union[float, torch.Tensor] = 100.0,
         learning: bool = True,
         **kwargs
@@ -771,8 +776,12 @@ class AdaptiveLIFPopulation(NeuralPopulation):
         trace_scale : float or torch.Tensor, Optional
             The scaling factor of spike traces. The default is 1.0.
         is_inhibitory : bool, Optional
-            Whether the neurons are inhibitory or excitatory. The default is False.
-        tau_decay: 
+            Whether the neurons are inhibitory or excitatory. The default is False. 
+        theta_plus : float or torch.Tensor, Optional
+            Voltage increase of threshold after spiking. The default is 0.05.
+        tau_theta_decay : float or torch.Tensor, Optional
+            Time constant of adaptive threshold decay. The default is 1e7.
+        tau_decay float or torch.Tensor, Optional: 
             Time constant of neuron voltage decay. The default is 100.0.
         learning : bool, Optional
             Define the training mode. The default is True.
@@ -798,6 +807,8 @@ class AdaptiveLIFPopulation(NeuralPopulation):
         self.register_buffer("refrac_count", torch.FloatTensor()) # Refractor counter
         self.register_buffer("tau_decay", torch.tensor(tau_decay, dtype=torch.float))  # Time constant of neuron voltage decay.
         self.register_buffer("decay", torch.zeros(*self.shape))  # Set in compute_decays.
+        self.register_buffer("theta_plus", torch.tensor(theta_plus))  # Constant threshold increase on spike.
+        self.register_buffer("tau_theta_decay", torch.tensor(tau_theta_decay))  # Time constant of adaptive threshold decay.
         self.compute_decay() # Compute decays and set time steps
         self.reset_state_variables()
         self.lower_bound = lower_bound
