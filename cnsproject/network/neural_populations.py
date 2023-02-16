@@ -1558,3 +1558,221 @@ class DiehlAndCookNode(NeuralPopulation):
         super().set_batch_size(batch_size=batch_size)
         self.v = self.rest_pot * torch.ones(batch_size, *self.shape, device=self.v.device)
         self.refrac_count = torch.zeros_like(self.v, device=self.refrac_count.device)
+
+class CSRMNode(NeuralPopulation):
+    
+    def __init__(
+        self,
+        n: Optional[int] = None,
+        shape: Optional[Iterable[int]] = None,
+        spike_trace: bool = True,
+        additive_spike_trace: bool = True,
+        tau_s: Union[float, torch.Tensor] = 1.,
+        rest: Union[float, torch.Tensor] = -65.,
+        threshold: Union[float, torch.Tensor] = -52.,
+        response_kernel: str = "ExponentialKernel",
+        refractory_kernel: str = "EtaKernel",
+        res_window_size: Union[float, torch.Tensor] = 20,
+        ref_window_size: Union[float, torch.Tensor] = 10,
+        reset_const: Union[float, torch.Tensor] = 50,
+        tc_decay: Union[float, torch.Tensor] = 100.,
+        theta_plus: Union[float, torch.Tensor] = 0.05,
+        tc_theta_decay: Union[float, torch.Tensor] = 1e7,
+        lower_bound: float = None,
+        trace_scale: Union[float, torch.Tensor] = 1.,
+        is_inhibitory: bool = False,
+        learning: bool = True,
+        dt: float = 0.1,
+        sum_input: bool = False,
+        **kwargs
+    ) -> None:
+        super().__init__(
+            n=n,
+            shape=shape,
+            spike_trace=spike_trace,
+            additive_spike_trace=additive_spike_trace,
+            tau_s=tau_s,
+            trace_scale=trace_scale,
+            is_inhibitory=is_inhibitory,
+            learning=learning,
+            dt=dt
+        )
+
+        """
+        TODO.
+
+        1. Add the required parameters.
+        2. Fill the body accordingly.
+        """
+        self.register_buffer("rest_pot", torch.tensor(rest))
+        self.register_buffer("threshold_pot", torch.tensor(threshold))
+        self.register_buffer("tau_s", torch.tensor(tau_s))
+        self.register_buffer("reset_const", torch.tensor(reset_const))
+        self.register_buffer("res_window_size", torch.tensor(res_window_size))
+        self.register_buffer("ref_window_size", torch.tensor(ref_window_size))
+        self.register_buffer("tc_decay", torch.tensor(tc_decay))
+        self.register_buffer("decay", torch.empty_like(self.tc_decay, dtype=torch.float32))
+        self.register_buffer("theta_plus", torch.tensor(theta_plus))
+        self.register_buffer("tc_theta_decay", torch.tensor(tc_theta_decay))
+        self.register_buffer("theta_decay", torch.empty_like(self.tc_theta_decay))
+        self.register_buffer("v", torch.FloatTensor())
+        self.register_buffer("last_spikes", torch.ByteTensor())
+        self.register_buffer("theta", torch.zeros(*self.shape))
+        
+        self.register_buffer("resKernel", torch.FloatTensor())
+        self.register_buffer("refKernel", torch.FloatTensor())
+        
+        self.lower_bound = lower_bound
+        self.response_kernel = response_kernel
+        self.refractory_kernel = refractory_kernel
+
+    def forward(self, x: torch.Tensor) -> None:
+        """
+        TODO.
+
+        1. Make use of other methods to fill the body. This is the main method\
+           responsible for one step of neuron simulation.
+        2. You might need to call the method from parent class.
+        """
+        
+        self.v *= self.decay
+        
+        if self.learning:
+            self.theta *= self.theta_decay
+        
+        v = torch.einsum("i,kij->kj", self.resKernel, x)
+        v += torch.einsum("i,kij->kj", self.refKernel, self.last_spikes)
+        self.v += v.view(x.size(0), *self.shape)
+        
+        self.s = self.v >= self.threshold_pot + self.theta
+        
+        if self.learning:
+            self.theta += self.theta_plus * self.s.float().sum(0)
+            
+        self.last_spikes = torch.cat((self.last_spikes[:, 1:, :], self.s[:, None, :]), 1)
+        
+        if self.lower_bound is not None:
+            self.v.masked_fill_(self.v < self.lower_bound, self.lower_bound)
+        
+        super().forward(x)
+
+    def compute_potential(self, x: torch.Tensor) -> None:
+        """
+        TODO.
+
+        Implement the neural dynamics for computing the potential of adaptive\
+        ELIF neurons. The method can either make changes to attributes directly\
+        or return the result for further use.
+        """
+        self.v *= self.decay
+        
+        if self.learning:
+            self.theta *= self.theta_decay
+        
+        v = torch.einsum("i,kij->kj", self.rest_kernel, x)
+        v += torch.einsum("i,kij->kj", self.refrac_kernel, self.last_spikes)
+        self.v += v.view(x.size(0), *self.shape)
+
+    def compute_spike(self) -> None:
+        """
+        TODO.
+
+        Implement the spike condition. The method can either make changes to\
+        attributes directly or return the result for further use.
+        """
+        self.s = self.v >= self.threshold_pot + self.theta
+
+    def refractory_and_reset(self) -> None:
+        """
+        TODO.
+
+        Implement the refractory and reset conditions. The method can either\
+        make changes to attributes directly or return the computed value for\
+        further use.
+        """
+        super().reset_state_variables()
+        self.v.fill_(self.rest_pot)
+
+    def compute_decay(self) -> None:
+        """
+        TODO.
+
+        Implement the dynamics of decays. You might need to call the method from
+        parent class.
+        """
+        super().compute_decay()
+        self.decay = torch.exp(
+            -self.dt / self.tc_decay
+        )
+        self.theta_decay = torch.exp(
+            -self.dt / self.tc_theta_decay
+        )
+    
+    def set_batch_size(self, batch_size: int) -> None:
+        """
+        Sets mini-batch size. Called when layer is added to a network.
+        
+        Parameters
+        ----------
+        batch_size: int,
+            Mini-batch size.
+        """
+        super().set_batch_size(batch_size=batch_size)
+        self.v = self.rest_pot * torch.ones(batch_size, *self.shape, device=self.v.device)
+        self.last_spikes = torch.zeros(batch_size, self.ref_window_size, *self.shape)
+        
+        resKernels = {
+            "AlphaKernel": self.Alpha_Kernel,
+            "AlphaKernelSLAYER": self.Alpha_Kernel_Slayer,
+            "LaplacianKernel": self.Laplacian_Kernel,
+            "ExponentialKernel": self.Exponential_Kernel,
+            "RectangularKernel": self.Rectangular_Kernel,
+            "TriangularKernel": self.Triangular_Kernel
+        }
+        
+        if self.response_kernel not in resKernels.keys():
+            raise Exception(" The given response Kernel is not implemented")
+        
+        self.resKernel = resKernels[self.response_kernel](self.dt)
+        
+        refKernels = {"EtaKernel": self.Eta_Kernel}
+        
+        if self.refractory_kernel not in refKernels.keys():
+            raise Exception(" The given refractory Kernel is not implemented")
+        
+        self.refKernel = refKernels[self.refractory_kernel](self.dt)
+        
+    def Alpha_Kernel(self, dt):
+        t = torch.arange(0, self.res_window_size, dt)
+        kernel_vec = (1 / (self.tau_s**2)) * t * torch.exp(-t / self.tau_s)
+        return torch.flip(kernel_vec, [0])
+    
+    def Alpha_Kernel_Slayer(self, dt):
+        t = torch.arange(0, self.res_window_size, dt)
+        kernel_vec = (1 / (self.tau_s * 2)) * torch.exp(-1 * torch.abs(t / self.tau_s))
+        return torch.flip(kernel_vec, [0])
+    
+    def Laplacian_Kernel(self, dt):
+        t = torch.arange(0, self.res_window_size, dt)
+        kernel_vec = (1 / (self.tau_s * 2)) * torch.exp(-1 * torch.abs(t / self.tau_s))
+        return torch.flip(kernel_vec, [0])
+    
+    def Exponential_Kernel(self, dt):
+        t = torch.arange(0, self.res_window_size, dt)
+        kernel_vec = (1 / self.tau_s) * torch.exp(-t / self.tau_s)
+        return torch.flip(kernel_vec, [0])
+    
+    def Rectangular_Kernel(self, dt):
+        t = torch.arange(0, self.res_window_size, dt)
+        kernel_vec = 1 / (self.tau_s * 2)
+        return torch.flip(kernel_vec, [0])
+    
+    def Triangular_Kernel(self, dt):
+        t = torch.arange(0, self.res_window_size, dt)
+        kernel_vec = -self.reset_const * torch.exp(-t / self.tau_s)
+        return torch.flip(kernel_vec, [0])
+    
+    def Eta_Kernel(self, dt):
+        t = torch.arange(0, self.res_window_size, dt)
+        kernel_vec = -self.reset_const * torch.exp(-t / self.tau_s)
+        return torch.flip(kernel_vec, [0])
