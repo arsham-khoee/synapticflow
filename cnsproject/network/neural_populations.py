@@ -1640,7 +1640,7 @@ class CSRMNode(NeuralPopulation):
         if self.learning:
             self.theta *= self.theta_decay
         
-        v = torch.einsum("i,kij->kj", self.resKernel, x)
+        v = torch.einsum( "i,kij->kj", self.resKernel, torch.tensor(x, dtype=torch.int64) )
         v += torch.einsum("i,kij->kj", self.refKernel, self.last_spikes)
         self.v += v.view(x.size(0), *self.shape)
         
@@ -1760,6 +1760,7 @@ class CSRMNode(NeuralPopulation):
     def Exponential_Kernel(self, dt):
         t = torch.arange(0, self.res_window_size, dt)
         kernel_vec = (1 / self.tau_s) * torch.exp(-t / self.tau_s)
+        print(torch.flip(kernel_vec, [0]))
         return torch.flip(kernel_vec, [0])
     
     def Rectangular_Kernel(self, dt):
