@@ -733,59 +733,23 @@ class AdaptiveLIFPopulation(NeuralPopulation):
         spike_trace: bool = False,
         additive_spike_trace: bool = False,
         tau_s: Union[float, torch.Tensor] = 10.,
+        tau_w: Union[float, torch.Tensor] = 4.,
         threshold: Union[float, torch.Tensor] = -52.,
         rest_pot: Union[float, torch.Tensor] = -62.,
         reset_pot: Union[float, torch.Tensor] = -62.,
-        refrac_length: Union[float, torch.Tensor] = 5,
+        refrac_length: Union[float, torch.Tensor] = 5.,
         dt: float = 0.1,
+        a0: Union[float, torch.Tensor] = 1.,
+        b: Union[float, torch.Tensor] = 2.,
+        R: Union[float, torch.Tensor] = 0.001,
         lower_bound: float = None,
         sum_input: bool = False,
         trace_scale: Union[float, torch.Tensor] = 1.,
         is_inhibitory: bool = False,
-        theta_plus: Union[float, torch.Tensor] = 0.05,
-        tau_theta_decay: Union[float, torch.Tensor] = 1e7,
-        tau_decay: Union[float, torch.Tensor] = 100.0,
         learning: bool = True,
+        tau_v: Union[float, torch.Tensor] = 100.0,
         **kwargs
     ) -> None:
-        """
-        Arguments
-        ---------
-        n : int, Optional
-            Number of neurons in the population.
-        shape : Iterable of int
-            Define the topology of neurons in the population.
-        spike_trace : bool, Optional
-            Specify whether to record spike traces. The default is False.
-        additive_spike_trace : bool, Optional
-            Specify whether to record spike traces additively. The default is False.
-        tau_s : float or torch.Tensor, Optional
-            Time constant of spike trace decay. The default is 10.0.
-        threshold : float or torch.Tensor, Optional
-            Threshold potential to spike. The default is -52.0v.
-        rest_pot : float or torch.Tensor, Optional
-            Rest potential for spike. The default is -62.0v.
-        reset_pot : float or torch.Tensor, Optional
-            Reset potential for spike. The default is -62.0v.
-        refrac_length : float or torch.Tensor, Optional
-            Neuron refractor interval length. The default is 5 time steps.
-        dt : float, Optional
-            Length of each time step.
-        lower_bound : float, Optional
-            Lower bound for neuron potential. The default is None.
-        trace_scale : float or torch.Tensor, Optional
-            The scaling factor of spike traces. The default is 1.0.
-        is_inhibitory : bool, Optional
-            Whether the neurons are inhibitory or excitatory. The default is False. 
-        theta_plus : float or torch.Tensor, Optional
-            Voltage increase of threshold after spiking. The default is 0.05.
-        tau_theta_decay : float or torch.Tensor, Optional
-            Time constant of adaptive threshold decay. The default is 1e7.
-        tau_decay float or torch.Tensor, Optional: 
-            Time constant of neuron voltage decay. The default is 100.0.
-        learning : bool, Optional
-            Define the training mode. The default is True.
-        """
         super().__init__(
             n=n,
             shape=shape,
@@ -799,16 +763,18 @@ class AdaptiveLIFPopulation(NeuralPopulation):
             dt=dt
         )
 
-        self.register_buffer("rest_pot", torch.tensor(rest_pot, dtype=torch.float))
-        self.register_buffer("reset_pot", torch.tensor(reset_pot, dtype=torch.float))
-        self.register_buffer("pot_threshold", torch.tensor(threshold, dtype=torch.float))
-        self.register_buffer("refrac_length", torch.tensor(refrac_length))
+        self.register_buffer("rest_pot", torch.tensor(rest_pot, dtype=torch.float)) # Rest potential
+        self.register_buffer("tau_s", torch.tensor(tau_s, dtype=torch.float)) # Tau_s
+        self.register_buffer("tau_w", torch.tensor(tau_w, dtype=torch.float)) # Tau_w
+        self.register_buffer("reset_pot", torch.tensor(reset_pot, dtype=torch.float)) # Reset potential
+        self.register_buffer("pot_threshold", torch.tensor(threshold, dtype=torch.float)) # Spiking Threshold
+        self.register_buffer("refrac_length", torch.tensor(refrac_length)) # Refractor length
         self.register_buffer("v", torch.FloatTensor()) # Neuron's potential
+        self.register_buffer("w", torch.FloatTensor()) # Adaptation variable
         self.register_buffer("refrac_count", torch.FloatTensor()) # Refractor counter
-        self.register_buffer("tau_decay", torch.tensor(tau_decay, dtype=torch.float))  # Time constant of neuron voltage decay.
-        self.register_buffer("decay", torch.zeros(*self.shape))  # Set in compute_decays.
-        self.register_buffer("theta_plus", torch.tensor(theta_plus))  # Constant threshold increase on spike.
-        self.register_buffer("tau_theta_decay", torch.tensor(tau_theta_decay))  # Time constant of adaptive threshold decay.
+        self.register_buffer("a0", torch.tensor(a0, dtype=torch.float)) # a_0
+        self.register_buffer("b", torch.tensor(b, dtype=torch.float)) # b
+        self.register_buffer("R", torch.tensor(R, dtype=torch.float)) # Resistance of neuron
         self.compute_decay() # Compute decays and set time steps
         self.reset_state_variables()
         self.lower_bound = lower_bound
@@ -843,16 +809,12 @@ class AdaptiveLIFPopulation(NeuralPopulation):
         """
         Compute new potential of neuron by given input tensor x and refrac_count
         """
-                
+        
         # Compute new potential with decay voltages.
-        self.v = self.decay * (self.v - self.rest_pot) + self.rest_pot
-
-        # Integrate inputs.
-        x.masked_fill_(self.refrac_count > 0, 0.0)
-
-        # interlaced
-        self.v += x 
-
+        if (self.refrac_count <= 0):          
+            self.v += ( - (self.v - self.rest_pot) - self.R * self.w + self.R * self.x) * self.dt / self.tau_v
+            self.w += (self.a0 * (self.v - self.rest_pot) - self.w + self.b * self.tau_w * (self.s.float())) * self.dt / self.tau_w
+                
 
     def compute_spike(self) -> None:
         """
@@ -878,7 +840,7 @@ class AdaptiveLIFPopulation(NeuralPopulation):
         # Set refrac_count equal to refrac_length if spiking is occurred.
         self.refrac_count.masked_fill_(self.s, self.refrac_length)
         
-        # Set potential of neuron to rest potential if spiking is occurred.
+        # Set potential of neuron to reset potential if spiking is occurred.
         self.v.masked_fill_(self.s, self.reset_pot)
         
 
@@ -898,8 +860,6 @@ class AdaptiveLIFPopulation(NeuralPopulation):
 
         """
         super().compute_decay()
-        self.decay = torch.exp(-self.dt / self.tau_decay)  # Neuron voltage decay (per timestep).
-
 
 
     def reset_state_variables(self) -> None:
@@ -914,6 +874,7 @@ class AdaptiveLIFPopulation(NeuralPopulation):
         super().reset_state_variables()
         self.v.fill_(self.rest_pot) # Reset neuron voltages
         self.refrac_count.zero_() # Refractory period reset
+        
 
     def set_batch_size(self, batch_size: int) -> None:
         """
@@ -927,6 +888,8 @@ class AdaptiveLIFPopulation(NeuralPopulation):
         super().set_batch_size(batch_size=batch_size)
         self.v = self.rest_pot * torch.ones(batch_size, *self.shape, device=self.v.device)
         self.refrac_count = torch.zeros_like(self.v, device=self.refrac_count.device)
+        self.w = torch.zeros_like(self.v, device=self.w.device)
+
 
 class ELIFPopulation(NeuralPopulation):
     """
