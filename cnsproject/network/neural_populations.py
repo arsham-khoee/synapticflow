@@ -1978,3 +1978,205 @@ class CLIFPopulation(NeuralPopulation):
         self.refrac_count = torch.zeros_like(self.v, device=self.refrac_count.device)
         self.i = torch.zeros_like(self.v, device=self.i.device)
 
+class SRM0Node(NeuralPopulation):
+    """
+    Layer of Simplified Spike Response Model.
+
+    Implement SRM0 neural dynamics(Parameters of the model must be modifiable).\
+    Follow the template structure of NeuralPopulation class for consistency.
+    """
+
+    def __init__(
+        self,
+        n: Optional[int] = None,
+        shape: Optional[Iterable[int]] = None,
+        spike_trace: bool = False,
+        additive_spike_trace: bool = False,
+        tc_trace: Union[float, torch.Tensor] = 20.0,
+        trace_scale: Union[float, torch.Tensor] = 1.0,
+        sum_input: bool = False,
+        tau_s: Union[float, torch.Tensor] = 10.,
+        threshold: Union[float, torch.Tensor] = -52.,
+        rest_pot: Union[float, torch.Tensor] = -62.,
+        reset_pot: Union[float, torch.Tensor] = -62.,
+        refrac_length: Union[float, torch.Tensor] = 5,
+        tau_decay: Union[float, torch.Tensor] = 10.0,
+        eps_0: Union[float, torch.Tensor] = 1.0,
+        rho_0: Union[float, torch.Tensor] = 1.0,
+        d_thresh: Union[float, torch.Tensor] = 5.0,
+        dt: float = 0.1,
+        lower_bound: float = None,
+        is_inhibitory: bool = False,
+        learning: bool = True,
+        **kwargs
+    ) -> None:
+        """
+        Arguments
+        ---------
+        n : int, Optional
+            Number of neurons in the population.
+        shape : Iterable of int
+            Define the topology of neurons in the population.
+        spike_trace : bool, Optional
+            Specify whether to record spike traces. The default is False.
+        additive_spike_trace : bool, Optional
+            Specify whether to record spike traces additively. The default is False.
+        tau_s : float or torch.Tensor, Optional
+            Time constant of spike trace decay. The default is 10.0.
+        threshold : float or torch.Tensor, Optional
+            Threshold potential to spike. The default is -52.0v.
+        rest_pot : float or torch.Tensor, Optional
+            Rest potential for spike. The default is -62.0v.
+        reset_pot : float or torch.Tensor, Optional
+            Reset potential for spike. The default is -62.0v.
+        refrac_length : float or torch.Tensor, Optional
+            Neuron refractor interval length. The default is 5 time steps.
+        dt : float, Optional
+            Length of each time step.
+        lower_bound : float, Optional
+            Lower bound for neuron potential. The default is None.
+        trace_scale : float or torch.Tensor, Optional
+            The scaling factor of spike traces. The default is 1.0.
+        is_inhibitory : bool, Optional
+            Whether the neurons are inhibitory or excitatory. The default is False.
+        tau_decay: 
+            Time constant of neuron voltage decay. The default is 100.0.
+        learning : bool, Optional
+            Define the training mode. The default is True.
+        """
+        super().__init__(
+            n=n,
+            shape=shape,
+            spike_trace=spike_trace,
+            additive_spike_trace=additive_spike_trace,
+            tau_s=tau_s,
+            sum_input=sum_input,
+            trace_scale=trace_scale,
+            is_inhibitory=is_inhibitory,
+            learning=learning,
+            dt=dt
+        )
+
+        self.register_buffer("rest_pot", torch.tensor(rest_pot, dtype=torch.float))
+        self.register_buffer("reset_pot", torch.tensor(reset_pot, dtype=torch.float))
+        self.register_buffer("threshold", torch.tensor(threshold, dtype=torch.float))
+        self.register_buffer("refrac_length", torch.tensor(refrac_length))
+        self.register_buffer("tau_decay", torch.tensor(tau_decay))
+        self.register_buffer("decay", torch.tensor(tau_decay))
+        self.register_buffer("eps_0", torch.tensor(eps_0))
+        self.register_buffer("rho_0", torch.tensor(rho_0))
+        self.register_buffer("d_thresh", torch.tensor(d_thresh))
+        self.register_buffer("v", torch.FloatTensor())
+        self.register_buffer("refrac_count", torch.FloatTensor())
+        self.compute_decay() # Compute decays and set time steps
+        self.reset_state_variables()
+        self.lower_bound = lower_bound
+
+
+    def forward(self, x: torch.Tensor) -> None:
+        """
+        TODO.
+
+        1. Make use of other methods to fill the body. This is the main method\
+           responsible for one step of neuron simulation.
+        2. You might need to call the method from parent class.
+        """
+        self.compute_potential(x) # Compute new potential
+        
+        self.compute_spike() # Check if neuron is spiking
+        
+        self.refractory_and_reset() # Applies refractory and reset conditions
+        
+        # Check lower bound condition for neuron.
+        if self.lower_bound is not None:
+            self.v.masked_fill_(self.lower_bound > self.v, self.lower_bound)
+            
+        super().forward(x)
+        
+
+    def compute_potential(self, x: torch.Tensor) -> None:
+        """
+        Compute new potential of neuron by given input tensor x and refrac_count
+        """
+                
+        self.v = self.decay * (self.v - self.rest_pot) + self.rest_pot
+        self.v += (self.refrac_count <= 0).float() * self.eps_0 * x
+        self.rho = self.rho_0 * torch.exp((self.v - self.threshold) / self.threshold)
+        self.s_prob = 1.0 - torch.exp(-self.rho * self.dt)
+        
+
+
+    def compute_spike(self) -> None:
+        """
+        Compute spike condition and make changes directly on spike tensor
+        """
+        # Check for spiking neuron
+        self.s = torch.rand_like(self.s_prob) < self.s_prob
+
+
+    @abstractmethod
+    def refractory_and_reset(self) -> None:
+        """
+        In this function, three things will be done:
+            1 - decrease refrac_count by time step size
+            2 - Set refrac_count to refrac_length if spiking is occurred
+            3 - Set neuron potential to rest_pot if spiking is occurred
+        """
+        super().refractory_and_reset()
+        
+        # Decrease refactor count by time step length
+        self.refrac_count -= self.dt
+        
+        # Set refrac_count equal to refrac_length if spiking is occurred.
+        self.refrac_count.masked_fill_(self.s, self.refrac_length)
+        
+        # Set potential of neuron to rest potential if spiking is occurred.
+        self.v.masked_fill_(self.s, self.reset_pot)
+        
+
+    @abstractmethod
+    def compute_decay(self) -> None:
+        """
+        Set the decays.
+
+        Parameters
+        ----------
+        dt : float,
+            Length of time steps.
+
+        Returns
+        -------
+        None
+
+        """
+        super().compute_decay()
+        self.decay = torch.exp(-self.dt / self.tau_decay)  # Neuron voltage decay (per timestep).
+
+
+
+    def reset_state_variables(self) -> None:
+        """
+        Reset all internal state variables.
+
+        Returns
+        -------
+        None
+
+        """
+        super().reset_state_variables()
+        self.v.fill_(self.rest_pot) # Reset neuron voltages
+        self.refrac_count.zero_() # Refractory period reset
+
+    def set_batch_size(self, batch_size: int) -> None:
+        """
+        Sets mini-batch size. Called when layer is added to a network.
+        
+        Parameters
+        ----------
+        batch_size: int,
+            Mini-batch size.
+        """
+        super().set_batch_size(batch_size=batch_size)
+        self.v = self.rest_pot * torch.ones(batch_size, *self.shape, device=self.v.device)
+        self.refrac_count = torch.zeros_like(self.v, device=self.refrac_count.device)        
+
