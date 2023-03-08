@@ -78,6 +78,7 @@ language = "en"
 html_static_path = ["_static"]
 html_css_files = ["pied-piper-admonition.css"]
 
+html_static_path = ["_static"]
 html_logo = "logo.png"
 
 html_theme_options: Dict[str, Any] = {
