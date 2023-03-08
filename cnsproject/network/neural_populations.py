@@ -1736,6 +1736,7 @@ class Izhikevich(NeuralPopulation):
         is_inhibitory: bool = False,
         learning: bool = True,
         critical_pot: Union[float, torch.Tensor] = 0.8,
+        tau_v: Union[float, torch.Tensor] = 4.0,
         **kwargs
     ) -> None:
         super().__init__(
@@ -1752,6 +1753,7 @@ class Izhikevich(NeuralPopulation):
 
         self.register_buffer("critical_pot", torch.tensor(critical_pot, dtype=torch.float))
         self.register_buffer("rest_pot", torch.tensor(rest_pot, dtype=torch.float)) # Rest potential
+        self.register_buffer("tau_v", torch.tensor(tau_v, dtype=torch.float)) # Tau_v
         self.register_buffer("tau_s", torch.tensor(tau_s, dtype=torch.float)) # Tau_s
         self.register_buffer("tau_w", torch.tensor(tau_w, dtype=torch.float)) # Tau_w
         self.register_buffer("reset_pot", torch.tensor(reset_pot, dtype=torch.float)) # Reset potential
