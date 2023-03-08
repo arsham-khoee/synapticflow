@@ -72,7 +72,7 @@ myst_heading_anchors = 3
 #
 
 html_theme = "furo"
-html_title = "Furo"
+html_title = "SynapticFlow"
 language = "en"
 
 html_static_path = ["_static"]
