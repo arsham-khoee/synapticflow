@@ -76,7 +76,7 @@ html_theme = "furo"
 language = "en"
 
 html_static_path = ["_static"]
-html_logo = "logo.png"
+html_logo = "demo.png"
 
 html_static_path = ["_static"]
 html_css_files = ["pied-piper-admonition.css"]
