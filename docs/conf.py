@@ -14,7 +14,7 @@ sys.path.append(os.path.abspath("./kitchen-sink/demo_py"))
 # -- Project information -----------------------------------------------------
 #
 
-project = "furo"
+project = "SynapticFlow"
 copyright = "2020, Pradyun Gedam"
 author = "Pradyun Gedam"
 
@@ -72,9 +72,10 @@ myst_heading_anchors = 3
 #
 
 html_theme = "furo"
-html_title = "Furo"
+# html_title = "Furo"
 language = "en"
 
+html_static_path = ["_static"]
 html_logo = "logo.png"
 
 html_static_path = ["_static"]
