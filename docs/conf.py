@@ -72,11 +72,14 @@ myst_heading_anchors = 3
 #
 
 html_theme = "furo"
-# html_title = "Furo"
+html_title = "SynapticFlow"
 language = "en"
 
 html_static_path = ["_static"]
-html_logo = "demo.png"
+html_theme_options = {
+    "light_logo": "logo.png",
+    "dark_logo": "logo.png",
+}
 
 html_static_path = ["_static"]
 html_css_files = ["pied-piper-admonition.css"]
