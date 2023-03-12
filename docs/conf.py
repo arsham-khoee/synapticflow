@@ -156,3 +156,12 @@ html_theme_options = {
     "light_logo": "logo.png",
     "dark_logo": "logo.png",
 }
+
+
+html_theme_options = {
+    "light_css_variables": {
+        "font-stack": "Lato, sans-serif",
+        "font-stack--monospace": "Courier, monospace",
+    },
+}
+
