@@ -1,9 +1,6 @@
 """
 Module for neuronal dynamics and populations.
 """
-"""
-Module for neuronal dynamics and populations.
-"""
 
 from functools import reduce
 from abc import abstractmethod
