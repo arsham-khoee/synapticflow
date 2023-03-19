@@ -14,7 +14,8 @@ sys.path.append(os.path.abspath("./kitchen-sink/demo_py"))
 # -- Project information -----------------------------------------------------
 #
 
-project = "SynapticFlow"
+# project = "SynapticFlow"
+project = ""
 copyright = "2023, Arsham Gholamzadeh, Negar Sourati, Mobin Nesari, Mohammad Mehdi Begmaz"
 author = "Arsham Gholamzadeh, Negar Sourati, Mobin Nesari, Mohammad Mehdi Begmaz"
 
