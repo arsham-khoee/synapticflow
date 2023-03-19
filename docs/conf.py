@@ -75,6 +75,7 @@ html_theme = "furo"
 
 language = "en"
 
+html_static_path = ["_static"]
 html_theme_options = {
     "light_logo": "logo-light-mode.png",
     "dark_logo": "logo-dark-mode.png",
