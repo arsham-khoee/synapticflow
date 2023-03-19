@@ -72,13 +72,18 @@ myst_heading_anchors = 3
 #
 
 html_theme = "furo"
-html_title = "SynapticFlow"
+
 language = "en"
 
 
 html_static_path = ["_static"]
 html_css_files = ["pied-piper-admonition.css"]
 
+html_static_path = ["_static"]
+html_theme_options = {
+    "light_logo": "logo-light-mode.png",
+    "dark_logo": "logo-dark-mode.png",
+}
 
 html_theme_options: Dict[str, Any] = {
     "footer_icons": [
