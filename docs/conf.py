@@ -153,15 +153,15 @@ if FONT_AWESOME_TESTING:
     
     html_static_path = ["_static"]
     html_theme_options = {
-        "light_logo": "logo-light-mode.png",
-        "dark_logo": "logo-dark-mode.png",
+        "light_logo": logo-light-mode.png,
+        "dark_logo": logo-dark-mode.png,
     }
 
     
 html_static_path = ["_static"]
 html_theme_options = {
-    "light_logo": "logo-light-mode.png",
-    "dark_logo": "logo-dark-mode.png",
+    "light_logo": logo-light-mode.png,
+    "dark_logo": logo-dark-mode.png,
 }
 
 
