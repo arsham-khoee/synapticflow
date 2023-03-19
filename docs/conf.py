@@ -74,8 +74,6 @@ myst_heading_anchors = 3
 
 html_theme = "furo"
 
-html_title = ""
-
 language = "en"
 
 
