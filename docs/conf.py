@@ -75,11 +75,6 @@ html_theme = "furo"
 
 language = "en"
 
-html_static_path = ["_static"]
-html_theme_options = {
-    "light_logo": "logo-light-mode.png",
-    "dark_logo": "logo-dark-mode.png",
-}
 
 html_static_path = ["_static"]
 html_css_files = ["pied-piper-admonition.css"]
@@ -155,6 +150,19 @@ if FONT_AWESOME_TESTING:
             "class": "fa-solid fa-github fa-2x",
         },
     ]
+    
+    html_static_path = ["_static"]
+    html_theme_options = {
+        "light_logo": "logo-light-mode.png",
+        "dark_logo": "logo-dark-mode.png",
+    }
+
+    
+html_static_path = ["_static"]
+html_theme_options = {
+    "light_logo": "logo-light-mode.png",
+    "dark_logo": "logo-dark-mode.png",
+}
 
 
 html_theme_options = {
