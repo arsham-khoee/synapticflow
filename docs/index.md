@@ -16,18 +16,26 @@ hide-toc: true
 :hidden:
 
 quickstart
-customisation/index
-reference/index
-recommendations
 ```
+
+
+```{toctree}
+:hidden: Neural Papulation's
+LIF
+ALIF
+ELIF
+Adex
+QLIF
+SRM0
+CSRM
+
+quickstart
+```
+
 
 ```{toctree}
 :caption: Development
 :hidden:
-
-contributing/index
-kitchen-sink/index
-stability
-changelog
+Contributer's
 license
 ```
