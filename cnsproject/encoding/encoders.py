@@ -99,6 +99,44 @@ class Time2FirstSpikeEncoder(AbstractEncoder):
         pass
 
 
+class Time2FirstSpikeEncoder(AbstractEncoder):
+    """
+    Time-to-First-Spike coding.
+
+    Implement Time-to-First-Spike coding.
+    """
+
+    def __init__(
+        self,
+        time: int,
+        dt: Optional[float] = 1.0,
+        device: Optional[str] = "cpu",
+        sparsity: float = 0.5,
+        **kwargs
+    ) -> None:
+        super().__init__(
+            time=time,
+            dt=dt,
+            device=device,
+            sparsity=sparsity,
+            **kwargs
+        )
+        """
+        TODO.
+
+        Add other attributes if needed and fill the body accordingly.
+        """
+
+    def __call__(self, data: torch.Tensor) -> None:
+        time = int(self.time / self.dt)
+        shape = list(data.shape)
+        data = torch.tensor(data)
+        quantile = torch.quantile(data, 1 - self.sparsity)
+        s = torch.zeros([time, *shape], device=self.device)
+        s[0] = torch.where(data > quantile, torch.ones(shape), torch.zeros(shape))
+        return torch.Tensor(s).byte()
+
+
 class PositionEncoder(AbstractEncoder):
     """
     Position coding.
