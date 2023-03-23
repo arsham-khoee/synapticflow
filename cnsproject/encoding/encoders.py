@@ -99,12 +99,7 @@ class Time2FirstSpikeEncoder(AbstractEncoder):
         pass
 
 
-class Time2FirstSpikeEncoder(AbstractEncoder):
-    """
-    Time-to-First-Spike coding.
-
-    Implement Time-to-First-Spike coding.
-    """
+class SingleEncoder(AbstractEncoder):
 
     def __init__(
         self,
