@@ -99,6 +99,32 @@ class Time2FirstSpikeEncoder(AbstractEncoder):
         pass
 
 
+class RepeatEncoder(AbstractEncoder):
+    """
+    Position coding.
+
+    Implement Position coding.
+    """
+
+    def __init__(
+        self,
+        time: int,
+        dt: Optional[float] = 1.0,
+        device: Optional[str] = "cpu",
+        **kwargs
+    ) -> None:
+        super().__init__(
+            time=time,
+            dt=dt,
+            device=device,
+            **kwargs
+        )
+
+    def __call__(self, data: torch.Tensor) -> None:
+        time = int(self.time / self.dt)
+        return data.repeat([self.time, *([1] * len(self.data.shape))])
+    
+
 class PositionEncoder(AbstractEncoder):
     """
     Position coding.
