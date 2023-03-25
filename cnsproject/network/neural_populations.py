@@ -343,6 +343,138 @@ class InputPopulation(NeuralPopulation):
         """
         super().reset_state_variables()
 
+class McCullochPitts(NeuralPopulation):
+    """
+    Layer of Integrate and Fire neurons.
+
+    Implement IF neural dynamics(Parameters of the model must be modifiable).\
+    Follow the template structure of NeuralPopulation class for consistency.
+    """
+
+    def __init__(
+        self,
+        n: Optional[int] = None,
+        shape: Optional[Iterable[int]] = None,
+        spike_trace: bool = False,
+        additive_spike_trace: bool = False,
+        tau_s: Union[float, torch.Tensor] = 10.,
+        threshold: Union[float, torch.Tensor] = 1.0,
+        dt: float = 0.1,
+        lower_bound: float = None,
+        sum_input: bool = False,
+        trace_scale: Union[float, torch.Tensor] = 1.,
+        is_inhibitory: bool = False,
+        learning: bool = True,
+        **kwargs
+    ) -> None:
+        
+        super().__init__(
+            n=n,
+            shape=shape,
+            spike_trace=spike_trace,
+            additive_spike_trace=additive_spike_trace,
+            tau_s=tau_s,
+            sum_input=sum_input,
+            trace_scale=trace_scale,
+            is_inhibitory=is_inhibitory,
+            learning=learning,
+            dt=dt
+        )
+        
+        self.register_buffer(
+            "threshold", torch.tensor(threshold, dtype=torch.float)
+        ) 
+        self.register_buffer("v", torch.FloatTensor())
+        self.compute_decay() # Compute decays and set time steps
+        self.reset_state_variables()
+        
+
+    def forward(self, x: torch.Tensor) -> None:
+        """
+        TODO.
+
+        1. Make use of other methods to fill the body. This is the main method\
+           responsible for one step of neuron simulation.
+        2. You might need to call the method from parent class.
+        """
+        self.compute_potential(x) # Compute new potential
+        
+        self.compute_spike() # Check if neuron is spiking
+        
+        self.refractory_and_reset() # Applies refractory and reset conditions
+        
+        super().forward(x)
+        
+
+    def compute_potential(self, x: torch.Tensor) -> None:
+        """
+        Compute new potential of neuron by given input tensor x and refrac_count
+        """
+        # Compute new potential
+        if isinstance(x, torch.Tensor):
+            self.v = x
+        else:
+            self.v = torch.tensor([x])
+
+    def compute_spike(self) -> None:
+        """
+        Compute spike condition and make changes directly on spike tensor
+        """
+        # Check for spiking neuron
+        self.s = self.v >= self.threshold
+
+    @abstractmethod
+    def refractory_and_reset(self) -> None:
+        """
+        In this function, three things will be done:
+            1 - decrease refrac_count by time step size
+            2 - Set refrac_count to refrac_length if spiking is occurred
+            3 - Set neuron potential to rest_pot if spiking is occurred
+        """
+        super().refractory_and_reset()
+        
+
+    @abstractmethod
+    def compute_decay(self) -> None:
+        """
+        Set the decays.
+
+        Parameters
+        ----------
+        dt : float,
+            Length of time steps.
+
+        Returns
+        -------
+        None
+
+        """
+        super().compute_decay()
+
+
+    def reset_state_variables(self) -> None:
+        """
+        Reset all internal state variables.
+
+        Returns
+        -------
+        None
+
+        """
+        super().reset_state_variables()
+
+    def set_batch_size(self, batch_size: int) -> None:
+        """
+        Sets mini-batch size. Called when layer is added to a network.
+        
+        Parameters
+        ----------
+        batch_size: int,
+            Mini-batch size.
+        """
+        super().set_batch_size(batch_size=batch_size)
+        self.v = torch.zeros(*self.shape, device=self.v.device)
+
 class IFPopulation(NeuralPopulation):
     """
     Layer of Integrate and Fire neurons.
