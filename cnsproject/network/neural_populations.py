@@ -1179,8 +1179,7 @@ class ELIFPopulation(NeuralPopulation):
         Compute new potential of neuron by given input tensor x and refrac_count
         """
         # Compute new potential of neuron
-        if (self.refrac_count <= 0):
-            self.v = self.v + (x + self.rest_pot - self.v + self.delta_T * torch.exp((self.v - self.theta_rh)/ self.delta_T)) / self.tau_s * self.dt
+        self.v += ((x + self.rest_pot - self.v + self.delta_T * torch.exp((self.v - self.theta_rh)/ self.delta_T)) / self.tau_s * self.dt) * (self.refrac_count<=0).float()
 
     def compute_spike(self) -> None:
         """
