@@ -264,7 +264,7 @@ class NeuralPopulation(torch.nn.Module):
         None
         """
         self.batch_size = batch_size
-        self.s = torch.zeros(batch_size, *self.shape, device=self.s.device, dtype=torch.bool)
+        self.s = torch.zeros(*self.shape, device=self.s.device, dtype=torch.bool)
 
 class InputPopulation(NeuralPopulation):
     """
@@ -518,7 +518,7 @@ class IFPopulation(NeuralPopulation):
             Mini-batch size.
         """
         super().set_batch_size(batch_size=batch_size)
-        self.v = self.rest_pot * torch.ones(batch_size, *self.shape, device=self.v.device)
+        self.v = self.rest_pot * torch.ones(*self.shape, device=self.v.device)
         self.refrac_count = torch.zeros_like(self.v, device=self.refrac_count.device)
 
 class LIFPopulation(NeuralPopulation):
@@ -720,7 +720,7 @@ class LIFPopulation(NeuralPopulation):
             Mini-batch size.
         """
         super().set_batch_size(batch_size=batch_size)
-        self.v = self.rest_pot * torch.ones(batch_size, *self.shape, device=self.v.device)
+        self.v = self.rest_pot * torch.ones(*self.shape, device=self.v.device)
         self.refrac_count = torch.zeros_like(self.v, device=self.refrac_count.device)
 
 
@@ -912,7 +912,7 @@ class BoostedLIFPopulation(NeuralPopulation):
             Mini-batch size.
         """
         super().set_batch_size(batch_size=batch_size)
-        self.v = torch.zeros(batch_size, *self.shape, device=self.v.device)
+        self.v = torch.zeros(*self.shape, device=self.v.device)
         self.refrac_count = torch.zeros_like(self.v, device=self.refrac_count.device)
 
 
@@ -1089,7 +1089,7 @@ class AdaptiveLIFPopulation(NeuralPopulation):
             Mini-batch size.
         """
         super().set_batch_size(batch_size=batch_size)
-        self.v = self.rest_pot * torch.ones(batch_size, *self.shape, device=self.v.device)
+        self.v = self.rest_pot * torch.ones(*self.shape, device=self.v.device)
         self.refrac_count = torch.zeros_like(self.v, device=self.refrac_count.device)
         self.w = torch.zeros_like(self.v, device=self.w.device)
 
@@ -1238,7 +1238,7 @@ class ELIFPopulation(NeuralPopulation):
         None
         """
         super().set_batch_size(batch_size=batch_size)
-        self.v = self.reset_pot * torch.ones(batch_size, *self.shape, device=self.v.device)
+        self.v = self.reset_pot * torch.ones(*self.shape, device=self.v.device)
         self.refrac_count = torch.zeros_like(self.v, device=self.refrac_count.device)
 
     def reset_state_variables(self) -> None:
@@ -1443,7 +1443,7 @@ class BoostedLIFPopulation(NeuralPopulation):
             Mini-batch size.
         """
         super().set_batch_size(batch_size=batch_size)
-        self.v = torch.zeros(batch_size, *self.shape, device=self.v.device)
+        self.v = torch.zeros(*self.shape, device=self.v.device)
         self.refrac_count = torch.zeros_like(self.v, device=self.refrac_count.device)
 
 
@@ -1594,7 +1594,7 @@ class QLIFPopulation(NeuralPopulation):
         None
         """
         super().set_batch_size(batch_size=batch_size)
-        self.v = self.reset_pot * torch.ones(batch_size, *self.shape, device=self.v.device)
+        self.v = self.reset_pot * torch.ones(*self.shape, device=self.v.device)
         self.refrac_count = torch.zeros_like(self.v, device=self.refrac_count.device)
 
     def reset_state_variables(self) -> None:
@@ -1765,7 +1765,7 @@ class AELIFPopulation(NeuralPopulation):
         None
         """
         super().set_batch_size(batch_size=batch_size)
-        self.v = self.reset_pot * torch.ones(batch_size, *self.shape, device=self.v.device)
+        self.v = self.reset_pot * torch.ones(*self.shape, device=self.v.device)
         self.refrac_count = torch.zeros_like(self.v, device=self.refrac_count.device)
         self.w = torch.zeros_like(self.v, device=self.w.device)
 
@@ -1973,7 +1973,7 @@ class CLIFPopulation(NeuralPopulation):
             Mini-batch size.
         """
         super().set_batch_size(batch_size=batch_size)
-        self.v = self.rest_pot * torch.ones(batch_size, *self.shape, device=self.v.device)
+        self.v = self.rest_pot * torch.ones(*self.shape, device=self.v.device)
         self.refrac_count = torch.zeros_like(self.v, device=self.refrac_count.device)
         self.i = torch.zeros_like(self.v, device=self.i.device)
 
@@ -2176,6 +2176,6 @@ class SRM0Node(NeuralPopulation):
             Mini-batch size.
         """
         super().set_batch_size(batch_size=batch_size)
-        self.v = self.rest_pot * torch.ones(batch_size, *self.shape, device=self.v.device)
+        self.v = self.rest_pot * torch.ones(*self.shape, device=self.v.device)
         self.refrac_count = torch.zeros_like(self.v, device=self.refrac_count.device)        
 
