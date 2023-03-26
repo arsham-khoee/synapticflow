@@ -50,6 +50,8 @@ class LearningRule(ABC):
         elif isinstance(lr, float) or isinstance(lr, int):
             lr = [lr, lr]
 
+        self.connection = connection
+
         self.lr = torch.tensor(lr, dtype=torch.float)
 
         self.weight_decay = 1 - weight_decay if weight_decay else 1.
@@ -65,12 +67,11 @@ class LearningRule(ABC):
         """
         if self.weight_decay:
             self.connection.w *= self.weight_decay
-
-        if (
-            self.connection.wmin != -np.inf or self.connection.wmax != np.inf
-        ) and not isinstance(self.connection, NoOp):
-            self.connection.w.clamp_(self.connection.wmin,
-                                     self.connection.wmax)
+        # if (
+        #     self.connection.w_min != -np.inf or self.connection.w_max != np.inf
+        # ) and not isinstance(self.connection, NoOp):
+        #     self.connection.w.clamp_(self.connection.w_min,
+        #                              self.connection.w_max)
 
 
 class NoOp(LearningRule):
@@ -139,20 +140,22 @@ class STDP(LearningRule):
             **kwargs
         )
         """
-        TODO.
-
         Consider the additional required parameters and fill the body\
         accordingly.
         """
 
     def update(self, **kwargs) -> None:
-        """
-        TODO.
+        
+        dw = self.connection.pre.dt * (-self.lr[0] * self.connection.post.traces.view(*self.connection.post.shape, 1).matmul(self.connection.pre.s.view(1, *self.connection.pre.shape).float()).T + (self.lr[1] * self.connection.pre.traces.view(*self.connection.pre.shape, 1).matmul(self.connection.post.s.view(1, *self.connection.post.shape).float())))
+        
+        self.connection.w += dw * (1 - self.connection.w)
 
+        super().update()
+
+        """
         Implement the dynamics and updating rule. You might need to call the\
         parent method.
         """
-        pass
 
 
 class FlatSTDP(LearningRule):

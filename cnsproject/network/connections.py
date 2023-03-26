@@ -8,7 +8,7 @@ from typing import Union, Sequence
 import torch
 from torch.nn import Module, Parameter
 
-from neural_populations import NeuralPopulation
+from .neural_populations import NeuralPopulation
 
 
 class AbstractConnection(ABC, torch.nn.Module):
@@ -181,12 +181,12 @@ class Connection(AbstractConnection):
                 w = torch.clamp(torch.as_tensor(w), self.w_min, self.w_max)
 
         if d is None:
-            if (self.d_min == 0.0) or (self.d_max == float('inf')):
+            if (self.d_min == 0.0) or (self.d_max == 100.0):
                 d = torch.clamp(torch.rand(pre.n, post.n), self.d_min, self.d_max)
             else:
                 d = self.d_min + torch.rand(pre.n, post.n) * (self.d_max - self.d_min)
         else:
-            if (self.d_min != 0.0) or (self.d_max != float('inf')):
+            if (self.d_min != 0.0) or (self.d_max != 100.0):
                 d = torch.clamp(torch.as_tensor(d), self.d_min, self.d_max)     
 
         self.w = Parameter(w, requires_grad=False)
