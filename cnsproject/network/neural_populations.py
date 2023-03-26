@@ -345,10 +345,34 @@ class InputPopulation(NeuralPopulation):
 
 class McCullochPitts(NeuralPopulation):
     """
-    Layer of Integrate and Fire neurons.
+        A class representing a McCulloch-Pitts neuron population.
 
-    Implement IF neural dynamics(Parameters of the model must be modifiable).\
-    Follow the template structure of NeuralPopulation class for consistency.
+        Args:
+            n (Optional[int]): The number of neurons in the population.
+            shape (Optional[Iterable[int]]): The shape of the input tensor. This
+                is used to determine the number of inputs to each neuron in the
+                population.
+            spike_trace (bool): Whether to compute spike traces for the neurons in
+                the population.
+            additive_spike_trace (bool): Whether to add spike traces over time
+                rather than replacing the old trace with the new one.
+            tau_s (Union[float, torch.Tensor]): The decay time constant for the
+                spike trace.
+            threshold (Union[float, torch.Tensor]): The spiking threshold for the
+                neurons in the population.
+            dt (float): The simulation time step.
+            lower_bound (float): The lower bound for the potential of the neurons
+                in the population.
+            sum_input (bool): Whether to sum the input across all dimensions or to
+                keep the input separate for each dimension.
+            trace_scale (Union[float, torch.Tensor]): A scaling factor for the
+                computed spike traces.
+            is_inhibitory (bool): Whether the population is inhibitory.
+            learning (bool): Whether the population is trainable.
+            **kwargs: Other arguments to pass to the base class constructor.
+
+        Returns:
+            None
     """
 
     def __init__(
@@ -367,7 +391,7 @@ class McCullochPitts(NeuralPopulation):
         learning: bool = True,
         **kwargs
     ) -> None:
-        
+        # Initializes the McCullochPitts neuron population.
         super().__init__(
             n=n,
             shape=shape,
@@ -390,13 +414,7 @@ class McCullochPitts(NeuralPopulation):
         
 
     def forward(self, x: torch.Tensor) -> None:
-        """
-        TODO.
-
-        1. Make use of other methods to fill the body. This is the main method\
-           responsible for one step of neuron simulation.
-        2. You might need to call the method from parent class.
-        """
+        # Computes the output of the population for the given input.
         self.compute_potential(x) # Compute new potential
         
         self.compute_spike() # Check if neuron is spiking
@@ -407,71 +425,33 @@ class McCullochPitts(NeuralPopulation):
         
 
     def compute_potential(self, x: torch.Tensor) -> None:
-        """
-        Compute new potential of neuron by given input tensor x and refrac_count
-        """
-        # Compute new potential
+        # Computes the potential of the neurons in the population for the given input.
         if isinstance(x, torch.Tensor):
             self.v = x
         else:
             self.v = torch.tensor([x])
 
     def compute_spike(self) -> None:
-        """
-        Compute spike condition and make changes directly on spike tensor
-        """
-        # Check for spiking neuron
+        # Computes the spikes of the neurons in the population based on their potential and threshold values.
         self.s = self.v >= self.threshold
 
     @abstractmethod
     def refractory_and_reset(self) -> None:
-        """
-        In this function, three things will be done:
-            1 - decrease refrac_count by time step size
-            2 - Set refrac_count to refrac_length if spiking is occurred
-            3 - Set neuron potential to rest_pot if spiking is occurred
-        """
+        # Applies the refractory period and resets the state variables of the neurons in the population.
         super().refractory_and_reset()
         
 
     @abstractmethod
     def compute_decay(self) -> None:
-        """
-        Set the decays.
-
-        Parameters
-        ----------
-        dt : float,
-            Length of time steps.
-
-        Returns
-        -------
-        None
-
-        """
+        # Computes the decay constants for the neuron population.
         super().compute_decay()
 
-
     def reset_state_variables(self) -> None:
-        """
-        Reset all internal state variables.
-
-        Returns
-        -------
-        None
-
-        """
+        # Resets the state variables of the neurons in the population.
         super().reset_state_variables()
 
     def set_batch_size(self, batch_size: int) -> None:
-        """
-        Sets mini-batch size. Called when layer is added to a network.
-        
-        Parameters
-        ----------
-        batch_size: int,
-            Mini-batch size.
-        """
+        # Sets the batch size of the population.
         super().set_batch_size(batch_size=batch_size)
         self.v = torch.zeros(*self.shape, device=self.v.device)
 
