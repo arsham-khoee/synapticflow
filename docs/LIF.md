@@ -1,4 +1,4 @@
-# LIF neuralpopulation
+# LIF
 
 ```{include} ../README.md
 :start-after: <!-- start quickstart -->
