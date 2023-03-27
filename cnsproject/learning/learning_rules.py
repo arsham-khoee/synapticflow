@@ -171,6 +171,7 @@ class FlatSTDP(LearningRule):
         connection: AbstractConnection,
         lr: Optional[Union[float, Sequence[float]]] = None,
         weight_decay: float = 0.,
+        window_steps: int = 10,
         **kwargs
     ) -> None:
         super().__init__(
@@ -179,22 +180,48 @@ class FlatSTDP(LearningRule):
             weight_decay=weight_decay,
             **kwargs
         )
+        self.window_steps = window_steps
+        self.pre_traces = torch.zeros(window_steps, *connection.pre.shape)
+        self.post_traces = torch.zeros(window_steps, *connection.post.shape)
+        self.pre_traces_i = 0
+        self.post_traces_i = 0
         """
-        TODO.
 
         Consider the additional required parameters and fill the body\
         accordingly.
         """
 
     def update(self, **kwargs) -> None:
+        
+        self.pre_traces_i %= self.window_steps
+        self.pre_traces[self.pre_traces_i] = self.connection.pre.s
+        self.pre_traces_i += 1
+        pre_traces_sum = sum(self.pre_traces)
+        
+        
+        print(self.pre_traces_i)
+        print(self.pre_traces)
+        print(pre_traces_sum)
+        
+        self.post_traces_i %= self.window_steps
+        self.post_traces[self.post_traces_i] = self.connection.post.s
+        self.post_traces_i += 1
+        post_traces_sum = sum(self.post_traces)
+        
+        
+        print(self.post_traces_i)
+        print(self.post_traces)
+        print(post_traces_sum)
+       
+        dw = self.connection.pre.dt * (-self.lr[0] * post_traces_sum.view(*self.connection.post.shape, 1).matmul(self.connection.pre.s.float().view(1, *self.connection.pre.shape)).T + self.lr[1] * pre_traces_sum.view(*self.connection.pre.shape, 1).matmul(self.connection.post.s.float().view(1, *self.connection.post.shape)))
+        self.connection.w += dw
+
         """
-        TODO.
 
         Implement the dynamics and updating rule. You might need to call the\
         parent method.
         """
-        pass
-
+        super().update()
 
 class RSTDP(LearningRule):
     """
@@ -209,6 +236,7 @@ class RSTDP(LearningRule):
         connection: AbstractConnection,
         lr: Optional[Union[float, Sequence[float]]] = None,
         weight_decay: float = 0.,
+        tau_c: Union[float, torch.Tensor] = 0.1,
         **kwargs
     ) -> None:
         super().__init__(
@@ -217,22 +245,32 @@ class RSTDP(LearningRule):
             weight_decay=weight_decay,
             **kwargs
         )
-        """
-        TODO.
+        self.c = torch.zeros(*connection.post.shape,*connection.pre.shape)
+        #self.register_buffer("tau_c", torch.tensor(tau_c, dtype=torch.float))
 
+        self.tau_c = tau_c
+        """
         Consider the additional required parameters and fill the body\
         accordingly.
         """
 
-    def update(self, **kwargs) -> None:
+    def update(self, da:float, **kwargs) -> None:
+        
+        delta = self.connection.post.s.float().view(*self.connection.post.shape, 1).matmul(self.connection.pre.s.float().view(1, *self.connection.pre.shape))
+        
+        dc = (-self.c / self.tau_c) * self.connection.pre.dt + (self.connection.pre.dt * (-self.lr[0] * self.connection.post.traces.view(*self.connection.post.shape, 1).matmul(self.connection.pre.s.view(1, *self.connection.pre.shape).float()) + (self.lr[1] * self.connection.pre.traces.view(*self.connection.pre.shape, 1).matmul(self.connection.post.s.view(1, *self.connection.post.shape).float())).T) * delta)
+        self.c += dc
+        
+        
+        dw = self.connection.pre.dt * (self.c * da)
+        self.connection.w += dw.T
         """
-        TODO.
 
         Implement the dynamics and updating rule. You might need to call the
         parent method. Make sure to consider the reward value as a given keyword
         argument.
         """
-        pass
+        super().update()
 
 
 class FlatRSTDP(LearningRule):
