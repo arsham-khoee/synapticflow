@@ -13,18 +13,21 @@ hide-toc: true
 ```
 
 ```{toctree}
-:hidden: SynapticFlow
+:caption: SynapticFlow
+:hidden: 
 Introduction
 Installation
 quickstart
 ```
 
 ```{toctree}
+:caption: Network
 :hidden: 
 Network
 
 ```{toctree}
-:hidden: Neural Papulation
+:caption: Neural Papulation
+:hidden:
 LIF
 ALIF
 ELIF
