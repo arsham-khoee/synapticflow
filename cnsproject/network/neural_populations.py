@@ -2307,7 +2307,7 @@ class CLIFPopulation(NeuralPopulation):
         self.refrac_count.zero_() # Refractory period reset
 
     def set_batch_size(self, batch_size: int) -> None:
-         """
+        """
         Sets the batch size of the neuron.
         
         Parameters:
