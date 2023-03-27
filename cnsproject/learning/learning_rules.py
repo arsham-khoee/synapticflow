@@ -310,3 +310,77 @@ class FlatRSTDP(LearningRule):
         argument.
         """
         pass
+
+class DSTDP(LearningRule):
+    
+    def __init__(
+        self,
+        connection: AbstractConnection,
+        lr: Optional[Union[float, Sequence[float]]] = None,
+        weight_decay: float = 0.,
+        delay_learning: bool = False,
+        A_positive: float = 1,
+        A_negative: float = 1,
+        tau_positive: float = 1,
+        tau_negative: float = 1,
+        B_positive: float = 1,
+        B_negative: float = 1,
+        sigma_positive: float = 1,
+        sigma_negative: float = 1,
+        **kwargs
+    ) -> None:
+        super().__init__(
+            connection=connection,
+            lr=lr,
+            weight_decay=weight_decay,
+            **kwargs
+        )
+        
+        self.delay_learning = delay_learning
+        self.delay_mem = torch.zeros((self.connection.pre.n, self.connection.post.n), dtype=torch.float32)
+        self.A_positive = A_positive
+        self.A_negative = A_negative
+        self.tau_positive = tau_positive
+        self.tau_negative = tau_negative
+        self.B_positive = B_positive
+        self.B_negative = B_negative
+        self.sigma_positive = sigma_positive
+        self.sigma_negative = sigma_negative
+        
+    def update(self, **kwargs):
+        
+        self.delay_mem[self.delay_mem.nonzero(as_tuple=True)] += self.connection.pre.dt
+        pos_s = self.connection.post.s
+        pos_s = pos_s.T.repeat(self.connection.pre.n, 1)
+        delta_time = pos_s.mul(self.delay_mem)
+        delta_w = torch.zeros_like(self.connection.w)
+        
+        if delta_time.any():
+            delta_w = self.F(delta_time)
+        
+        delta_d = torch.zeros_like(self.connection.d)
+        if self.delay_learning:
+            delta_d = self.G(delta_time)
+        
+        self.connection.w += delta_w
+        self.connection.d += delta_d
+            
+        self.delay_mem.masked_fill_(delta_time != 0, 0)
+        
+        pre_s = self.connection.pre.s
+        pre_s = pre_s.repeat(self.connection.post.n, 1).T
+        result = pre_s.mul(self.connection.d)
+        self.delay_mem.masked_fill_(result != 0, 0)
+        result *= -1
+        self.delay_mem += result
+        
+    
+    def F(self, delta_time : torch.Tensor) -> torch.Tensor:
+        result = delta_time
+        result[result.nonzero(as_tuple=True)] = (result[result.nonzero(as_tuple=True)] >= 0).float() * (self.A_positive * torch.exp((-1 * result[result.nonzero(as_tuple=True)]) / self.tau_positive)) + (result[result.nonzero(as_tuple=True)] < 0 ).float() * (-1 * self.A_negative * torch.exp((result[result.nonzero(as_tuple=True)]) / self.tau_negative))
+        return result
+
+    def G(self, delta_time : torch.Tensor) -> torch.Tensor:
+        result = delta_time
+        result[result.nonzero(as_tuple=True)] = (result[result.nonzero(as_tuple=True)] >= 0).float() * (-1 * self.B_negative * torch.exp((-1 * result[result.nonzero(as_tuple=True)]) / self.sigma_negative)) + (result[result.nonzero(as_tuple=True)] < 0).float() * (self.B_positive * torch.exp((result[result.nonzero(as_tuple=True)]) / self.sigma_positive))
+        return result
