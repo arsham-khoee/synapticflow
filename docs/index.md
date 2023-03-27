@@ -25,7 +25,6 @@ quickstart
 :hidden: 
 Network
 
-```{toctree}
 :caption: Neural Papulation
 :hidden:
 LIF
@@ -34,7 +33,6 @@ ELIF
 Adex
 QLIF
 SRM0
-```
 ```
 
 ```{toctree}
