@@ -14,28 +14,30 @@ hide-toc: true
 
 ```{toctree}
 :hidden:
-
 quickstart
+SynapticFlow
+Introduction
 ```
 
+```{toctree}
+:hidden: 
+Network
+```
 
 ```{toctree}
-:hidden: Neural Papulation's
+:hidden: Neural Papulation
 LIF
 ALIF
 ELIF
 Adex
 QLIF
 SRM0
-CSRM
-
-quickstart
 ```
 
 
 ```{toctree}
 :caption: Development
 :hidden:
-Contributer's
+Contributing
 license
 ```
