@@ -21,12 +21,9 @@ quickstart
 ```
 
 ```{toctree}
-:caption: Networks
+:caption: Network
 :hidden: 
 Network
-
-:caption: Neural Papulation
-:hidden:
 LIF
 ALIF
 ELIF
