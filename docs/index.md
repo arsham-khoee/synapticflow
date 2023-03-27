@@ -13,16 +13,15 @@ hide-toc: true
 ```
 
 ```{toctree}
-:hidden:
-quickstart
-SynapticFlow
+:hidden: SynapticFlow
 Introduction
+Installation
+quickstart
 ```
 
 ```{toctree}
 :hidden: 
 Network
-```
 
 ```{toctree}
 :hidden: Neural Papulation
@@ -33,7 +32,7 @@ Adex
 QLIF
 SRM0
 ```
-
+```
 
 ```{toctree}
 :caption: Development
