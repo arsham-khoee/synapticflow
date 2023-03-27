@@ -146,24 +146,50 @@ class PoissonEncoder(AbstractEncoder):
         time: int,
         dt: Optional[float] = 1.0,
         device: Optional[str] = "cpu",
+        approx: bool = False,
         **kwargs
     ) -> None:
+        """
+        Constructor.
+
+        :param time: Length of time for which to generate spike trains.
+        :param dt: Time resolution of the spike trains.
+        :param device: Device to use for computations.
+        :param approx: Flag indicating whether to use an approximation method for generating Poisson spikes.
+        """
         super().__init__(
             time=time,
             dt=dt,
-            device=device,
-            **kwargs
+            device=device
         )
-        """
-        TODO.
+        self.approx = approx
 
-        Add other attributes if needed and fill the body accordingly.
-        """
+    def __call__(self, data: torch.Tensor) -> torch.Tensor:
+        
+        min_rate = 0.0
+        max_rate = 80.0
+        num_levels = 16
+        level_size = 1 / num_levels
+        rate_range = max_rate - min_rate
+        rates = np.linspace(min_rate, max_rate, num_levels)
 
-    def __call__(self, data: torch.Tensor) -> None:
-        """
-        TODO.
+        levels = torch.floor(data / level_size).clamp(max=num_levels - 1)
 
-        Implement the computation for coding the data. Return resulting tensor.
-        """
-        pass
+        num_neurons = num_levels
+        num_steps = int(self.time / self.dt)
+        spikes = torch.zeros((num_neurons, num_steps), device=self.device)
+        for i in range(num_neurons):
+            rate = rates[i]
+            for j in range(num_steps):
+                if self.approx:
+                    prob = rate * self.dt
+                    spikes[i, j] = torch.bernoulli(prob.unsqueeze(0)).squeeze()
+                else:
+                    rate_tensor = torch.tensor(rate, device=self.device)
+                    exp_val = torch.exp(-rate_tensor * self.dt)
+                    spikes[i, j] = torch.bernoulli(1 - exp_val.unsqueeze(0)).squeeze()
+
+        indices = levels.long()
+        spikes = spikes[indices, :]
+
+        return spikes
