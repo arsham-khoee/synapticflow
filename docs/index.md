@@ -21,7 +21,7 @@ quickstart
 ```
 
 ```{toctree}
-:caption: Network
+:caption: Networks
 :hidden: 
 Network
 
