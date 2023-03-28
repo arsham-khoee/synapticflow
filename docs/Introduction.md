@@ -5,8 +5,8 @@
 
 
 <div class="sidebar-logo-container">
-  <img class="sidebar-logo only-light" src="logo-light-mode.png" alt="Light Logo"/>
-  <img class="sidebar-logo only-dark" src="logo-dark-mode.png" alt="Dark Logo"/>
+  <img class="sidebar-logo only-light" src="_static/logo-light-mode.png" alt="Light Logo"/>
+  <img class="sidebar-logo only-dark" src="_static/logo-dark-mode.png" alt="Dark Logo"/>
 </div>
  
 
