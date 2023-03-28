@@ -1,0 +1,8 @@
+body {
+  --logo: url(logo-light-mode.png) no-repeat;
+
+}
+
+body[data-theme="dark"] {
+  --logo: url(logo-dark-mode.png) no-repeat;
+}
