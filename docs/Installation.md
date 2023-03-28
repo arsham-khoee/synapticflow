@@ -15,3 +15,13 @@ $ git clone https://github.com/arsham-khoee/synapticflow
 $ cd synapticflow
 $ python setup.py install
 ```
+
+
+<h3> Requirements </h3>
+The requirements for SynapticFlow are as follows: 
+
+<ul>
+  <li>torch</li>
+  <li>seaborn</li>
+  <li>math</li>
+</ul>
