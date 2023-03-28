@@ -5,12 +5,11 @@
 
 <picture>
   <source
-    srcset="_static/logo-dark-mode.png"
+    srcset="_static/logo-light-mode.png"
     media="(prefers-color-scheme: dark)"
   />
   <img
-    src="_static/logo-light-mode.png"
-    alt="Browser with large and small images of a coffee cup and plants"
+    src="_static/logo-dark-mode.png"
   />
 </picture>
 
