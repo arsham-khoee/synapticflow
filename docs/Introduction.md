@@ -9,7 +9,6 @@ If you encounter any problems, want to share your thoughts or have any questions
 <h3> Requirements: </h3>
 The requirements for SynapticFlow are as follows: 
 <br>
-<br>
 
 <ul>
   <li>torch</li>
