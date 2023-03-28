@@ -21,3 +21,16 @@ Please consider supporting the SynapticFlow project by giving it a star ⭐️ o
 If you encounter any problems, want to share your thoughts or have any questions related to training spiking neural networks, we welcome you to open an issue, start a discussion, or join our <a href="https://discord.gg/dhQyAMxM">Discord</a> channel where we can chat and offer advice.
 
 
+## Synapticflow Structure
+The following are the components included in SynapticFlow:
+
+
+|        Component        |                        Description                        |
+|:-----------------------:|:---------------------------------------------------------:|
+|   synapticflow.network  | A spiking network components like neurons and connections |
+|  synapticflow.encoding  |              Several encoders implementation              |
+|  synapticflow.learning  |           Learning rules and surrogate gradients          |
+| synapticflow.evaluation |         Several evaluation functions for networks         |
+|  synapticflow.datasets  | Include MNIST, Fashion-MNIST, CIFAR-10 benchmark datasets |
+|   synapticflow.vision   |         Include vision components for neuroscienc         |
+|    synapticflow.plot    |        Plot tools for neural networks visualization       |
