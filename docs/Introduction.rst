@@ -1,8 +1,6 @@
-
-<link rel="stylesheet" href="/_/static/css/extra.css" type="text/css" />
-
-# Introduction 
-
+=======
+Introduction 
+=======
 
 .. image:: https://colab.research.google.com/assets/colab-badge.svg
         :alt: Open In Colab
