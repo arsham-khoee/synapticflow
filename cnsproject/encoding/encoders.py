@@ -146,7 +146,6 @@ class PoissonEncoder(AbstractEncoder):
         time: int,
         dt: Optional[float] = 1.0,
         device: Optional[str] = "cpu",
-        approx: bool = False,
         **kwargs
     ) -> None:
         """
@@ -155,41 +154,36 @@ class PoissonEncoder(AbstractEncoder):
         :param time: Length of time for which to generate spike trains.
         :param dt: Time resolution of the spike trains.
         :param device: Device to use for computations.
-        :param approx: Flag indicating whether to use an approximation method for generating Poisson spikes.
         """
         super().__init__(
             time=time,
             dt=dt,
             device=device
         )
-        self.approx = approx
 
     def __call__(self, data: torch.Tensor) -> torch.Tensor:
         
-        min_rate = 0.0
-        max_rate = 80.0
-        num_levels = 16
-        level_size = 1 / num_levels
-        rate_range = max_rate - min_rate
-        rates = np.linspace(min_rate, max_rate, num_levels)
+        """
+        :param data: Tensor of shape ``[n_1, ..., n_k]``.
+        :return: Tensor of shape ``[time, n_1, ..., n_k]`` of Poisson-distributed spikes.
+        """
 
-        levels = torch.floor(data / level_size).clamp(max=num_levels - 1)
+        shape, size = data.shape, data.numel()
+        data = data.flatten().to(self.device)
+        time = int(self.time / self.dt)
 
-        num_neurons = num_levels
-        num_steps = int(self.time / self.dt)
-        spikes = torch.zeros((num_neurons, num_steps), device=self.device)
-        for i in range(num_neurons):
-            rate = rates[i]
-            for j in range(num_steps):
-                if self.approx:
-                    prob = rate * self.dt
-                    spikes[i, j] = torch.bernoulli(prob.unsqueeze(0)).squeeze()
-                else:
-                    rate_tensor = torch.tensor(rate, device=self.device)
-                    exp_val = torch.exp(-rate_tensor * self.dt)
-                    spikes[i, j] = torch.bernoulli(1 - exp_val.unsqueeze(0)).squeeze()
+        rate = torch.zeros(size, device=self.device)
+        rate[data != 0] = 1 / data[data != 0] * (1000 / self.dt)
 
-        indices = levels.long()
-        spikes = spikes[indices, :]
+        dist = torch.distributions.Poisson(rate=rate, validate_args=False)
+        intervals = dist.sample(sample_shape=torch.Size([time + 1]))
+        intervals[:, data != 0] += (intervals[:, data != 0] == 0).float()
 
-        return spikes
+        times = torch.cumsum(intervals, dim=0).long()
+        times[times >= time + 1] = 0
+
+        spikes = torch.zeros(time + 1, size, device=self.device).byte()
+        spikes[times, torch.arange(size)] = 1
+        spikes = spikes[1:]
+
+        return spikes.view(time, *shape)
