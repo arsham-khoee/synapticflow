@@ -1,4 +1,9 @@
+
+<link rel="stylesheet" href="/_/static/css/extra.css" type="text/css" />
+
 # Introduction
+
+<img src="_static/logo-light-mode.png" class="logo" alt="Logo" style="margin: auto; width: 700px; "/>
 
 Spiking Neural Networks (SNNs) are a type of artificial neural network that attempts to mimic the behavior of neurons in the brain. Unlike traditional neural networks that use continuous-valued signals, SNNs operate using discrete spikes of activity that are similar to the action potentials in biological neurons. SynapticFlow is a powerful Python package for prototyping and simulating SNNs. It is based on PyTorch and supports both CPU and GPU computation. SynapticFlow extends the capabilities of PyTorch and enables us to take advantage of using spiking neurons. Additionally, it offers different variations of synaptic plasticity as well as delay learning for SNNs.
 
