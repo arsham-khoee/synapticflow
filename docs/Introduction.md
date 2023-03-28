@@ -4,6 +4,11 @@
 # Introduction 
 
 
+.. image:: https://colab.research.google.com/assets/colab-badge.svg
+        :alt: Open In Colab
+        :target: https://colab.research.google.com/github/jeshraghian/snntorch/blob/master/examples/quickstart.ipynb
+
+
 <div class="sidebar-logo-container">
   <img class="sidebar-logo only-light" src="_static/logo-light-mode.png" alt="Light Logo" style="width: 600px; padding: 25px;"/>
   <img class="sidebar-logo only-dark" src="_static/logo-dark-mode.png" alt="Dark Logo" style="width: 600px; padding: 25px;"/>
