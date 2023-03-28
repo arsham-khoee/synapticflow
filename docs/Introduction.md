@@ -6,8 +6,13 @@ Please consider supporting the SynapticFlow project by giving it a star ⭐️ o
 
 If you encounter any problems, want to share your thoughts or have any questions related to training spiking neural networks, we welcome you to open an issue, start a discussion, or join our <a href="https://discord.gg/dhQyAMxM">Discord</a> channel where we can chat and offer advice.
 
-<h3> Requirements </h3>:
+<h3> Requirements: </h3>
 The requirements for SynapticFlow are as follows: 
-- torch
-- seaborn
-- math
+<br>
+<br>
+
+<ul>
+  <li>torch</li>
+  <li>seaborn</li>
+  <li>math</li>
+</ul>
