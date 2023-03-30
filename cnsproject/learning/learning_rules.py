@@ -374,7 +374,8 @@ class DSTDP(LearningRule):
         result *= -1
         self.delay_mem += result
         
-    
+        super().update()
+        
     def F(self, delta_time : torch.Tensor) -> torch.Tensor:
         result = delta_time
         result[result.nonzero(as_tuple=True)] = (result[result.nonzero(as_tuple=True)] >= 0).float() * (self.A_positive * torch.exp((-1 * result[result.nonzero(as_tuple=True)]) / self.tau_positive)) + (result[result.nonzero(as_tuple=True)] < 0 ).float() * (-1 * self.A_negative * torch.exp((result[result.nonzero(as_tuple=True)]) / self.tau_negative))
@@ -384,3 +385,4 @@ class DSTDP(LearningRule):
         result = delta_time
         result[result.nonzero(as_tuple=True)] = (result[result.nonzero(as_tuple=True)] >= 0).float() * (-1 * self.B_negative * torch.exp((-1 * result[result.nonzero(as_tuple=True)]) / self.sigma_negative)) + (result[result.nonzero(as_tuple=True)] < 0).float() * (self.B_positive * torch.exp((result[result.nonzero(as_tuple=True)]) / self.sigma_positive))
         return result
+    
