@@ -7,8 +7,9 @@ from typing import Union, Optional, Sequence
 
 import numpy as np
 import torch
+import copy
 
-from ..network.connections import AbstractConnection
+from connections import AbstractConnection
 
 
 class LearningRule(ABC):
@@ -355,16 +356,18 @@ class DSTDP(LearningRule):
         delta_time = pos_s.mul(self.delay_mem)
         delta_w = torch.zeros_like(self.connection.w)
         
+        
         if delta_time.any():
             delta_w = self.F(delta_time)
         
-        delta_d = torch.zeros_like(self.connection.d)
-        if self.delay_learning:
-            delta_d = self.G(delta_time)
+        
+        delta_d = self.G(delta_time) * (float(self.delay_learning))
+        
         
         self.connection.w += delta_w
         self.connection.d += delta_d
-            
+        
+        
         self.delay_mem.masked_fill_(delta_time != 0, 0)
         
         pre_s = self.connection.pre.s
@@ -377,12 +380,12 @@ class DSTDP(LearningRule):
         super().update()
         
     def F(self, delta_time : torch.Tensor) -> torch.Tensor:
-        result = delta_time
+        result = copy.deepcopy(delta_time)
         result[result.nonzero(as_tuple=True)] = (result[result.nonzero(as_tuple=True)] >= 0).float() * (self.A_positive * torch.exp((-1 * result[result.nonzero(as_tuple=True)]) / self.tau_positive)) + (result[result.nonzero(as_tuple=True)] < 0 ).float() * (-1 * self.A_negative * torch.exp((result[result.nonzero(as_tuple=True)]) / self.tau_negative))
         return result
 
     def G(self, delta_time : torch.Tensor) -> torch.Tensor:
-        result = delta_time
+        result = copy.deepcopy(delta_time)
         result[result.nonzero(as_tuple=True)] = (result[result.nonzero(as_tuple=True)] >= 0).float() * (-1 * self.B_negative * torch.exp((-1 * result[result.nonzero(as_tuple=True)]) / self.sigma_negative)) + (result[result.nonzero(as_tuple=True)] < 0).float() * (self.B_positive * torch.exp((result[result.nonzero(as_tuple=True)]) / self.sigma_positive))
         return result
     
