@@ -170,6 +170,37 @@ class Time2FirstSpikeEncoder(AbstractEncoder):
         """
         pass
 
+    
+class BernoulliEncoder(AbstractEncoder):
+    """
+    Bernoulli coding.
+
+    Implement Bernoulli coding.
+    """
+
+    def __init__(
+        self,
+        time: int,
+        dt: Optional[float] = 1.0,
+        device: Optional[str] = "cpu",
+        **kwargs
+    ) -> None:
+        super().__init__(
+            time=time,
+            dt=dt,
+            device=device,
+            **kwargs
+        )
+        
+
+    def __call__(self, data: torch.Tensor, max_prob = 1.0) -> None:
+        time = int(self.time / self.dt)
+        data = data.flatten().to(self.device)
+        data /= data.max()
+        spikes = torch.bernoulli(max_prob * data.repeat([time, 1]))
+        spikes = spikes.view(time, data.shape)
+        return spikes
+
 
 class PositionEncoder(AbstractEncoder):
     """
