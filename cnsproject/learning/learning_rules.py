@@ -313,6 +313,10 @@ class FlatRSTDP(LearningRule):
         pass
 
 class DSTDP(LearningRule):
+    """
+    Delay Related STDP implementation from Bio-plausible Unsupervised Delay Learning for Extracting Temporal Features in Spiking Neural Networks paper.
+    Paper link: https://arxiv.org/pdf/2011.09380.pdf
+    """
     
     def __init__(
         self,
@@ -330,6 +334,26 @@ class DSTDP(LearningRule):
         sigma_negative: float = 1,
         **kwargs
     ) -> None:
+        
+        """
+        DSDTP Constructor
+        
+        Params:
+        -------
+        connection (Connection) : A connection to apply learning rule.
+        lr (Optional(float / Sequence(float))) : Learning rate for both pre and post synaptic neurons. Default: None
+        weight_decay (float) : Weight decay for learning process. Default: 0
+        delay_learning (bool) : Indicates apply delay learning for delay parameter or not. Default: False
+        A_positive (float) : Constant for weights changes function. Default: 1
+        A_negative (float) : Constant for weights changes function. Default: 1
+        tau_positive (float) : Constant for weights changes exponential rate. Default: 1
+        tau_negative (float) : Constant for weights changes exponential rate. Default: 1
+        B_positive (float) : Constant for delay changes function. Default: 1
+        B_negative (float) : Constant for delay changes function. Default: 1
+        sigma_positive (float) : Constant for delay changes exponential rate. Default: 1
+        sigma_negative (float) : Constant for delay changes exponential rate. Default: 1
+        """
+        
         super().__init__(
             connection=connection,
             lr=lr,
@@ -350,26 +374,27 @@ class DSTDP(LearningRule):
         
     def update(self, **kwargs):
         
+        # Simulate one time step and compute required information
         self.delay_mem[self.delay_mem.nonzero(as_tuple=True)] += self.connection.pre.dt
         pos_s = self.connection.post.s
         pos_s = pos_s.T.repeat(self.connection.pre.n, 1)
         delta_time = pos_s.mul(self.delay_mem)
         delta_w = torch.zeros_like(self.connection.w)
         
+        # Checks if any modification should be applied on weights
+        delta_w = self.F(delta_time) * (float(delta_time.any()))
         
-        if delta_time.any():
-            delta_w = self.F(delta_time)
-        
-        
+        # Checks if any modification should be applied on delays
         delta_d = self.G(delta_time) * (float(self.delay_learning))
         
-        
+        # Apply modification on weights and delays
         self.connection.w += delta_w
         self.connection.d += delta_d
         
-        
+        # Remove old memory
         self.delay_mem.masked_fill_(delta_time != 0, 0)
         
+        # Indicates new potential modification
         pre_s = self.connection.pre.s
         pre_s = pre_s.repeat(self.connection.post.n, 1).T
         result = pre_s.mul(self.connection.d)
@@ -380,11 +405,33 @@ class DSTDP(LearningRule):
         super().update()
         
     def F(self, delta_time : torch.Tensor) -> torch.Tensor:
+        """
+        Non-Linear exponential function for indicating change in weight
+        
+        Params:
+        -------
+        delta_time (torch.tensor) : delta time = |t_j - t_i - d_ij|
+        
+        Returns:
+        -------
+        torch.Tensor : Output of this function
+        """
         result = copy.deepcopy(delta_time)
         result[result.nonzero(as_tuple=True)] = (result[result.nonzero(as_tuple=True)] >= 0).float() * (self.A_positive * torch.exp((-1 * result[result.nonzero(as_tuple=True)]) / self.tau_positive)) + (result[result.nonzero(as_tuple=True)] < 0 ).float() * (-1 * self.A_negative * torch.exp((result[result.nonzero(as_tuple=True)]) / self.tau_negative))
         return result
 
     def G(self, delta_time : torch.Tensor) -> torch.Tensor:
+        """
+        Non-Linear exponential function for indicating change in weight
+        
+        Params:
+        -------
+        delta_time (torch.tensor) : delta time = |t_j - t_i - d_ij|
+        
+        Returns:
+        -------
+        torch.Tensor : Output of this function
+        """
         result = copy.deepcopy(delta_time)
         result[result.nonzero(as_tuple=True)] = (result[result.nonzero(as_tuple=True)] >= 0).float() * (-1 * self.B_negative * torch.exp((-1 * result[result.nonzero(as_tuple=True)]) / self.sigma_negative)) + (result[result.nonzero(as_tuple=True)] < 0).float() * (self.B_positive * torch.exp((result[result.nonzero(as_tuple=True)]) / self.sigma_positive))
         return result
