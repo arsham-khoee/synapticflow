@@ -15,31 +15,37 @@ def get_random_rgb() -> np.ndarray:
     color = (r, g, b)
     return np.array(color).reshape(1, -1)
 
-def plot_current(currents: torch.Tensor, steps: int, dt: float) -> None:
+def plot_current(currents: torch.Tensor, steps: int, dt: float, save_path: str = None) -> None:
     times = [dt * i for i in range(steps)]
     plt.plot(times, currents)
     plt.xlabel("Time")
     plt.ylabel("Current")
+    if save_path:
+        plt.savefig(save_path)
     plt.show()
     
-def plot_adaptation(adaptations: List[float], dt: float) -> None:
+def plot_adaptation(adaptations: List[float], dt: float, save_path: str = None) -> None:
     times = [dt * i for i in range(len(adaptations))]
     plt.plot(times, adaptations, c='r')
     plt.xlabel("Time")
     plt.ylabel("Adaptation Value")
+    if save_path:
+        plt.savefig(save_path)
     plt.show()
     
-def plot_dopamin(dopamins: List[float], dt: float) -> None:
+def plot_dopamin(dopamins: List[float], dt: float, save_path: str = None) -> None:
     plt.plot([dt * i for i in range(len(dopamins))], dopamins)
     plt.xlabel("Time")
     plt.ylabel("Dopamin")
+    if save_path:
+        plt.savefig(save_path)
     plt.show()
     
 def get_spiked_neurons(spikes: torch.Tensor) -> torch.Tensor:
     spiked_neurons = list(map(lambda x: x[0], filter( lambda x: x[1] != 0, enumerate(spikes))))
     return torch.tensor(spiked_neurons)
 
-def plot_activity(population_spikes: List[torch.Tensor], dt: float) -> None:
+def plot_activity(population_spikes: List[torch.Tensor], dt: float, save_path: str = None) -> None:
     steps = len(population_spikes[0])
     population_size = reduce(lambda acc, pop: acc + len(pop[0]), population_spikes, 0)
     activities = []
@@ -50,8 +56,11 @@ def plot_activity(population_spikes: List[torch.Tensor], dt: float) -> None:
     plt.plot([dt * i for i in range(steps)], activities)
     plt.xlabel("Time")
     plt.ylabel("Activities")
+    if save_path:
+        plt.savefig(save_path)
+    plt.show()
     
-def raster_plot(populations_spikes: List[torch.Tensor], dt: float) -> None:
+def raster_plot(populations_spikes: List[torch.Tensor], dt: float, save_path: str = None) -> None:
     acc = 0
     for spikes_per_step in populations_spikes:
         color = get_random_rgb()
@@ -69,9 +78,11 @@ def raster_plot(populations_spikes: List[torch.Tensor], dt: float) -> None:
         
     plt.xlabel("Time")
     plt.ylabel("Raster Activity")
+    if save_path:
+        plt.savefig(save_path)
     plt.show()
     
-def plot_weights(weights: List[torch.Tensor], dt: float):
+def plot_weights(weights: List[torch.Tensor], dt: float, save_path: str = None):
     weights_in_time = torch.tensor(
         list(map(
             lambda w: list(w.flatten()), weights
@@ -95,6 +106,9 @@ def plot_weights(weights: List[torch.Tensor], dt: float):
         axs[i].set_title(f'Weights changes for post synaptic neuron {i + 1}')
         axs[i].set_xlabel('Time')
         axs[i].set_ylabel('Weight Value')
+    
+    if save_path:
+        plt.savefig(save_path)
         
     plt.show()
     
