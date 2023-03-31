@@ -89,7 +89,6 @@ class SingleEncoder(AbstractEncoder):
         self,
         time: int,
         dt: Optional[float] = 1.0,
-        sparsity: float = 0.5,
         device: Optional[str] = "cpu",
         **kwargs
     ) -> None:
@@ -101,9 +100,9 @@ class SingleEncoder(AbstractEncoder):
         )
         
 
-    def __call__(self, data: torch.Tensor) -> torch.Tensor:
+    def __call__(self, data: torch.Tensor, sparsity = 0.5) -> torch.Tensor:
         time_step = int(self.time / self.dt)
-        quantile = torch.quantile(data, 1 - self.sparsity)
+        quantile = torch.quantile(data, 1 - sparsity)
         spikes = torch.zeros([time_step, *data.shape], device=self.device)
         spikes[0] = torch.where(data > quantile, torch.ones(data.shape), torch.zeros(data.shape))
         return torch.Tensor(spikes)
