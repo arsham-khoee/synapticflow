@@ -64,6 +64,20 @@ class AbstractEncoder(ABC):
         pass
 
 
+class NullEncoder(AbstractEncoder):
+    """
+    Null coding.
+
+    Implement Null coding.
+    """
+
+    def __init__(self):
+        super().__init__()
+
+    def __call__(self, data: torch.Tensor) -> torch.Tensor:
+        return data
+
+
 class RepeatEncoder(AbstractEncoder):
     """
     Reapeat coding.
@@ -86,7 +100,7 @@ class RepeatEncoder(AbstractEncoder):
         )
         
 
-    def __call__(self, data: torch.Tensor) -> None:
+    def __call__(self, data: torch.Tensor) -> torch.Tensor:
         
         time = int(self.time / self.dt)
         return data.repeat([time, 1])
