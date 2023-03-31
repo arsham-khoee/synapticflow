@@ -64,6 +64,34 @@ class AbstractEncoder(ABC):
         pass
 
 
+class RepeatEncoder(AbstractEncoder):
+    """
+    Reapeat coding.
+
+    Implement repeat coding.
+    """
+
+    def __init__(
+        self,
+        time: int,
+        dt: Optional[float] = 1.0,
+        device: Optional[str] = "cpu",
+        **kwargs
+    ) -> None:
+        super().__init__(
+            time=time,
+            dt=dt,
+            device=device,
+            **kwargs
+        )
+        
+
+    def __call__(self, data: torch.Tensor) -> None:
+        
+        time = int(self.time / self.dt)
+        return data.repeat([time, 1])
+
+
 class Time2FirstSpikeEncoder(AbstractEncoder):
     """
     Time-to-First-Spike coding.
