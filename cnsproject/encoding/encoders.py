@@ -198,7 +198,7 @@ class BernoulliEncoder(AbstractEncoder):
         data = data.flatten().to(self.device)
         data /= data.max()
         spikes = torch.bernoulli(max_prob * data.repeat([time, 1]))
-        spikes = spikes.view(time, data.shape)
+        spikes = spikes.view(time, *data.shape)
         return spikes
 
 
