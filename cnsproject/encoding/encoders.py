@@ -72,10 +72,41 @@ class NullEncoder(AbstractEncoder):
     """
 
     def __init__(self):
-        super().__init__()
+        pass
 
     def __call__(self, data: torch.Tensor) -> torch.Tensor:
         return data
+    
+
+class SingleEncoder(AbstractEncoder):
+    """
+    Single coding.
+
+    Implement Single coding.
+    """
+
+    def __init__(
+        self,
+        time: int,
+        dt: Optional[float] = 1.0,
+        sparsity: float = 0.5,
+        device: Optional[str] = "cpu",
+        **kwargs
+    ) -> None:
+        super().__init__(
+            time=time,
+            dt=dt,
+            device=device,
+            **kwargs
+        )
+        
+
+    def __call__(self, data: torch.Tensor) -> torch.Tensor:
+        time_step = int(self.time / self.dt)
+        quantile = torch.quantile(data, 1 - self.sparsity)
+        spikes = torch.zeros([time_step, *data.shape], device=self.device)
+        spikes[0] = torch.where(data > quantile, torch.ones(data.shape), torch.zeros(data.shape))
+        return torch.Tensor(spikes)
 
 
 class RepeatEncoder(AbstractEncoder):
