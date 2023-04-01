@@ -352,7 +352,7 @@ class RankOrderEncoder(AbstractEncoder):
 
         spikes = torch.zeros(time, size, device=self.device).byte()
         for i in range(size):
-            if 0 < times[i] < time:
+            if 0 < times[i] <= time:
                 spikes[times[i] - 1, i] = 1
 
         return spikes.reshape(time, *shape)
