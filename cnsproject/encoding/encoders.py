@@ -135,47 +135,6 @@ class RepeatEncoder(AbstractEncoder):
         time = int(self.time / self.dt)
         return data.repeat([time, 1])
 
-
-class Time2FirstSpikeEncoder(AbstractEncoder):
-    """
-    Time-to-First-Spike coding.
-
-    Implement Time-to-First-Spike coding.
-    """
-
-    def __init__(
-        self,
-        time: int,
-        dt: Optional[float] = 1.0,
-        device: Optional[str] = "cpu",
-        **kwargs
-    ) -> None:
-        super().__init__(
-            time=time,
-            dt=dt,
-            device=device,
-            **kwargs
-        )
-        
-
-    def __call__(self, data: torch.Tensor) -> None:
-        shape, size = data.shape, data.numel()
-        data = data.flatten().to(self.device)
-        time = int(self.time / self.dt)
-
-        data /= data.max()
-        times = torch.zeros(size)
-        times[data != 0] = 1 / data[data != 0]
-        times *= time / times.max() 
-        times = torch.ceil(times).long()
-
-        spikes = torch.zeros(time, size, device=self.device).byte()
-        for i in range(size):
-            if 0 < times[i] < time:
-                spikes[times[i] - 1, i] = 1
-
-        return spikes.reshape(time, *shape)
-
     
 class BernoulliEncoder(AbstractEncoder):
     """
