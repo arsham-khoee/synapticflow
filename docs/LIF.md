@@ -1,6 +1,6 @@
 <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=default'></script>
 
-#Leaky Integrate and Fire
+#LIF
 
 The LIF (Leaky Integrate and Fire) neuron is a widely used model in computational neuroscience for simulating the behavior of a single neuron. It is a simplified model that captures the essential features of a neuron, including the integration of synaptic inputs and the generation of action potentials. The LIF neuron is based on the concept of the membrane potential, which is the electrical potential difference across the neuron's cell membrane. When the membrane potential reaches a certain threshold, an action potential is triggered, which allows the neuron to communicate with other neurons. The LIF neuron has been used extensively in the study of neural networks and information processing in the brain, and it continues to be an important tool in neuroscience research.
 
