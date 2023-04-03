@@ -248,9 +248,9 @@ class PositionEncoder(AbstractEncoder):
 class PoissonEncoder(AbstractEncoder):
     
     """
-    Generates Poisson-distributed spike trains based on input intensity. Inputs must be
-    non-negative, and give the firing rate in Hz. Inter-spike intervals (ISIs) for
-    non-negative data incremented by one to avoid zero intervals while maintaining ISI
+    Generates Poisson-distributed spike trains based on input intensity. Inputs must be \
+    non-negative, and give the firing rate in Hz. Inter-spike intervals (ISIs) for \
+    non-negative data incremented by one to avoid zero intervals while maintaining ISI \
     distributions.
 
     Parameters:
