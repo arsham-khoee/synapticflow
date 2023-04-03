@@ -344,7 +344,6 @@ class RankOrderEncoder(AbstractEncoder):
         data = data.flatten().to(self.device)
         time = int(self.time / self.dt)
 
-        data /= data.max()
         times = torch.zeros(size)
         times[data != 0] = 1 / data[data != 0]
         times *= time / times.max() 
