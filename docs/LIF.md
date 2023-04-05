@@ -27,7 +27,7 @@ To solve this particular ODE, we can apply the forward Euler method in order to 
 $$
 \begin{align*}
 \\
-\tau_m\,\frac{ u(t+\Delta t)-u(t)}{\Delta t}\ = -[u(t) - u_{rest}] + R\,I(t) ,
+\tau_m\frac{ u(t+\Delta t)-u(t)}{\Delta t}\ = -[u(t) - u_{rest}] + RI(t) ,
 \\
 \end{align*}
 $$
@@ -37,7 +37,7 @@ The equation can be transformed to the following well-formed equation:
 $$
 \begin{align*}
 \\
-u(t+\Delta t) = u(t)-\frac{\Delta t}{\tau_m} \left( [u(t) - u_{rest}] - R\,I(t) \right) .
+u(t+\Delta t) = u(t)-\frac{\Delta t}{\tau_m} \left( [u(t) - u_{rest}] - RI(t) \right) .
 \\
 \end{align*}
 $$
