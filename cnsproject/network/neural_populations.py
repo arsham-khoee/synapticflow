@@ -727,8 +727,8 @@ class LIFPopulation(NeuralPopulation):
         lower_bound: float = None,
         sum_input: bool = False,
         trace_scale: Union[float, torch.Tensor] = 1.,
+        R: Union[float, torch.Tensor] = 20.,
         is_inhibitory: bool = False,
-        tau_decay: Union[float, torch.Tensor] = 100.0,
         learning: bool = True,
         **kwargs
     ) -> None:
@@ -765,8 +765,8 @@ class LIFPopulation(NeuralPopulation):
             Scaling factor for the synaptic traces.
         is_inhibitory : bool, optional
             Indicates whether the neuron is inhibitory or not.
-        tau_decay : float or torch.Tensor, optional
-            The time constant of the neuron voltage decay.
+        R : Union[float, torch.Tensor], optional
+            Resistance of neuron. (default: 20.0)
         learning : bool, optional
             Indicates whether the neuron should update its weights during training.
 
@@ -793,8 +793,8 @@ class LIFPopulation(NeuralPopulation):
         self.register_buffer("refrac_length", torch.tensor(refrac_length))
         self.register_buffer("v", torch.FloatTensor()) # Neuron's potential
         self.register_buffer("refrac_count", torch.FloatTensor()) # Refractor counter
-        self.register_buffer("tau_decay", torch.tensor(tau_decay, dtype=torch.float))  # Time constant of neuron voltage decay.
-        self.register_buffer("decay", torch.zeros(*self.shape))  # Set in compute_decays.
+        self.register_buffer("tau_s", torch.tensor(tau_s, dtype=torch.float))  # Time constant of neuron voltage decay.
+        self.register_buffer("R", torch.tensor(R, dtype=torch.float)) # Resistance of neuron
         self.compute_decay() # Compute decays and set time steps
         self.reset_state_variables()
         self.lower_bound = lower_bound
@@ -837,10 +837,9 @@ class LIFPopulation(NeuralPopulation):
         -------
         None
         """
-        self.v = self.decay * (self.v - self.rest_pot) + self.rest_pot
-        x.masked_fill_(self.refrac_count > 0, 0.0)
-        self.v += x 
-
+            
+        self.v += (( - (self.v - self.rest_pot) + self.R * x) * self.dt / self.tau_s) * (self.refrac_count <= 0).float()
+    
     def compute_spike(self) -> None:
         """
         Checks if the neuron is spiking.
@@ -881,7 +880,6 @@ class LIFPopulation(NeuralPopulation):
         None
         """
         super().compute_decay()
-        self.decay = torch.exp(-self.dt / self.tau_decay) 
 
     def reset_state_variables(self) -> None:
         """
@@ -1086,7 +1084,6 @@ class BoostedLIFPopulation(NeuralPopulation):
         -------
         None
         """
-        self.dt = dt
         super().compute_decay()
         self.decay = torch.exp(-self.dt / self.tau_decay)  # Neuron voltage decay (per timestep).
 
@@ -1159,7 +1156,7 @@ class AdaptiveLIFPopulation(NeuralPopulation):
             spike_trace (bool): Whether to use spike trace or not. (default: True)
             additive_spike_trace (bool): Whether to use additive spike trace or not. (default: False)
             tau_s (Union[float, torch.Tensor]): Synaptic time constant. (default: 10.0)
-            tau_w (Union[float, torch.Tensor]): Adaptation time constant. (default: 20.0)
+            tu_w (Union[float, torch.Tensor]): Adaptation time constant. (default: 20.0)
             threshold (Union[float, torch.Tensor]): Spiking threshold. (default: -52.0)
             rest_pot (Union[float, torch.Tensor]): Resting potential. (default: -62.0)
             reset_pot (Union[float, torch.Tensor]): Reset potential. (default: -62.0)
@@ -1201,7 +1198,7 @@ class AdaptiveLIFPopulation(NeuralPopulation):
         self.register_buffer("a0", torch.tensor(a0, dtype=torch.float)) # a_0
         self.register_buffer("b", torch.tensor(b, dtype=torch.float)) # b
         self.register_buffer("R", torch.tensor(R, dtype=torch.float)) # Resistance of neuron
-        self.compute_decay(dt) # Compute decays and set time steps
+        self.compute_decay() # Compute decays and set time steps
         self.reset_state_variables()
         self.lower_bound = lower_bound
 
@@ -1285,7 +1282,7 @@ class AdaptiveLIFPopulation(NeuralPopulation):
         
 
     @abstractmethod
-    def compute_decay(self, dt: float) -> None:
+    def compute_decay(self) -> None:
         """
         Computes the decay rate of the neuron.
         
@@ -1293,7 +1290,6 @@ class AdaptiveLIFPopulation(NeuralPopulation):
         -------
         None
         """
-        self.dt = dt
         super().compute_decay()
 
 
