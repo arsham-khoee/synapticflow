@@ -23,13 +23,24 @@ where $u(t)$ is the membrane potential, $\tau_m$ is the membrane time constant w
 The membrane equation is an *ordinary differential equation (ODE)* that illustrates the time evolution of membrane potential $u(t)$ in response to synaptic input and leaking of change across the cell membrane.
 
 To solve this particular ODE, we can apply the forward Euler method in order to solve the ODE with a given initial value. We simulate the evolution of the membrane equation in discrete time steps, with a sufficiently small $\Delta t$. We start by writing the time derivative $\frac{du}{dt}$ in the membrane equation without taking the limit $\Delta t \to 0$:
-
 <br>
-$$\tau_m\,\frac{ u(t+\Delta t)-u(t)}{\Delta t}\ = -[u(t) - u_{rest}] + R\,I(t)$$
+$$
+\begin{align*}
+\\
+\tau_m\,\frac{ u(t+\Delta t)-u(t)}{\Delta t}\ = -[u(t) - u_{rest}] + R\,I(t) ,
+\\
+\end{align*}
+$$
 <br>
 The equation can be transformed to the following well-formed equation:
 <br>
-$$u(t+\Delta t) = u(t)-\frac{\Delta t}{\tau_m} \left( [u(t) - u_{rest}] - R\,I(t) \right)$$
+$$
+\begin{align*}
+\\
+u(t+\Delta t) = u(t)-\frac{\Delta t}{\tau_m} \left( [u(t) - u_{rest}] - R\,I(t) \right) .
+\\
+\end{align*}
+$$
 <br>
 The value of membrane potential $u(t+\Delta t)$ can be expressed in terms of its previous value $u(t)$ by simple algebraic manipulation. For *small enough* values of $\Delta t$, this provides a good approximation of the continuous-time integration.
 
