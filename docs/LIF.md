@@ -38,6 +38,10 @@ neuron = LIFPopulation(n=1)
 ```
 In the construction of the object, we must specify the number of neurons (n) in that population of neurons.
 
+With the function method, the neuron can be activated for a one-time step with an input x, which is the same amount of input current in that time step:
 
+```python
+neuron.forward(4)
+```
 
 
