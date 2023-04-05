@@ -924,11 +924,10 @@ class BoostedLIFPopulation(NeuralPopulation):
         threshold: Union[float, torch.Tensor] = 40.0,
         refrac_length: Union[float, torch.Tensor] = 5.0,
         dt: float = 0.1,
-        lower_bound: float = None,
         sum_input: bool = False,
         trace_scale: Union[float, torch.Tensor] = 1.0,
+        R: Union[float, torch.Tensor] = 20.,
         is_inhibitory: bool = False,
-        tau_decay: Union[float, torch.Tensor] = 100.0,
         learning: bool = True,
         **kwargs
     ) -> None:
@@ -953,17 +952,14 @@ class BoostedLIFPopulation(NeuralPopulation):
             Refractory period length after a neuron spikes in ms.
         dt : float, default=0.1
             Time step length for the neurons in ms.
-        lower_bound : float or None, default=None
-            Lower bound potential for the neuron. If not None, the potential of the neuron is clipped to be greater than
-            or equal to this value.
         sum_input : bool, default=False
             Whether to sum incoming input instead of averaging.
         trace_scale : float or torch.Tensor, default=1.0
             Scaling factor for spike traces.
         is_inhibitory : bool, default=False
             Determines whether the neurons are inhibitory or excitatory.
-        tau_decay : float or torch.Tensor, default=100.0
-            Time constant of the voltage decay.
+        R : Union[float, torch.Tensor], optional
+            Resistance of neuron. (default: 20.0)
         learning : bool, default=True
             Whether to enable learning on the layer.
         **kwargs
@@ -990,11 +986,10 @@ class BoostedLIFPopulation(NeuralPopulation):
         self.register_buffer("refrac_length", torch.tensor(refrac_length))
         self.register_buffer("v", torch.FloatTensor()) # Neuron's potential
         self.register_buffer("refrac_count", torch.FloatTensor()) # Refractor counter
-        self.register_buffer("tau_decay", torch.tensor(tau_decay, dtype=torch.float))  # Time constant of neuron voltage decay.
-        self.register_buffer("decay", torch.zeros(*self.shape))  # Set in compute_decays.
+        self.register_buffer("tau_s", torch.tensor(tau_s, dtype=torch.float))  # Tau_s
+        self.register_buffer("R", torch.tensor(R, dtype=torch.float)) # Resistance of neuron
         self.compute_decay() # Compute decays and set time steps
         self.reset_state_variables()
-        self.lower_bound = lower_bound
 
 
     def forward(self, x: torch.Tensor) -> None:
@@ -1032,15 +1027,8 @@ class BoostedLIFPopulation(NeuralPopulation):
         -------
         None
         """
-        # Compute new potential with decay voltages.
-        self.v *= self.decay
 
-        # Integrate inputs.
-        x.masked_fill_(self.refrac_count > 0, 0.0)
-
-        # interlaced
-        self.v += x 
-
+        self.v += (( - (self.v) + self.R * x) * self.dt / self.tau_s) * (self.refrac_count <= 0).float()
 
     def compute_spike(self) -> None:
         """
@@ -1085,8 +1073,6 @@ class BoostedLIFPopulation(NeuralPopulation):
         None
         """
         super().compute_decay()
-        self.decay = torch.exp(-self.dt / self.tau_decay)  # Neuron voltage decay (per timestep).
-
 
 
     def reset_state_variables(self) -> None:
