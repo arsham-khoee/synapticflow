@@ -10,15 +10,16 @@ A *membrane equation* and a *reset condition* define our *leaky-integrate-and-fi
 $$\tau_m \frac{du}{dt} = - [u(t) - u_{rest}] + RI(t) \ \ \ if \ \ \ u(t) \leq u_{th}$$
 $$u(t) = u_{rest} \quad \quad \quad \quad \quad \quad \quad \quad \quad \quad \quad otherwise$$
 
-\begin{align*}
+\begin{align}
 \\
 &\tau_m\frac{du}{dt}\ = -[u(t) - u_{rest}] + RI(t) &\text{if }\quad u(t) \leq u_{th}\\
 <br>
 <br>
 &u(t) = u_{rest} &\text{otherwise}\\
 \\
-\end{align*}
-where $u(t)$ is the membrane potential, $\tau_m$ is the membrane time constant which is equal to $RC$, it is the characteristic time of the decay, $R$ is the membrane resistance, $C$ is the capacity of the capacitor, $I(t)$ is the synaptic input current, $u_{th}$ is the spiking threshold, and $u_{rest}$ is the resting voltage.
+\end{align}
+
+where $u(t)$ is the membrane potential, \tau_m is the membrane time constant which is equal to $RC$, it is the characteristic time of the decay, $R$ is the membrane resistance, $C$ is the capacity of the capacitor, $I(t)$ is the synaptic input current, $u_{th}$ is the spiking threshold, and $u_{rest}$ is the resting voltage.
 
 The membrane equation is an *ordinary differential equation (ODE)* that illustrates the time evolution of membrane potential $u(t)$ in response to synaptic input and leaking of change across the cell membrane.
 
