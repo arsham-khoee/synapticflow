@@ -12,8 +12,8 @@ $$u(t) = u_{rest} \quad \quad \quad \quad \quad \quad \quad \quad \quad \quad \q
 
 \begin{align*}
 \\
-&\tau_m\,\frac{du}{dt}\ = -[u(t) - u_{rest}] + R\,I(t) &\text{if }\quad u(t) \leq u_{th}\\
-\\
+&\tau_m\frac{du}{dt}\ = -[u(t) - u_{rest}] + RI(t) &\text{if }\quad u(t) \leq u_{th}\\
+<br>
 &u(t) = u_{rest} &\text{otherwise}\\
 \\
 \end{align*}
