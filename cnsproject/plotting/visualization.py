@@ -6,7 +6,7 @@ from typing import List, Callable
 from functools import reduce
 from operator import add, mul
 
-from ..network.neural_populations import NeuralPopulations
+from ..network.neural_populations import NeuralPopulation
 
 def get_random_rgb() -> np.ndarray:
     r = random.random()
@@ -45,17 +45,28 @@ def get_spiked_neurons(spikes: torch.Tensor) -> torch.Tensor:
     spiked_neurons = list(map(lambda x: x[0], filter( lambda x: x[1] != 0, enumerate(spikes))))
     return torch.tensor(spiked_neurons)
 
-def plot_activity(population_spikes: List[torch.Tensor], dt: float, save_path: str = None) -> None:
-    steps = len(population_spikes[0])
-    population_size = reduce(lambda acc, pop: acc + len(pop[0]), population_spikes, 0)
-    activities = []
-    for step in range(steps):
-        active_neurons = reduce(add, map(lambda spikes: len(get_spiked_neurons(torch.flatten(spikes[step])), population_spikes)))
-        activities.append(active_neurons / population_size)
+def plot_activity(population_spikes: List[torch.Tensor], dt: float, save_path: str = None, legend: bool = False) -> None:
+    # print(population_spikes)
+    steps = len(population_spikes)
+    population_size = len(population_spikes[0])
+    data = {}
+    for i in range(population_size):
+        data[i] = []
+    for s in range(steps):
+        for i in range(population_size):
+            if population_spikes[s][i] == True:
+                data[i].append(1)
+            else:
+                data[i].append(0)
+    colors = [get_random_rgb() for _ in range(population_size)]
+    time = [dt * i for i in range(steps)]
+    for i in range(population_size):
+        plt.plot(time, data[i], color=colors[i])
     
-    plt.plot([dt * i for i in range(steps)], activities)
     plt.xlabel("Time")
     plt.ylabel("Activities")
+    if legend:
+        plt.legend([f'Neuron {i}' for i in range(population_size)])
     if save_path:
         plt.savefig(save_path)
     plt.show()
@@ -110,5 +121,55 @@ def plot_weights(weights: List[torch.Tensor], dt: float, save_path: str = None):
     if save_path:
         plt.savefig(save_path)
         
+    plt.show()
+    
+def plot_potential(population_potentials: List[torch.tensor], dt: float, save_path: str = None, legend: bool = False) -> None:
+    steps = len(population_potentials)
+    population_size = len(population_potentials[0])
+    
+    data = {}
+    for i in range(population_size):
+        data[i] = []
+    
+    for s in range(steps):
+        for i in range(population_size):
+            data[i].append(population_potentials[s][i].item())
+    
+    colors = [get_random_rgb() for _ in range(population_size)]
+    time = [dt * i for i in range(steps)]
+    for i in range(population_size):
+        plt.plot(time, data[i], color=colors[i])
+    
+    plt.xlabel("Time")
+    plt.ylabel("Voltage")
+    if legend:
+        plt.legend([f'Neuron {i}' for i in range(population_size)])
+    if save_path:
+        plt.savefig(save_path)
+    plt.show()
+    
+def plot_refractory_count(population_refracts: List[torch.tensor], dt: float, save_path: str = None, legend: bool = False) -> None:
+    steps = len(population_refracts)
+    population_size = len(population_refracts[0])
+    
+    data = {}
+    for i in range(population_size):
+        data[i] = []
+    
+    for s in range(steps):
+        for i in range(population_size):
+            data[i].append(population_refracts[s][i].item())
+    
+    colors = [get_random_rgb() for _ in range(population_size)]
+    time = [dt * i for i in range(steps)]
+    for i in range(population_size):
+        plt.plot(time, data[i], color=colors[i])
+    
+    plt.xlabel("Time")
+    plt.ylabel("Refractory Count")
+    if legend:
+        plt.legend([f'Neuron {i}' for i in range(population_size)])
+    if save_path:
+        plt.savefig(save_path)
     plt.show()
     
