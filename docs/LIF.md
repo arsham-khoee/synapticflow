@@ -51,7 +51,7 @@ Another concept to be considered is the refractory period. After the action pote
 </p>
 <br>
 
-## How to simulate LIF meuron
+## How to simulate a LIF neuron
 
 To simulate a LIF neuron using the synaptic flow package, you must first create an object from the LIFPopulation class as in the example below:
 
