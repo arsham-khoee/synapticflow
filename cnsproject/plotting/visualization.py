@@ -15,11 +15,26 @@ def get_random_rgb() -> np.ndarray:
     color = (r, g, b)
     return np.array(color).reshape(1, -1)
 
-def plot_current(currents: torch.Tensor, steps: int, dt: float, save_path: str = None) -> None:
-    times = [dt * i for i in range(steps)]
-    plt.plot(times, currents)
+def plot_current(currents: List[torch.Tensor], dt: float, save_path: str = None, legend: bool = False) -> None:
+    current_size = len(currents[0])
+    steps = len(currents)
+    data = {}
+    for i in range(current_size):
+        data[i] = []
+    
+    for s in range(steps):
+        for i in range(current_size):
+            data[i].append(currents[s][i].item())
+    
+    time = [dt * i for i in range(steps)]
+    colors = [get_random_rgb() for _ in range(current_size)]
+    
+    for i in range(current_size):
+        plt.plot(time, data[i], color = colors[i])
+    
     plt.xlabel("Time")
-    plt.ylabel("Current")
+    plt.ylabel("Input Current")
+    plt.legend([f'Neuron {i}' for i in range(current_size)])
     if save_path:
         plt.savefig(save_path)
     plt.show()
@@ -173,3 +188,41 @@ def plot_refractory_count(population_refracts: List[torch.tensor], dt: float, sa
         plt.savefig(save_path)
     plt.show()
     
+def plot_neuron(neural_population: NeuralPopulation, input_current: List[torch.tensor], dt: float, does_plot_current: bool = True, does_plot_potential: bool = True, does_plot_refractory: bool = True, does_plot_activity: bool = True, save_path: str = None, legend: bool = False) -> None:
+    population_size = neural_population.n
+    steps = len(input_current)
+    
+    if does_plot_current:
+        if save_path:
+            plot_current(input_current, dt, legend=legend, save_path=save_path + '/current.png')
+        else:
+            plot_current(input_current, dt, legend=legend)
+    
+    voltage_data = [neural_population.v]
+    spike_data = [neural_population.s]
+    refractory_data = [neural_population.refrac_count]
+    
+    for current in input_current:
+        neural_population.forward(current)
+        spike_data.append(copy.deepcopy(neural_population.s))
+        voltage_data.append(copy.deepcopy(neural_population.v))
+        refractory_data.append(copy.deepcopy(neural_population.refrac_count))
+    
+    if does_plot_activity:
+        if save_path:
+            plot_activity(spike_data, dt=dt, save_path=save_path + '/activity.png', legend=legend)
+        else:
+            plot_activity(spike_data, dt=dt, legend=legend)
+        
+    if does_plot_potential:
+        if save_path:
+            plot_potential(voltage_data, dt=dt, save_path=save_path + '/potential.png', legend=legend)
+        else:
+            plot_potential(voltage_data, dt=dt, legend=legend)
+        
+    if does_plot_refractory:
+        if save_path:
+            plot_refractory_count(refractory_data, dt=dt, save_path=save_path + '/refractory.png', legend=legend)
+        else:
+            plot_refractory_count(refractory_data, dt=dt, legend=legend)
+            
