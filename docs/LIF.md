@@ -50,10 +50,16 @@ $$
 The value of membrane potential $u(t+\Delta t)$ can be expressed in terms of its previous value $u(t)$ by simple algebraic manipulation. For *small enough* values of $\Delta t$, this provides a good approximation of the continuous-time integration.
 
 Another concept to be considered is the refractory period. After the action potential occurs, however, there is a short period of refractoriness, which affects neuron firing. During the first part of the refractory period (the absolute refractory period), the neuron will not fire again no matter how great the stimulation. The absolute refractory period lasts for only a short time. It is followed by the relative refractory period, during which a stronger than usual stimulus is required to trigger the action potential before the neuron returns to its resting state. After the refractory period, the neuron will fire when the neural threshold is reached.
+
 <br>
-<p align="center">
-  <img src="_static/membrane.jpeg" alt="Membrane Potential" style="width: 450px; padding: 25px; margin: auto;"/>
-</p>
+
+<div class="sidebar-logo-container">
+  <p align="center">
+    <img class="sidebar-logo only-light" src="_static/logo-light-mode.png" alt="Light Logo" style="width: 600px; padding: 25px;"/>
+    <img class="sidebar-logo only-dark" src="_static/logo-dark-mode.png" alt="Dark Logo" style="width: 600px; padding: 25px;"/>
+  </p>
+</div>
+
 <br>
 
 ## How to simulate a LIF neuron
