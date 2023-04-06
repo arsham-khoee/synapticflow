@@ -58,7 +58,8 @@ def plot_current(currents: List[torch.Tensor], dt: float, save_path: str = None,
     
     plt.xlabel("Time")
     plt.ylabel("Input Current")
-    plt.legend([f'Neuron {i}' for i in range(current_size)])
+    if legend:
+        plt.legend([f'Neuron {i}' for i in range(current_size)])
     if save_path:
         plt.savefig(save_path)
     plt.show()
