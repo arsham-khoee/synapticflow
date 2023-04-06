@@ -34,8 +34,6 @@ The exponential integrate-and-fire model is a special case of the general nonlin
 
 
 
-
-
 In the above figure the function $f(u)$ is plotted for different choices of the *sharpness* of the threshold ($\Delta_T = 1, 0.5, 0.25,  mV$). If the limit $\Delta_T \rightarrow 0$ the exponential integrate-and-fire model converts to a LIF model (dashed line). The figure displays a zoom onto the threshold region (dotted box).
 
 To solve this particular ODE, we can apply the forward Euler method in order to solve the ODE with a given initial value. We simulate the evolution of the membrane equation in discrete time steps, with a sufficiently small $\Delta t$. We start by writing the time derivative $\frac{du}{dt}$ in the membrane equation without taking the limit $\Delta t \to 0$:
@@ -59,4 +57,19 @@ u(t+\Delta t) = u(t)-\frac{\Delta t}{\tau_m} \left( [u(t) - u_{rest}]  - \Delta_
 $$
 <br>
 The value of membrane potential $u(t+\Delta t)$ can be expressed in terms of its previous value $u(t)$ by simple algebraic manipulation. For *small enough* values of $\Delta t$, this provides a good approximation of the continuous-time integration.
+
+## How to simulate a ELIF neuron
+
+To simulate a ELIF neuron, you need to create an object from the LIFPopulation class, which can be done using the following example code:
+
+```python
+neuron = ELIFPopulation(n=1)
+```
+When creating the object, you must specify the number of neurons (n) in that particular population of neurons.
+
+After creating the object, the forward method can be used to activate the neuron for a one-time step with an input x that represents the amount of input current in that time step:
+
+```python
+neuron.forward(4)
+```
 
