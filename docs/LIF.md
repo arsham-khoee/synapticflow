@@ -25,21 +25,21 @@ The membrane equation is an *ordinary differential equation (ODE)* that illustra
 To solve this particular ODE, we can apply the forward Euler method in order to solve the ODE with a given initial value. We simulate the evolution of the membrane equation in discrete time steps, with a sufficiently small $\Delta t$. We start by writing the time derivative $\frac{du}{dt}$ in the membrane equation without taking the limit $\Delta t \to 0$:
 <br>
 $$
-\begin{align*}
+\begin{align}
 \\
 \tau_m\frac{ u(t+\Delta t)-u(t)}{\Delta t}\ = -[u(t) - u_{rest}] + RI(t) ,
 \\
-\end{align*}
+\end{align}
 $$
 <br>
 The equation can be transformed to the following well-formed equation:
 <br>
 $$
-\begin{align*}
+\begin{align}
 \\
 u(t+\Delta t) = u(t)-\frac{\Delta t}{\tau_m} \left( [u(t) - u_{rest}] - RI(t) \right) .
 \\
-\end{align*}
+\end{align}
 $$
 <br>
 The value of membrane potential $u(t+\Delta t)$ can be expressed in terms of its previous value $u(t)$ by simple algebraic manipulation. For *small enough* values of $\Delta t$, this provides a good approximation of the continuous-time integration.
