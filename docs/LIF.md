@@ -2,7 +2,7 @@
 
 # LIF
 
-The LIF (Leaky Integrate and Fire) neuron is a widely used model in computational neuroscience for simulating the behavior of a single neuron. It is a simplified model that captures the essential features of a neuron, including the integration of synaptic inputs and the generation of action potentials. The LIF neuron is based on the concept of the membrane potential, which is the electrical potential difference across the neuron's cell membrane. When the membrane potential reaches a certain threshold, an action potential is triggered, which allows the neuron to communicate with other neurons. The LIF neuron has been used extensively in the study of neural networks and information processing in the brain, and it continues to be an important tool in neuroscience research.
+The Leaky-Integrate-and-Fire (LIF) neuron is a widely used model in computational neuroscience that simulates the behavior of a single neuron. It is a simplified model that captures essential features of neurons, including synaptic input integration and action potential generation. The model relies on the concept of membrane potential, which is the electrical potential difference across a neuron's cell membrane. Once the membrane potential reaches a specific threshold, an action potential is triggered, allowing the neuron to communicate with other neurons. 
 
 
 A *membrane equation* and a *reset condition* define our *leaky-integrate-and-fire (LIF)* neuron:
@@ -27,7 +27,7 @@ where $u(t)$ is the membrane potential, $\tau_m$ is the membrane time constant w
 
 The membrane equation is an *ordinary differential equation (ODE)* that illustrates the time evolution of membrane potential $u(t)$ in response to synaptic input and leaking of change across the cell membrane.
 
-To solve this particular ODE, we can apply the forward Euler method in order to solve the ODE with a given initial value. We simulate the evolution of the membrane equation in discrete time steps, with a sufficiently small $\Delta t$. We start by writing the time derivative $\frac{du}{dt}$ in the membrane equation without taking the limit $\Delta t \to 0$:
+To solve this particular ODE, we can apply the forward Euler method in order to solve the ODE with a given initial value. We simulate the evolution of the membrane equation in discrete time steps with a sufficiently small $\Delta t$. We start by writing the time derivative $\frac{du}{dt}$ in the membrane equation without taking the limit $\Delta t \to 0$:
 <br>
 $$
 \begin{align}
@@ -37,7 +37,7 @@ $$
 \end{align}
 $$
 <br>
-The equation can be transformed to the following well-formed equation:
+The equation can be transformed into the following well-formed equation:
 <br>
 $$
 \begin{align}
@@ -49,13 +49,13 @@ $$
 <br>
 The value of membrane potential $u(t+\Delta t)$ can be expressed in terms of its previous value $u(t)$ by simple algebraic manipulation. For *small enough* values of $\Delta t$, this provides a good approximation of the continuous-time integration.
 
-Another concept to be considered is the refractory period. After the action potential occurs, however, there is a short period of refractoriness, which affects neuron firing. During the first part of the refractory period (the absolute refractory period), the neuron will not fire again no matter how great the stimulation. The absolute refractory period lasts for only a short time. It is followed by the relative refractory period, during which a stronger than usual stimulus is required to trigger the action potential before the neuron returns to its resting state. After the refractory period, the neuron will fire when the neural threshold is reached.
+Another concept to be considered is the refractory period. After the action potential occurs, however, there is a short period of refractoriness, which affects neuron firing. During the first part of the refractory period (the absolute refractory period), the neuron will not fire again, no matter how great the stimulation. 
 
 <br>
 
 <div class="sidebar-logo-container">
   <p align="center">
-    <img class="sidebar-logo only-light" src="_static/light-membrane.jpeg" alt="Light Membrane" style="width: 600px; padding: 25px;"/>
+    <img class="sidebar-logo only-light" src="_static/membrane.jpeg" alt="Light Membrane" style="width: 600px; padding: 25px;"/>
     <img class="sidebar-logo only-dark" src="_static/dark-membrane.jpeg" alt="Dark Membrane" style="width: 600px; padding: 25px;"/>
   </p>
 </div>
@@ -64,14 +64,14 @@ Another concept to be considered is the refractory period. After the action pote
 
 ## How to simulate a LIF neuron
 
-To simulate a LIF neuron using the synaptic flow package, you must first create an object from the LIFPopulation class as in the example below:
+To simulate a LIF neuron, you need to create an object from the LIFPopulation class, which can be done using the following example code:
 
 ```python
 neuron = LIFPopulation(n=1)
 ```
-In the construction of the object, we must specify the number of neurons (n) in that population of neurons.
+When creating the object, you must specify the number of neurons (n) in that particular population of neurons.
 
-With the function method, the neuron can be activated for a one-time step with an input x, which is the same amount of input current in that time step:
+After creating the object, the forward method can be used to activate the neuron for a one-time step with an input x that represents the amount of input current in that time step:
 
 ```python
 neuron.forward(4)
