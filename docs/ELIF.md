@@ -8,15 +8,21 @@ The ELIF neuron model includes an additional parameter called the adaptation cur
 
 In the exponential integrate-and-fire model, the differential equation for the *membrane potential* and a *reset condition* is given by:
 <br>
+
 $$
 \begin{align*}
 \\
-&\tau_m\,\frac{du}{dt}\ = -[u(t) - u_{rest}] + \Delta_T exp(\frac{u(t) - \theta_{rh}}{\Delta_T}) + R\,I(t) &\text{if }\quad u(t) \leq u_{th}\\
-\\
+&\tau_m\frac{du}{dt}\ = -[u(t) - u_{rest}] + \Delta_T exp(\frac{u(t) - \theta_{rh}}{\Delta_T}) + RI(t) &\text{if }\quad u(t) \leq u_{th}\\
+\end{align*}
+$$
+
+$$
+\begin{align*}
 &u(t) = u_{rest} &\text{otherwise}\\
 \\
 \end{align*}
 $$
+
 <br>
 The first term on the right-hand of this equation describes the leak of a passive membrane. The second term is an exponential nonlinearity with *sharpness* parameter $\Delta_T$ and *threshold* $\theta_{rh}$.
 
@@ -37,7 +43,7 @@ To solve this particular ODE, we can apply the forward Euler method in order to 
 $$
 \begin{align*}
 \\
-\tau_m\,\frac{ u(t+\Delta t)-u(t)}{\Delta t}\ = -[u(t) - u_{rest}] + \Delta_T exp(\frac{u(t) - \theta_{rh}}{\Delta_T}) + R\,I(t) ,
+\tau_m\frac{ u(t+\Delta t)-u(t)}{\Delta t}\ = -[u(t) - u_{rest}] + \Delta_T exp(\frac{u(t) - \theta_{rh}}{\Delta_T}) + RI(t) ,
 \\
 \end{align*}
 $$
@@ -47,7 +53,7 @@ The equation can be transformed to the following well-formed equation:
 $$
 \begin{align*}
 \\
-u(t+\Delta t) = u(t)-\frac{\Delta t}{\tau_m} \left( [u(t) - u_{rest}]  - \Delta_T exp(\frac{u(t) - \theta_{rh}}{\Delta_T}) - R\,I(t) \right) .
+u(t+\Delta t) = u(t)-\frac{\Delta t}{\tau_m} \left( [u(t) - u_{rest}]  - \Delta_T exp(\frac{u(t) - \theta_{rh}}{\Delta_T}) - RI(t) \right) .
 \\
 \end{align*}
 $$
