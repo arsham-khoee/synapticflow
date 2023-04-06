@@ -8,6 +8,15 @@ The LIF (Leaky Integrate and Fire) neuron is a widely used model in computationa
 A *membrane equation* and a *reset condition* define our *leaky-integrate-and-fire (LIF)* neuron:
 <br>
 
+
+$$
+\begin{split}
+   \tau.\frac{du}{dt} = - (u - u_{rest}) + R.I(t),\\
+   if \; u(t) = \vartheta \Longrightarrow Fire + Reset,
+\end{split}
+$$
+
+
 $$
 \begin{align*}
 \\
