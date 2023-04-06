@@ -158,37 +158,42 @@ def plot_activity(population_spikes: List[torch.Tensor], dt: float, save_path: s
         plt.savefig(save_path)
     plt.show()
     
-def raster_plot(populations_spikes: List[torch.Tensor], dt: float, save_path: str = None) -> None:
+def raster_plot(population_spikes: List[torch.Tensor], dt: float, save_path: str = None, legend: bool = False) -> None:
     """
-    Plot the activity of multiple populations of neurons in a raster plot.
+    Generates a raster plot of population spikes.
 
     Args:
-        populations_spikes (List[torch.Tensor]): A list of Tensors representing the spike trains of neurons in each population at each time step.
-        dt (float): The time step used in the simulation.
-        save_path (str, optional): The file path to save the plot. Defaults to None.
+        population_spikes (List[torch.Tensor]): A list of tensors, where each tensor represents the spike activity of neurons in a population at different time steps.
+        dt (float): The time step size used to simulate the neural activity. 
+        save_path (str, optional): Path to save the generated plot. Defaults to None.
+        legend (bool, optional): Whether to show the legend indicating the neuron index. Defaults to False.
 
     Returns:
         None
     """
-    acc = 0
-    for spikes_per_step in populations_spikes:
-        color = get_random_rgb()
-        for step, spikes in enumerate(spikes_per_step):
-            spikes_flatten = torch.flatten(spikes)
-            spiked_neurons = get_spiked_neurons(spikes_flatten)
-            plot_neuron_index = list(map(lambda x: x + acc, spiked_neurons))
-            plt.scatter(
-                [dt * step] * len(spiked_neurons), 
-                plot_neuron_index,
-                c=color, s=[1] * len(spiked_neurons)
-            )
-        
-        acc = acc + len(spikes_flatten)
-        
+    population_size = len(population_spikes[0])
+    steps = len(population_spikes)
+    
+    data = {}
+    for i in range(population_size):
+        data[i] = []
+    
+    for s in range(steps):
+        for i in range(population_size):
+            if population_spikes[s][i] == True:
+                data[i].append(i)
+            else:
+                data[i].append(None)
+
+    time = [dt * i for i in range(steps)]
+    for i in range(population_size):
+        plt.scatter(time, data[i], color='royalblue')
     plt.xlabel("Time")
-    plt.ylabel("Raster Activity")
+    plt.ylabel("Neuron Index")
     if save_path:
         plt.savefig(save_path)
+    if legend:
+        plt.legend([f'Neuron {i}' for i in range(population_size)])
     plt.show()
     
 def plot_weights(weights: List[torch.Tensor], dt: float, save_path: str = None):
