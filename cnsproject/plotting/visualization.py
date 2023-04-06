@@ -10,6 +10,12 @@ import copy
 from ..network.neural_populations import NeuralPopulation
 
 def get_random_rgb() -> np.ndarray:
+    """
+    Generate a random RGB color and return it as an ndarray.
+
+    Returns:
+        np.ndarray: A 1D array of shape (3,) representing the RGB color.
+    """
     r = random.random()
     g = random.random()
     b = random.random()
@@ -17,6 +23,19 @@ def get_random_rgb() -> np.ndarray:
     return np.array(color).reshape(1, -1)
 
 def plot_current(currents: List[torch.Tensor], dt: float, save_path: str = None, legend: bool = False, default_colors: List = None) -> None:
+    """
+    Plot the input current of neurons.
+
+    Args:
+        currents (List[torch.Tensor]): A list of Tensors representing the input currents of each neuron at each time step.
+        dt (float): The time step used in the simulation.
+        save_path (str, optional): The file path to save the plot. Defaults to None.
+        legend (bool, optional): Whether to include a legend in the plot. Defaults to False.
+        default_colors (List, optional): A list of colors to use for each neuron. Defaults to None.
+
+    Returns:
+        None
+    """
     current_size = len(currents[0])
     steps = len(currents)
     data = {}
@@ -45,6 +64,17 @@ def plot_current(currents: List[torch.Tensor], dt: float, save_path: str = None,
     plt.show()
     
 def plot_adaptation(adaptations: List[float], dt: float, save_path: str = None) -> None:
+    """
+    Plot the adaptation value of neurons.
+
+    Args:
+        adaptations (List[float]): A list of adaptation values of neurons at each time step.
+        dt (float): The time step used in the simulation.
+        save_path (str, optional): The file path to save the plot. Defaults to None.
+
+    Returns:
+        None
+    """
     times = [dt * i for i in range(len(adaptations))]
     plt.plot(times, adaptations, c='r')
     plt.xlabel("Time")
@@ -54,6 +84,17 @@ def plot_adaptation(adaptations: List[float], dt: float, save_path: str = None) 
     plt.show()
     
 def plot_dopamin(dopamins: List[float], dt: float, save_path: str = None) -> None:
+    """
+    Plot the dopamine level.
+
+    Args:
+        dopamins (List[float]): A list of dopamine levels at each time step.
+        dt (float): The time step used in the simulation.
+        save_path (str, optional): The file path to save the plot. Defaults to None.
+
+    Returns:
+        None
+    """
     plt.plot([dt * i for i in range(len(dopamins))], dopamins)
     plt.xlabel("Time")
     plt.ylabel("Dopamin")
@@ -62,10 +103,32 @@ def plot_dopamin(dopamins: List[float], dt: float, save_path: str = None) -> Non
     plt.show()
     
 def get_spiked_neurons(spikes: torch.Tensor) -> torch.Tensor:
+    """
+    Get the indices of neurons that spiked.
+
+    Args:
+        spikes (torch.Tensor): A 1D Tensor representing the spike train of neurons.
+
+    Returns:
+        torch.Tensor: A 1D Tensor containing the indices of neurons that spiked.
+    """
     spiked_neurons = list(map(lambda x: x[0], filter( lambda x: x[1] != 0, enumerate(spikes))))
     return torch.tensor(spiked_neurons)
 
 def plot_activity(population_spikes: List[torch.Tensor], dt: float, save_path: str = None, legend: bool = False, default_colors: List = None) -> None:
+    """
+    Plot the activity of neurons as a function of time.
+
+    Args:
+        population_spikes (List[torch.Tensor]): A list of Tensors representing the spike trains of neurons in a population at each time step.
+        dt (float): The time step used in the simulation.
+        save_path (str, optional): The file path to save the plot. Defaults to None.
+        legend (bool, optional): Whether to include a legend in the plot. Defaults to False.
+        default_colors (List, optional): A list of colors to use for each neuron. Defaults to None.
+
+    Returns:
+        None
+    """
     steps = len(population_spikes)
     population_size = len(population_spikes[0])
     data = {}
@@ -95,6 +158,17 @@ def plot_activity(population_spikes: List[torch.Tensor], dt: float, save_path: s
     plt.show()
     
 def raster_plot(populations_spikes: List[torch.Tensor], dt: float, save_path: str = None) -> None:
+    """
+    Plot the activity of multiple populations of neurons in a raster plot.
+
+    Args:
+        populations_spikes (List[torch.Tensor]): A list of Tensors representing the spike trains of neurons in each population at each time step.
+        dt (float): The time step used in the simulation.
+        save_path (str, optional): The file path to save the plot. Defaults to None.
+
+    Returns:
+        None
+    """
     acc = 0
     for spikes_per_step in populations_spikes:
         color = get_random_rgb()
@@ -117,6 +191,17 @@ def raster_plot(populations_spikes: List[torch.Tensor], dt: float, save_path: st
     plt.show()
     
 def plot_weights(weights: List[torch.Tensor], dt: float, save_path: str = None):
+    """
+    Plot the weights between neurons as a function of time.
+
+    Args:
+        weights (List[torch.Tensor]): A list of Tensors representing the weights between neurons at each time step.
+        dt (float): The time step used in the simulation.
+        save_path (str, optional): The file path to save the plot. Defaults to None.
+
+    Returns:
+        None
+    """
     weights_in_time = torch.tensor(
         list(map(
             lambda w: list(w.flatten()), weights
@@ -147,6 +232,19 @@ def plot_weights(weights: List[torch.Tensor], dt: float, save_path: str = None):
     plt.show()
     
 def plot_potential(population_potentials: List[torch.tensor], dt: float, save_path: str = None, legend: bool = False, default_colors: List = None) -> None:
+    """
+    Plot the membrane potential of neurons as a function of time.
+
+    Args:
+        population_potentials (List[torch.tensor]): A list of Tensors representing the membrane potential of neurons in a population at each time step.
+        dt (float): The time step used in the simulation.
+        save_path (str, optional): The file path to save the plot. Defaults to None.
+        legend (bool, optional): Whether to include a legend in the plot. Defaults to False.
+        default_colors (List, optional): A list of colors to use for each neuron. Defaults to None.
+
+    Returns:
+        None
+    """
     steps = len(population_potentials)
     population_size = len(population_potentials[0])
     
@@ -177,6 +275,19 @@ def plot_potential(population_potentials: List[torch.tensor], dt: float, save_pa
     plt.show()
     
 def plot_refractory_count(population_refracts: List[torch.tensor], dt: float, save_path: str = None, legend: bool = False, default_colors: List = None) -> None:
+    """
+    Plot the refractory length of the population as a function of time.
+
+    Args:
+        population_refracts (List[torch.tensor]): A list of refractory counts of a population at each time step.
+        dt (float): The time step used in the simulation.
+        save_path (str, optional): The file path to save the plot. Defaults to None.
+        legend (bool, optional): Whether to include a legend in the plot. Defaults to False.
+        default_colors (List, optional): A list of colors to use for each neuron. Defaults to None.
+    
+    Returns:
+        None
+    """
     steps = len(population_refracts)
     population_size = len(population_refracts[0])
     
@@ -207,6 +318,24 @@ def plot_refractory_count(population_refracts: List[torch.tensor], dt: float, sa
     plt.show()
     
 def plot_neuron(neural_population: NeuralPopulation, input_current: List[torch.tensor], dt: float, does_plot_current: bool = True, does_plot_potential: bool = True, does_plot_refractory: bool = True, does_plot_activity: bool = True, save_path: str = None, legend: bool = False) -> None:
+    """
+    Plot all attributes of the population as a function of time.
+
+    Args:
+        neural_population (NeuralPopulation): A neural population.
+        input_current (List[torch.tensor]): The list of input current over time.
+        dt (float): The time step used in the simulation.
+        does_plot_current (bool, optional): Whether to plot input current figure. Defaults to True.
+        does_plot_potential (bool, optional): Whether to plot membrane potential of population figure. Defaults to True.
+        does_plot_refractory (bool, optional): Whether to plot refractory count of population figure. Defaults to True.
+        does_plot_activity (bool, optional): Whether to plot activity of population figure. Defaults to True.
+        save_path (str, optional): The file path to save the plot. Defaults to None.
+        legend (bool, optional): Whether to include a legend in the plot. Defaults to False.
+        default_colors (List, optional): A list of colors to use for each neuron. Defaults to None.
+    
+    Returns:
+        None
+    """
     population_size = neural_population.n
     steps = len(input_current)
     colors = [get_random_rgb() for _ in range(population_size)]
