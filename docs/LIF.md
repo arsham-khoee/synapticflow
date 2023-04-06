@@ -10,18 +10,14 @@ A *membrane equation* and a *reset condition* define our *leaky-integrate-and-fi
 
 
 $$
-\begin{split}
-   \tau.\frac{du}{dt} = - (u - u_{rest}) + R.I(t),\\
-   if \; u(t) = \vartheta \Longrightarrow Fire + Reset,
-\end{split}
-$$
-
-
-$$
 \begin{align*}
 \\
 &\tau_m\frac{du}{dt}\ = -[u(t) - u_{rest}] + RI(t) &\text{if }\quad u(t) \leq u_{th}\\
-\\
+\end{align*}
+$$
+
+$$
+\begin{align*}
 &u(t) = u_{rest} &\text{otherwise}\\
 \\
 \end{align*}
