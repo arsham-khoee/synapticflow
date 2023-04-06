@@ -55,8 +55,8 @@ Another concept to be considered is the refractory period. After the action pote
 
 <div class="sidebar-logo-container">
   <p align="center">
-    <img class="sidebar-logo only-light" src="_static/light-membrane.png" alt="Light Membrane" style="width: 600px; padding: 25px;"/>
-    <img class="sidebar-logo only-dark" src="_static/dark-membrane.png" alt="Dark Membrane" style="width: 600px; padding: 25px;"/>
+    <img class="sidebar-logo only-light" src="_static/light-membrane.jpeg" alt="Light Membrane" style="width: 600px; padding: 25px;"/>
+    <img class="sidebar-logo only-dark" src="_static/dark-membrane.jpeg" alt="Dark Membrane" style="width: 600px; padding: 25px;"/>
   </p>
 </div>
 
