@@ -1,3 +1,5 @@
+<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=default'></script>
+
 # ELIF
 
 The ELIF neuron model is an extension of the LIF (leaky integrate-and-fire) neuron model, which allows for more complex dynamics and a wider range of behaviors. ELIF stands for "exponential integrate-and-fire," which refers to the addition of an exponential function to the basic LIF model. The ELIF neuron model is used to study the behavior of neurons in the brain and has been shown to accurately capture many aspects of real neuron behavior.
