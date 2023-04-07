@@ -1233,9 +1233,8 @@ class ALIFPopulation(NeuralPopulation):
         None
         """
         # Compute new potential with decay voltages.
-        if (self.refrac_count <= 0):          
-            self.v += ( - (self.v - self.rest_pot) - self.R * self.w + self.R * x) * self.dt / self.tau_v
-            self.w += (self.a0 * (self.v - self.rest_pot) - self.w + self.b * self.tau_w * (self.s.float())) * self.dt / self.tau_w
+        self.v += (( - (self.v - self.rest_pot) - self.R * self.w + self.R * x) * self.dt / self.tau_v) * (self.refrac_count <= 0).float()
+        self.w += ((self.a0 * (self.v - self.rest_pot) - self.w + self.b * self.tau_w * (self.s.float())) * self.dt / self.tau_w) * (self.refrac_count <= 0).float()
                 
 
     def compute_spike(self) -> None:
@@ -1832,9 +1831,8 @@ class AELIFPopulation(NeuralPopulation):
         None
         """
         # Compute new potential of neuron
-        if (self.refrac_count <= 0):
-            self.v = self.v + (x + self.rest_pot - self.v + self.delta_T * torch.exp((self.v - self.theta_rh)/ self.delta_T) - self.R * self.w) / self.tau_s * self.dt
-            self.w += (self.a0 * (self.v - self.rest_pot) - self.w + self.b * self.tau_w * (self.s.float())) * self.dt /self.tau_w
+        self.v += ((x + self.rest_pot - self.v + self.delta_T * torch.exp((self.v - self.theta_rh)/ self.delta_T) - self.R * self.w) / self.tau_s * self.dt) * (self.refrac_count <= 0).float()
+        self.w += ((self.a0 * (self.v - self.rest_pot) - self.w + self.b * self.tau_w * (self.s.float())) * self.dt /self.tau_w) * (self.refrac_count <= 0).float()
 
     def compute_spike(self) -> None:
         """
@@ -2037,9 +2035,8 @@ class Izhikevich(NeuralPopulation):
         None
         """
         # Compute new potential of neuron
-        if (self.refrac_count <= 0):          
-            self.v += ((self.v - self.rest_pot) * (self.v  - self.critical_pot) - self.R * self.w + self.R * x) * self.dt / self.tau_v
-            self.w += (self.a0 * (self.v - self.rest_pot) - self.w + self.b * self.tau_w * (self.s.float())) * self.dt / self.tau_w
+        self.v += (((self.v - self.rest_pot) * (self.v  - self.critical_pot) - self.R * self.w + self.R * x) * self.dt / self.tau_v) * (self.refrac_count <= 0).float()
+        self.w += ((self.a0 * (self.v - self.rest_pot) - self.w + self.b * self.tau_w * (self.s.float())) * self.dt / self.tau_w) * (self.refrac_count <= 0).float()
 
     def compute_spike(self) -> None:
         """
