@@ -1,27 +1,74 @@
+<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=default'></script>
 
+# AELIF
 
+## Introduction
+Adaptive Exponential Leaky-Integrate-and-Fire (AELIF) is an extension of the classical LIF neuron model that incorporates an adaptive exponential function to capture the sub-threshold dynamics of the neuron membrane potential. The AELIF model provides a more accurate representation of the biological behavior of neurons by accounting for the non-linear relationship between the input current and the membrane potential. The adaptive component allows the model to adjust the firing threshold in response to changes in input statistics, making it more biologically plausible and suitable for modeling neural systems that exhibit adaptive behavior.
 
-we explore the adaptive exponential integrate-and-fire model, we observerd that the dynamics of the memrane voltage in the nonlinear integrate-and-fire neuron is characterized by a function $f(u)$ where in the ELIF model $f(u) =  -[u(t) - u_{rest}] + \Delta_T exp(\frac{u - \theta_{rh}}{\Delta_T})$. AELIF model is a two-dimensional spiking neuron model where we couple the voltage equation to abstract current variables $w_k$, each described by a linear differential equation as below:
+<br>
+
+## How does it work?
+The ALIF neuron is an extension of the LIF neuron that takes into account the adaptation of the neuron's firing threshold. The membrane equation for the ALIF neuron is given by:
+
 $$
 \begin{align*}
 \\
-&\tau_m\,\frac{du}{dt}\ = f(u) - R\sum_{k} w_k + R\,I(t) \\
-\\
-&\tau_k\,\frac{dw_k}{dt}\ = a_k (u - u_{rest}) - w_k + b_k\tau_k \sum_{t^{(f)}} \delta (t - t^{(f)}) \\
-\\
+\tau_m\frac{du}{dt}\ =  -[u(t) - u_{rest}] - R\sum_{k} w_k + RI(t) \\
 \end{align*}
 $$
-Same as other integrate-and-fire models, the voltage variable $u$ is set to $u_{rest}$ if the membrane potential reaches the threshold. 
-The $\delta - function$ in the $w_k$ equations indicates that the adaptation currents $w_k$ are increased by an amount $b_k$. For example, a value $b_k = 10 pA$ means that the adaptation current $w_k$is a $10pA$ stronger after a spike that it was just before the spike. The parameters $b_k$ are the *jump* of the spike-triggered adaptation.
 
-For simplicity, the voltage equation of the exponential LIF model could be coupled to a single variable $w$:
 $$
 \begin{align*}
-\\
-&\tau_m\,\frac{du}{dt}\ = -[u(t) - u_{rest}] + \Delta_T exp(\frac{u - \theta_{rh}}{\Delta_T}) - Rw + R\,I(t) \\
-\\
-&\tau_w\,\frac{dw_k}{dt}\ = a_k (u - u_{rest}) - w + b\tau_k \sum_{t^{(f)}} \delta (t - t^{(f)}) \\
+\tau_k\frac{dw_k}{dt}\ = a_k (u - u_{rest}) - w_k + b_k\tau_k \sum_{t {(f)}} \delta (t - t^{(f)}) \\
 \\
 \end{align*}
 $$
-If the membrane potential reaches the threshold, the voltage variable $u$ is set to $u_{rest}$, and the adaptation variable $w$ is increased by an amount $b$. Two parameters characterize adaptation, the parameter $a$ is the source of the subthreshold adaptation since it couples adaptation to the voltage, and the spike-triggered adaptation is controlled by a combination of $a$ and $b$. The choice of $a$ and mainly $b$ determines the firing patterns of the neuron.
+
+where $u(t)$ is the membrane potential, $\tau_m$ is the membrane time constant, $R$ is the membrane resistance, $C$ is the membrane capacitance, $I(t)$ is the synaptic input current, $u_{rest}$ is the resting potential, $w(t)$ is the adaptation variable, $z(t)$ is the input from the adaptation current, $\Delta_{th}$ is the adaptation strength for the firing threshold, $\Delta_{w}$ is the adaptation strength for the adaptation variable, and $\tau_w$ is the time constant for the adaptation variable.
+
+The ALIF neuron has two dynamics: 
+- The membrane potential $u(t)$ and the adaptation variable $w(t)$.
+- The adaptation variable w(t) is increased after each spike and decays back to zero with a time constant $\tau_w$. 
+This increase in w(t) causes the firing threshold to increase over time, resulting in a slower firing rate.
+
+The ALIF neuron can be simulated using the forward Euler method as in the LIF neuron. However, since there are now two dynamics, we must solve two ODEs in each time step. This can be achieved by first updating the adaptation variable w(t) and then updating the membrane potential u(t).
+
+<br>
+
+## Strengths:
+<li>The adaptive threshold in ALIF model provides a more realistic representation of neuronal behavior compared to traditional LIF models, as it accounts for the varying response of neurons to input stimuli.
+
+<li>The ALIF model is capable of producing more precise spike timing compared to the LIF model, which can be useful in modeling and understanding various neural processes.
+
+<li>The ALIF model is robust to changes in input statistics, making it more versatile and useful for a wider range of applications.
+## Weaknesses:
+
+<br>
+
+## Weaknesses:
+<li>The adaptive threshold in the ALIF model increases computational complexity compared to the LIF model, which may limit its use in certain applications.
+
+<li>The increased complexity of the ALIF model may make it harder to interpret and understand compared to simpler models like the LIF model.
+
+<li>The performance of the ALIF model depends on the specific parameter values chosen, which may require careful tuning for optimal results.
+
+<br>
+
+## Usage
+To use a ALIF neuron, you need to create an object from the LIFPopulation class, which can be done using the following example code:
+```python
+neuron = ALIFPopulation(n=1)
+```
+When creating the object, you must specify the number of neurons (n) in that particular population of neurons.
+
+After creating the object, the forward method can be used to activate the neuron for a one-time step with an input x that represents the amount of input current in that time step:
+
+```python
+neuron.forward(4)
+```
+
+<br>
+
+## Reference
+<li> Wikipedia
+<li> Scholarpedia
