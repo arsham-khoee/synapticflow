@@ -22,7 +22,7 @@ where the exponential term with time constant $\Delta_T$ is responsible for the 
 $$
 \begin{align*}
 \\
-\tau_k\frac{dw_k}{dt}\ = a_k (u - u_{rest}) - w_k + b_k\tau_k \sum_{t {(f)}} \delta (t - t^{(f)})
+\tau_k\frac{dw_k}{dt}\ = a_k (u - u_{rest}) - w_k + b_k\tau_k \sum_{t^{(f)}} \delta (t - t^{(f)})
 \\
 \end{align*}
 $$
