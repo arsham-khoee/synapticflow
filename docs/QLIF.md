@@ -4,36 +4,10 @@
 
 # LIF
 
-The LIF (Leaky Integrate and Fire) neuron is a widely used model in computational neuroscience for simulating the behavior of a single neuron. It is a simplified model that captures the essential features of a neuron, including the integration of synaptic inputs and the generation of action potentials. The LIF neuron is based on the concept of the membrane potential, which is the electrical potential difference across the neuron's cell membrane. When the membrane potential reaches a certain threshold, an action potential is triggered, which allows the neuron to communicate with other neurons. The LIF neuron has been used extensively in the study of neural networks and information processing in the brain, and it continues to be an important tool in neuroscience research.
+The quadratic LIF (QLIF) neuron model is a nonlinear version of the LIF neuron model. In the QLIF model, the membrane potential is presented by a quadratic function of the input signals. The membrane potential and a reset condition are given by:
+C dV/dt = -g(V-Vr)(V-Vt) + I
+where C is the membrane capacitance, g is the conductance, Vr is the resting potential, Vt is the firing threshold, and I is the input current. The conductance g and the firing threshold Vt are parameters of the model.
 
+The quadratic term in this equation means that the response of the neuron to input signals is nonlinear. This can lead to behaviors such as subthreshold oscillations, which are not present in the linear LIF model.
+When the membrane potential reaches the firing threshold, the neuron produces a spike, and the membrane potential is reset to a lower value. 
 
-A *membrane equation* and a *reset condition* define our *leaky-integrate-and-fire (LIF)* neuron:
-<br>
-$$\tau_m \frac{du}{dt} = - [u(t) - u_{rest}] + RI(t) \ \ \ if \ \ \ u(t) \leq u_{th}$$
-$$u(t) = u_{rest} \quad \quad \quad \quad \quad \quad \quad \quad \quad otherwise$$
-\begin{align*}
-\\
-&\tau_m\,\frac{du}{dt}\ = -[u(t) - u_{rest}] + R\,I(t) & \text{if }\quad u(t) \leq u_{th}\\
-<br>
-\\
-&u(t) = u_{rest} &\text{otherwise}\\
-<br>
-\\
-\end{align*}
-where $u(t)$ is the membrane potential, $\tau_m$ is the membrane time constant which is equal to $RC$, it is the characteristic time of the decay, $R$ is the membrane resistance, $C$ is the capacity of the capacitor, $I(t)$ is the synaptic input current, $u_{th}$ is the spiking threshold, and $u_{rest}$ is the resting voltage.
-
-The membrane equation is an *ordinary differential equation (ODE)* that illustrates the time evolution of membrane potential $u(t)$ in response to synaptic input and leaking of change across the cell membrane.
-
-To solve this particular ODE, we can apply the forward Euler method in order to solve the ODE with a given initial value. We simulate the evolution of the membrane equation in discrete time steps, with a sufficiently small $\Delta t$. We start by writing the time derivative $\frac{du}{dt}$ in the membrane equation without taking the limit $\Delta t \to 0$:
-\begin{align*}
-\\
-\tau_m\,\frac{ u(t+\Delta t)-u(t)}{\Delta t}\ = -[u(t) - u_{rest}] + R\,I(t) ,
-\\
-\end{align*}
-The equation can be transformed to the following well-formed equation:
-\begin{align*}
-\\
-u(t+\Delta t) = u(t)-\frac{\Delta t}{\tau_m} \left( [u(t) - u_{rest}] - R\,I(t) \right) .
-\\
-\end{align*}
-The value of membrane potential $u(t+\Delta t)$ can be expressed in terms of its previous value $u(t)$ by simple algebraic manipulation. For *small enough* values of $\Delta t$, this provides a good approximation of the continuous-time integration.
