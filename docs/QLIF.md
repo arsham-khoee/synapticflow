@@ -2,7 +2,6 @@
 
 <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=default'></script>
 
-# LIF
 
 The quadratic LIF (QLIF) neuron model is a nonlinear version of the LIF neuron model. In the QLIF model, the membrane potential is presented by a quadratic function of the input signals. The membrane potential and a reset condition are given by:
 C dV/dt = -g(V-Vr)(V-Vt) + I
