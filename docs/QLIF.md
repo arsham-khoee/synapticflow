@@ -16,7 +16,7 @@ The QLIF model has a quadratic term in the membrane equation that makes it nonli
 $$
 \begin{align*}
 \\
-&\tau_m\frac{ u(t+\Delta t)-u(t)}{\Delta t}\ = a_0(u(t) - u_{rest}) (u(t) - u_{critical}) + RI(t) &\text{if }\quad u(t) \leq u_{th}\\
+&\tau_m\frac{du}{dt}\ = a_0(u(t) - u_{rest}) (u(t) - u_{critical}) + RI(t) &\text{if }\quad u(t) \leq u_{th}\\
 \end{align*}
 $$
 
