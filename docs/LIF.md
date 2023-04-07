@@ -89,17 +89,24 @@ Another concept to be considered is the refractory period. After the action pote
 <br>
 
 ## Usage
-To use a LIF neuron, you need to create an object from the LIFPopulation class, which can be done using the following example code:
-```python
-neuron = LIFPopulation(n=1)
-```
-When creating the object, you must specify the number of neurons (n) in that particular population of neurons.
 
-After creating the object, the forward method can be used to activate the neuron for a one-time step with an input x that represents the amount of input current in that time step:
+ LIF Population model can be used by given code:
+ ```python
+ from synapticflow.network import neural_population
+ model = LIFPopulation(n=10)
+ model.set_batch_size(10)
+ ```
 
-```python
-neuron.forward(4)
-```
+ Then you can stimulate each time step by calling `forward` function:
+ ```python
+ model.forward(torch.tensor([10 for _ in range(model.n)]))
+ ```
+
+ All available attributes like spike trace and membrane potential is available by `model` instance:
+ ```python
+ print(model.s) # Model spike trace
+ print(model.v) # Model membrane potential
+ ```
 
 <br>
 
