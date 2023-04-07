@@ -467,6 +467,109 @@ class Conv1dConnection(AbstractConnection):
         Reset all the state variables of the connection.
         """
         super().reset_state_variables()
+
+class Conv2dConnection(AbstractConnection):
+    """
+    Specify a convolutional synaptic connection between neural populations.
+
+    Implement the convolutional connection pattern following the abstract\
+    connection template.
+    """
+
+    def __init__(
+        self,
+        pre: NeuralPopulation,
+        post: NeuralPopulation,
+        kernel_size: Union[int, Tuple[int, int]],
+        w: torch.Tensor = None,
+        weight_decay: float = 0.0,
+        stride: Union[int, Tuple[int, int]] = 1,
+        padding: Union[int, Tuple[int, int]] = 0,
+        dilation: Union[int, Tuple[int, int]] = 1,
+        **kwargs
+    ) -> None:
+        super().__init__(
+            pre=pre,
+            post=post,
+            weight_decay=weight_decay,
+            **kwargs
+        )
+        self.kernel_size = _pair(kernel_size)
+        self.stride = _pair(stride)
+        self.padding = _pair(padding)
+        self.dilation = _pair(dilation)
+
+        self.in_channels, input_height, input_width = (self.pre.shape[0], self.pre.shape[1], self.pre.shape[2])
+        self.out_channels, output_height, output_width = (self.post.shape[0], self.post.shape[1], self.post.shape[2])
+
+        height = (input_height - self.kernel_size[0] + 2 * self.padding[0]) / self.stride[0] + 1
+        width =  (input_width - self.kernel_size [1]+ 2 * self.padding[1]) / self.stride[1] + 1
+        shape = (self.in_channels, self.out_channels, int(height), int(width))
+        print(shape)
+        print('height', height)
+        print('width', width)
+        error = (
+            "Target dimensionality must be (out_channels, ?,"
+            "(input_height - filter_height + 2 * padding_height) / stride_height + 1,"
+            "(input_width - filter_width + 2 * padding_width) / stride_width + 1"
+        )
+
+
+        print(self.post.shape[0] == shape[1] , self.post.shape[1] == shape[2] , self.post.shape[2] == shape[3])
+        assert self.post.shape[0] == shape[1] and self.post.shape[1] == shape[2] and self.post.shape[2] == shape[3], error
+        if w is None:
+            if (self.w_min == float('-inf')).any() or (self.w_max == float('inf')).any():
+                w = torch.clamp(torch.rand(self.post.shape[0], self.pre.shape[0], *self.kernel_size), self.w_min, self.w_max)
+            else:
+                w = self.w_min + torch.rand(self.post.shape[0], self.pre.shape[0], *self.kernel_size) * (self.w_max - self.w_min)
+                print('w:' , w)
+        else:
+            if (self.w_min != float('-inf')).any() or (self.w_max != float('inf')).any():
+                w = torch.clamp(torch.as_tensor(w), self.w_min, self.w_max)
+
+        self.w = Parameter(w, requires_grad=False)
+
+        self.b = Parameter(
+            kwargs.get("b", torch.zeros(self.out_channels)), requires_grad=False
+        )
+
+        """
+        1. Add more parameters if needed.
+        2. Fill the body accordingly.
+        """
+
+    def compute(self, s: torch.Tensor) -> None:
+        print('b', self.b)
+        return F.conv2d(
+            s.float(),
+            self.w,
+            self.b,
+            stride=self.stride,
+            padding=self.padding,
+            dilation=self.dilation,
+        )
+        """
+        Implement the computation of post-synaptic population activity given the
+        activity of the pre-synaptic population.
+        """
+
+    def update(self, **kwargs) -> None:
+        """
+        TODO.
+
+        Update the connection weights based on the learning rule computations.
+        You might need to call the parent method.
+        """
+        super().update(**kwargs)
+
+    def reset_state_variables(self) -> None:
+        """
+        TODO.
+
+        Reset all the state variables of the connection.
+        """
+        super().reset_state_variables()    
+
 class PoolingConnection(AbstractConnection):
     """
     Specify a pooling synaptic connection between neural populations.
