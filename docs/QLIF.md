@@ -69,6 +69,13 @@ To simulate the QLIF neuron model, we can use a similar approach to the LIF mode
  print(model.v) # Model membrane potential
  ```
 
+And in the same way, you can use the visualization file to draw plots of the obtained answer:
+
+<p align="center">
+  <img src="_static/QLIF-v.svg" alt="Voltage Plot" style="width: 600px; padding: 25px;"/>
+  <img src="_static/QLIF-s.svg" alt="Raster Plot" style="width: 600px; padding: 25px;"/>
+</p>
+
 <br>
 
 ## Reference

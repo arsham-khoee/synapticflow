@@ -39,5 +39,12 @@ $$
  print(model.v) # Model membrane potential
  ```
 
+ And in the same way, you can use the visualization file to draw plots of the obtained answer:
+
+<p align="center">
+  <img src="_static/MC-v.svg" alt="Voltage Plot" style="width: 600px; padding: 25px;"/>
+  <img src="_static/MC-s.svg" alt="Raster Plot" style="width: 600px; padding: 25px;"/>
+</p>
+
  ## References
  - <a href="https://towardsdatascience.com/mcculloch-pitts-model-5fdf65ac5dd1"> Towards Data Science: McCulloch-Pitts Neuron</a>

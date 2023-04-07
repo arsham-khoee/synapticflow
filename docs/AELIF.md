@@ -60,6 +60,13 @@ print(model.s) # Model spike trace
 print(model.v) # Model membrane potential
 ```
 
+ And in the same way, you can use the visualization file to draw plots of the obtained answer:
+
+<p align="center">
+  <img src="_static/AELIF-v.svg" alt="Voltage Plot" style="width: 600px; padding: 25px;"/>
+  <img src="_static/AELIF-s.svg" alt="Raster Plot" style="width: 600px; padding: 25px;"/>
+</p>
+
 <br>
 
 ## Reference

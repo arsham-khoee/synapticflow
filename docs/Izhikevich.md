@@ -89,6 +89,13 @@ All available attributes like spike trace and membrane potential are available b
 
  ```
 
+ And in the same way, you can use the visualization file to draw plots of the obtained answer:
+
+<p align="center">
+  <img src="_static/Izh-v.svg" alt="Voltage Plot" style="width: 600px; padding: 25px;"/>
+  <img src="_static/Izh-s.svg" alt="Raster Plot" style="width: 600px; padding: 25px;"/>
+</p>
+
 <br>
 
 ## Reference
