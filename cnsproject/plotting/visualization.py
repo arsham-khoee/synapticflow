@@ -187,7 +187,7 @@ def raster_plot(population_spikes: List[torch.Tensor], dt: float, save_path: str
 
     time = [dt * i for i in range(steps)]
     for i in range(population_size):
-        plt.scatter(time, data[i], color='royalblue')
+        plt.scatter(time, data[i], color='royalblue', s=2)
     plt.xlabel("Time")
     plt.ylabel("Neuron Index")
     if save_path:
@@ -380,3 +380,59 @@ def plot_neuron(neural_population: NeuralPopulation, input_current: List[torch.t
         else:
             plot_refractory_count(refractory_data, dt=dt, legend=legend, default_colors=colors)
 
+def plot_periodic(data: dict, dt: float, save_path: str = None, legend: bool = False) -> None:
+    """
+    Plots periodic data for neurons.
+
+    Args:
+    - data (dict): Dictionary containing data for each timestep
+    - dt (float): The time step size
+    - save_path (str, optional): The file path to save the plot. Default is None.
+    - legend (bool, optional): Whether to show the legend. Default is False.
+
+    Returns:
+    - None
+    """
+    steps = len(data.keys())
+    population_size = len(data[0]['spike'])
+    spikes = {}
+    voltages = {}
+    refracts = {}
+    currents = {}
+    for i in range(population_size):
+        spikes[i] = []
+        voltages[i] = []
+        refracts[i] = []
+        currents[i] = []
+    
+    time = [dt * i for i in range(steps)]
+    
+    fig, axs = plt.subplots(4, sharex= True, figsize=(10, 8))
+    fig.suptitle('Neuron Periodic Plots')
+    
+    for k in data.keys():
+        spike = data[k]['spike']
+        voltage = data[k]['voltage']
+        refract = data[k]['refract']
+        current = data[k]['current']
+        for i in range(population_size):
+            if spike[i] == True:
+                spikes[i].append(i)
+            else:
+                spikes[i].append(None)
+            voltages[i].append(voltage[i].item())
+            refracts[i].append(refract[i].item())
+            currents[i].append(current[i].item())
+    colors = [get_random_rgb() for _ in range(population_size)]
+    
+    for i in range(population_size):
+        axs[0].plot(time, currents[i], color=colors[i])
+        axs[1].plot(time, voltages[i], color=colors[i])
+        axs[2].scatter(time, spikes[i], color='royalblue', s=2)
+        axs[3].plot(time, refracts[i], color=colors[i])
+    axs[0].set(ylabel='Input Current')
+    axs[1].set(ylabel='Membrane Potential')
+    axs[2].set(ylabel='Neuron Index')
+    axs[3].set(ylabel='Refractory Count', xlabel='Time')
+    plt.show()
+    
