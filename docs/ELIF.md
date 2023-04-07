@@ -8,8 +8,7 @@ The ELIF neuron model is an extension of the LIF (leaky integrate-and-fire) neur
 <br>
 
 ## How does it work?
-In the exponential integrate-and-fire model, the differential equation for the *membrane potential* and a *reset condition* is given by:
-
+The Exponential Leaky Integrate-and-Fire (ELIF) neuron model is a modified version of the LIF model that includes a subthreshold depolarizing current. ELIF neurons have a resting potential and a threshold potential like LIF neurons, but the membrane potential dynamics are slightly different. The membrane potential of an ELIF neuron is given by:
 
 $$
 \begin{align*}
@@ -25,42 +24,9 @@ $$
 \end{align*}
 $$
 
+If the membrane potential $u$ exceeds the threshold potential $u_{th}$, then the neuron fires a spike and the membrane potential is reset to the resting potential $u_{rest}$. If $u(t) \leq u_{th}$, the neuron remains in a subthreshold regime and the dynamics are governed by a subthreshold depolarizing current term $\Delta_T exp(\frac{u(t) - \theta_{rh}}{\Delta_T})$.
 
-The first term on the right-hand of this equation describes the leak of a passive membrane. The second term is an exponential nonlinearity with *sharpness* parameter $\Delta_T$ and *threshold* $\theta_{rh}$.
-
-The membrane equation is an *ordinary differential equation (ODE)* that illustrates the time evolution of membrane potential $u(t)$ in response to synaptic input and leaking of change across the cell membrane.
-
-The exponential integrate-and-fire model is a special case of the general nonlinear model where:
-
-<br>
-
-$$f(u) = -[u(t) - u_{rest}] + \Delta_T exp(\frac{u(t) - \theta_{rh}}{\Delta_T}) $$
-
-<br>
-
-To solve this particular ODE, we can apply the forward Euler method in order to solve the ODE with a given initial value. We simulate the evolution of the membrane equation in discrete time steps, with a sufficiently small $\Delta t$. We start by writing the time derivative $\frac{du}{dt}$ in the membrane equation without taking the limit $\Delta t \to 0$:
-
-$$
-\begin{align*}
-\\
-\tau_m\frac{ u(t+\Delta t)-u(t)}{\Delta t}\ = -[u(t) - u_{rest}] + \Delta_T exp(\frac{u(t) - \theta_{rh}}{\Delta_T}) + RI(t)
-\\
-\\
-\end{align*}
-$$
-
-The equation can be transformed to the following well-formed equation:
-
-$$
-\begin{align*}
-\\
-u(t+\Delta t) = u(t)-\frac{\Delta t}{\tau_m} \left( [u(t) - u_{rest}]  - \Delta_T exp(\frac{u(t) - \theta_{rh}}{\Delta_T}) - RI(t) \right)
-\\
-\\
-\end{align*}
-$$
-
-The value of membrane potential $u(t+\Delta t)$ can be expressed in terms of its previous value $u(t)$ by simple algebraic manipulation. For *small enough* values of $\Delta t$, this provides a good approximation of the continuous-time integration.
+The ELIF model adds a degree of flexibility to the LIF model by allowing for the generation of subthreshold depolarizations in response to input. The model is also computationally efficient and relatively simple to implement. However, like the LIF model, the ELIF model is limited in its ability to accurately capture the complex dynamics of biological neurons. In particular, the model does not capture the effects of active membrane properties such as ion channels, and the subthreshold dynamics are based on an exponential function rather than the more physiologically realistic Hodgkin-Huxley formalism.
 
 <br>
 
