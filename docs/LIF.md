@@ -1,4 +1,4 @@
-<script src=’https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=default’></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=default"></script>
 
 # LIF
 
@@ -15,15 +15,10 @@ A *membrane equation* and a *reset condition* define our *leaky-integrate-and-fi
 <br>
 
 $$
-
 \begin{align*}
-
 \\
-
 &\tau_m\frac{du}{dt}\ = -[u(t) - u_{rest}] + RI(t) &\text{if }\quad u(t) \leq u_{th}\\
-
 \end{align*}
-
 $$
 
 $$
