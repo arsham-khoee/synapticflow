@@ -32,8 +32,6 @@ where $u$ is the membrane potential, $u_{rest}$ is the resting potential, $\tau_
 ## Strengths:
 <li>The spike frequency adaptation in the ALIF model provides a more realistic representation of neuronal behavior compared to the common LIF models, as it accounts for the varying response of neurons to input stimuli.
 
-## Weaknesses:
-
 <br>
 
 ## Weaknesses:
