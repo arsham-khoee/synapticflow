@@ -8,7 +8,7 @@ The Adaptive Exponential Leaky Integrate and Fire (ALIF) neuron model is an exte
 <br>
 
 ## How does it work?
-The ALIF neuron is an extension of the LIF neuron that takes into account the adaptation of the neuron's firing threshold. The membrane equation for the ALIF neuron is given by:
+The Adaptive Exponential Integrate-and-Fire (AEIF) neuron model is a biologically realistic spiking neuron model that extends the popular Leaky Integrate-and-Fire (LIF) model by adding an exponential term to the subthreshold dynamics of the membrane potential. In contrast, the Adaptive Leaky Integrate-and-Fire (ALIF) model simplifies the AEIF model by removing the exponential term from the subthreshold dynamics of the membrane potential. The ALIF model is described by the following equations:
 
 $$
 \begin{align*}
@@ -24,46 +24,7 @@ $$
 \end{align*}
 $$
 
-Same as other integrate-and-fire models, the voltage variable $u$ is set to $u_{rest}$ if the membrane potential reaches the threshold. 
-The $\delta - function$ in the $w_k$ equations indicates that the adaptation currents $w_k$ are increased by an amount $b_k$. For example, a value $b_k = 10 pA$ means that the adaptation current $w_k$is a $10pA$ stronger after a spike that it was just before the spike. The parameters $b_k$ are the *jump* of the spike-triggered adaptation.
-
-The ALIF neuron has two dynamics: 
-- The membrane potential $u(t)$ and the adaptation variable $w(t)$.
-- The adaptation variable w(t) is increased after each spike and decays back to zero with a time constant $\tau_w$. 
-This increase in w(t) causes the firing threshold to increase over time, resulting in a slower firing rate.
-
-The ALIF neuron can be simulated using the forward Euler method as in the LIF neuron. However, since there are now two dynamics, we must solve two ODEs in each time step. This can be achieved by first updating the adaptation variable w(t) and then updating the membrane potential u(t).
-
-$$
-\begin{align*}
-\\
-\tau_m\frac{ u(t+\Delta t)-u(t)}{\Delta t}\ =  -[u(t) - u_{rest}] - R\sum_{k} w_k + RI(t) \\
-\end{align*}
-$$
-
-$$
-\begin{align*}
-\tau_k\frac{ w(t+\Delta t)-w(t)}{\Delta t}\ = a_k (u - u_{rest}) - w_k + b_k\tau_k \sum_{t {(f)}} \delta (t - t^{(f)}) \\
-\\
-\end{align*}
-$$
-
-The equation can be transformed into the following well-formed equation:
-
-$$
-\begin{align*}
-\\
-u(t+\Delta t)\ = \ u(t)-\frac{\Delta t}{\tau_m} \left( [u(t) - u_{rest}] + R\sum_{k} w_k - RI(t) \right)
-\\
-\end{align*}
-$$
-
-$$
-\begin{align*}
-w(t+\Delta t) = w(t)-\frac{\Delta t}{\tau_k} \left( a_k (u - u_{rest}) - w_k + b_k\tau_k \sum_{t {(f)}} \delta (t - t^{(f)}) \right)
-\\
-\end{align*}
-$$
+where $u$ is the membrane potential, $u_{rest}$ is the resting potential, $\tau_m$ is the membrane time constant, $R$ is the membrane resistance, $w_k$ are the synaptic conductances, $a_k$ and $b_k$ are parameters that control the adaptation current, and $I(t)$ is the input current. As in the AEIF model, the adaptation current $I_{adapt}(t)$ is given by a spike-rate-dependent term that reflects the history of spiking activity. However, in the ALIF model, this adaptation current is linearly related to the membrane potential, and there is no explicit exponential term. When the membrane potential reaches a threshold value, the neuron emits a spike and the membrane potential is reset to the resting potential. The ALIF model is computationally efficient and has been used in large-scale simulations of spiking neural networks.
 
 <br>
 
