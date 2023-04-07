@@ -1516,12 +1516,10 @@ class QLIFPopulation(NeuralPopulation):
         shape: Optional[Iterable[int]] = None,
         spike_trace: bool = True,
         additive_spike_trace: bool = False,
-        tau_s: Union[float, torch.Tensor] = 10.,
+        tau_s: Union[float, torch.Tensor] = 30.,
         threshold: Union[float, torch.Tensor] = -52.,
-        theta_rh: Union[float, torch.Tensor] = -60.,
-        delta_T: Union[float, torch.Tensor] = 1.,
         a0: Union[float, torch.Tensor] = 1,
-        critical_pot: Union[float, torch.Tensor] = 0.8,
+        critical_pot: Union[float, torch.Tensor] = -54.,
         rest_pot: Union[float, torch.Tensor] = -62.,
         reset_pot: Union[float, torch.Tensor] = -62.,
         refrac_length: Union[float, torch.Tensor] = 5,
@@ -1529,7 +1527,7 @@ class QLIFPopulation(NeuralPopulation):
         lower_bound: float = None,
         sum_input: bool = False,
         trace_scale: Union[float, torch.Tensor] = 1.,
-        R: Union[float, torch.Tensor] = 20.,
+        R: Union[float, torch.Tensor] = 1.,
         is_inhibitory: bool = False,
         learning: bool = True,
         **kwargs
@@ -1544,8 +1542,6 @@ class QLIFPopulation(NeuralPopulation):
         - additive_spike_trace (bool): A flag indicating whether to add spike trace or replace it. Default is False.
         - tau_s (Union[float, torch.Tensor]): A float or tensor representing tau_s value for neuron model. Default is 10.
         - threshold (Union[float, torch.Tensor]): A float or tensor representing spike threshold value for neuron model. Default is -52.
-        - theta_rh (Union[float, torch.Tensor]): A float or tensor representing the resting potential value for neuron model. Default is -60.
-        - delta_T (Union[float, torch.Tensor]): A float or tensor representing sharpness of the neuron's voltage threshold. Default is 1.
         - a0 (Union[float, torch.Tensor]): A float or tensor representing initial quadratic parameter value. Default is 1.
         - critical_pot (Union[float, torch.Tensor]): A float or tensor representing the critical potential value for quadratic parameter. Default is 0.8.
         - rest_pot (Union[float, torch.Tensor]): A float or tensor representing the resting potential value for neuron model. Default is -62.
@@ -1577,8 +1573,6 @@ class QLIFPopulation(NeuralPopulation):
         self.register_buffer("rest_pot", torch.tensor(rest_pot, dtype=torch.float)) # Rest potential
         self.register_buffer("tau_s", torch.tensor(tau_s, dtype=torch.float)) # Tau_s
         self.register_buffer("reset_pot", torch.tensor(reset_pot, dtype=torch.float)) # Reset potential
-        self.register_buffer("theta_rh", torch.tensor(theta_rh, dtype=torch.float)) # Theta_rh potential
-        self.register_buffer("delta_T", torch.tensor(delta_T, dtype=torch.float)) # Delta_T : sharpness
         self.register_buffer("pot_threshold", torch.tensor(threshold, dtype=torch.float)) # Spiking Threshold
         self.register_buffer("a0", torch.tensor(a0, dtype=torch.float))
         self.register_buffer("critical_pot", torch.tensor(critical_pot, dtype=torch.float))
