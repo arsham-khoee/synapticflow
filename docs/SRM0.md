@@ -28,7 +28,7 @@ SRM0 model can be used by following code:
 
 ```python
 import synapticflow as sf
-model = sf.SRM0(n=10) # Creates a neural population with 10 neurons
+model = sf.SRM0Node(n=10) # Creates a neural population with 10 neurons
 ```
 
 Then you can stimulate each time step by calling the forward function:
