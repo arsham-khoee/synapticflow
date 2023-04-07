@@ -2221,12 +2221,10 @@ class CLIFPopulation(NeuralPopulation):
         -------
         None
         """
-        self.v = self.decay * (self.v - self.rest_pot) + self.rest_pot # Compute voltage with respect to recent potential and rest potential
-        self.i *= self.i_decay # Compute input current
-        
-        self.i += x # Add new input current to recent ones
-        self.v += (self.refrac_count <= 0).float() * self.i # Compute voltage if the neuron was not in refractory state
 
+        self.i *= self.i_decay  # Decay current
+        self.i += x  # Add new input current to recent ones
+        self.v += (( - (self.v - self.rest_pot) + self.R * self.i) * self.dt / self.tau_s) * (self.refrac_count <= 0).float()
 
     def compute_spike(self) -> None:
         """
