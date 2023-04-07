@@ -91,6 +91,7 @@ class NeuralPopulation(torch.nn.Module):
         is_inhibitory: bool = False,
         learning: bool = True,
         dt: Union[float, torch.Tensor] = 0.1,
+        R: Union[float, torch.Tensor] = 20.0,
         **kwargs
     ) -> None:
         """
@@ -156,6 +157,7 @@ class NeuralPopulation(torch.nn.Module):
         self.learning = learning
 
         self.register_buffer("s", torch.ByteTensor())
+        self.register_buffer("R", torch.tensor(R, dtype=tensor.float32))
         
         if self.sum_input:
             self.register_buffer("summed", torch.FloatTensor()) # Inputs summation
@@ -439,6 +441,7 @@ class McCullochPitts(NeuralPopulation):
         tau_s: Union[float, torch.Tensor] = 10.,
         threshold: Union[float, torch.Tensor] = 1.0,
         dt: float = 0.1,
+        R: Union[float, torch.Tensor] = 20,
         lower_bound: float = None,
         sum_input: bool = False,
         trace_scale: Union[float, torch.Tensor] = 1.,
@@ -457,7 +460,8 @@ class McCullochPitts(NeuralPopulation):
             trace_scale=trace_scale,
             is_inhibitory=is_inhibitory,
             learning=learning,
-            dt=dt
+            dt=dt,
+            R=R
         )
         
         self.register_buffer(
@@ -585,14 +589,14 @@ class IFPopulation(NeuralPopulation):
             trace_scale=trace_scale,
             is_inhibitory=is_inhibitory,
             learning=learning,
-            dt=dt
+            dt=dt,
+            R=R
         )
 
         self.register_buffer("rest_pot", torch.tensor(rest_pot, dtype=torch.float))
         self.register_buffer("pot_threshold", torch.tensor(threshold, dtype=torch.float))
         self.register_buffer("refrac_length", torch.tensor(refrac_length))
         self.register_buffer("v", torch.FloatTensor()) # Neuron's potential
-        self.register_buffer("R", torch.tensor(R, dtype=torch.float)) # Resistance of neuron
         self.register_buffer("refrac_count", torch.FloatTensor()) # Refractor counter
         self.compute_decay() # Compute decays and set time steps
         self.reset_state_variables()
@@ -788,7 +792,8 @@ class LIFPopulation(NeuralPopulation):
             trace_scale=trace_scale,
             is_inhibitory=is_inhibitory,
             learning=learning,
-            dt=dt
+            dt=dt,
+            R=R
         )
 
         self.register_buffer("rest_pot", torch.tensor(rest_pot, dtype=torch.float))
@@ -798,7 +803,6 @@ class LIFPopulation(NeuralPopulation):
         self.register_buffer("v", torch.FloatTensor()) # Neuron's potential
         self.register_buffer("refrac_count", torch.FloatTensor()) # Refractor counter
         self.register_buffer("tau_s", torch.tensor(tau_s, dtype=torch.float))  # Time constant of neuron voltage decay.
-        self.register_buffer("R", torch.tensor(R, dtype=torch.float)) # Resistance of neuron
         self.compute_decay() # Compute decays and set time steps
         self.reset_state_variables()
         self.lower_bound = lower_bound
@@ -983,7 +987,8 @@ class BLIFPopulation(NeuralPopulation):
             trace_scale=trace_scale,
             is_inhibitory=is_inhibitory,
             learning=learning,
-            dt=dt
+            dt=dt,
+            R = R
         )
 
         self.register_buffer("pot_threshold", torch.tensor(threshold, dtype=torch.float))
@@ -991,7 +996,6 @@ class BLIFPopulation(NeuralPopulation):
         self.register_buffer("v", torch.FloatTensor()) # Neuron's potential
         self.register_buffer("refrac_count", torch.FloatTensor()) # Refractor counter
         self.register_buffer("tau_s", torch.tensor(tau_s, dtype=torch.float))  # Tau_s
-        self.register_buffer("R", torch.tensor(R, dtype=torch.float)) # Resistance of neuron
         self.compute_decay() # Compute decays and set time steps
         self.reset_state_variables()
 
@@ -1172,7 +1176,8 @@ class ALIFPopulation(NeuralPopulation):
             trace_scale=trace_scale,
             is_inhibitory=is_inhibitory,
             learning=learning,
-            dt=dt
+            dt=dt,
+            R=R
         )
 
         self.register_buffer("rest_pot", torch.tensor(rest_pot, dtype=torch.float)) # Rest potential
@@ -1187,7 +1192,6 @@ class ALIFPopulation(NeuralPopulation):
         self.register_buffer("refrac_count", torch.FloatTensor()) # Refractor counter
         self.register_buffer("a0", torch.tensor(a0, dtype=torch.float)) # a_0
         self.register_buffer("b", torch.tensor(b, dtype=torch.float)) # b
-        self.register_buffer("R", torch.tensor(R, dtype=torch.float)) # Resistance of neuron
         self.compute_decay() # Compute decays and set time steps
         self.reset_state_variables()
         self.lower_bound = lower_bound
@@ -1376,7 +1380,8 @@ class ELIFPopulation(NeuralPopulation):
             trace_scale=trace_scale,
             is_inhibitory=is_inhibitory,
             learning=learning,
-            dt=dt
+            dt=dt,
+            R=R
         )
 
         self.register_buffer("rest_pot", torch.tensor(rest_pot, dtype=torch.float)) # Rest potential
@@ -1387,7 +1392,6 @@ class ELIFPopulation(NeuralPopulation):
         self.register_buffer("pot_threshold", torch.tensor(threshold, dtype=torch.float)) # Spiking Threshold
         self.register_buffer("refrac_length", torch.tensor(refrac_length)) # Refractor length
         self.register_buffer("v", torch.FloatTensor()) # Neuron's potential
-        self.register_buffer("R", torch.tensor(R, dtype=torch.float)) # Resistance of neuron
         self.register_buffer("refrac_count", torch.FloatTensor()) # Refractor counter
         self.compute_decay() # Compute decays and set time steps
         self.reset_state_variables()
@@ -1568,6 +1572,7 @@ class QLIFPopulation(NeuralPopulation):
             trace_scale=trace_scale,
             is_inhibitory=is_inhibitory,
             learning=learning,
+            R=R
         )
 
         self.register_buffer("rest_pot", torch.tensor(rest_pot, dtype=torch.float)) # Rest potential
@@ -1578,7 +1583,6 @@ class QLIFPopulation(NeuralPopulation):
         self.register_buffer("critical_pot", torch.tensor(critical_pot, dtype=torch.float))
         self.register_buffer("refrac_length", torch.tensor(refrac_length)) # Refractor length
         self.register_buffer("v", torch.FloatTensor()) # Neuron's potential
-        self.register_buffer("R", torch.tensor(R, dtype=torch.float)) # Resistance of neuron
         self.register_buffer("refrac_count", torch.FloatTensor()) # Refractor counter
         self.compute_decay() # Compute decays and set time steps
         self.reset_state_variables()
@@ -1718,7 +1722,7 @@ class AELIFPopulation(NeuralPopulation):
         dt: float = 0.1,
         a0: Union[float, torch.Tensor] = 1.,
         b: Union[float, torch.Tensor] = 2.,
-        R: Union[float, torch.Tensor] = 0.001,
+        R: Union[float, torch.Tensor] = 20.0,
         lower_bound: float = None,
         sum_input: bool = False,
         trace_scale: Union[float, torch.Tensor] = 1.,
@@ -1765,7 +1769,8 @@ class AELIFPopulation(NeuralPopulation):
             trace_scale=trace_scale,
             is_inhibitory=is_inhibitory,
             learning=learning,
-            dt=dt
+            dt=dt,
+            R=R
         )
 
         self.register_buffer("rest_pot", torch.tensor(rest_pot, dtype=torch.float)) # Rest potential
@@ -1781,7 +1786,6 @@ class AELIFPopulation(NeuralPopulation):
         self.register_buffer("refrac_count", torch.FloatTensor()) # Refractor counter
         self.register_buffer("a0", torch.tensor(a0, dtype=torch.float)) # a_0
         self.register_buffer("b", torch.tensor(b, dtype=torch.float)) # b
-        self.register_buffer("R", torch.tensor(R, dtype=torch.float)) # Resistance of neuron
         self.compute_decay() # Compute decays and set time steps
         self.reset_state_variables()
         self.lower_bound = lower_bound
@@ -1969,7 +1973,8 @@ class Izhikevich(NeuralPopulation):
             trace_scale=trace_scale,
             is_inhibitory=is_inhibitory,
             learning=learning,
-            dt=dt
+            dt=dt,
+            R=R
         )
 
         self.register_buffer("critical_pot", torch.tensor(critical_pot, dtype=torch.float))
@@ -1985,7 +1990,6 @@ class Izhikevich(NeuralPopulation):
         self.register_buffer("refrac_count", torch.FloatTensor()) # Refractor counter
         self.register_buffer("a0", torch.tensor(a0, dtype=torch.float)) # a_0
         self.register_buffer("b", torch.tensor(b, dtype=torch.float)) # b
-        self.register_buffer("R", torch.tensor(R, dtype=torch.float)) # Resistance of neuron
         self.compute_decay() # Compute decays and set time steps
         self.reset_state_variables()
         self.lower_bound = lower_bound
@@ -2167,6 +2171,7 @@ class CLIFPopulation(NeuralPopulation):
             trace_scale=trace_scale,
             is_inhibitory=is_inhibitory,
             learning=learning,
+            R=R
         )
 
         self.register_buffer("rest_pot", torch.tensor(rest_pot, dtype=torch.float))
@@ -2180,7 +2185,6 @@ class CLIFPopulation(NeuralPopulation):
         self.register_buffer("tc_i_decay", torch.tensor(tc_i_decay, dtype=torch.float)) # Time constant input current decay
         self.register_buffer("decay", torch.empty_like(self.tc_decay)) # Main decay which applies to neuron voltage
         self.register_buffer("i_decay", torch.empty_like(self.tc_i_decay)) # Main current decay which applies to input current
-        self.register_buffer("R", torch.tensor(R, dtype=torch.float)) # Resistance of neuron
         self.compute_decay() # Compute decays and set time steps
         self.reset_state_variables()
         self.lower_bound = lower_bound
@@ -2330,6 +2334,7 @@ class SRM0Node(NeuralPopulation):
         rho_0: Union[float, torch.Tensor] = 1.0,
         d_thresh: Union[float, torch.Tensor] = 5.0,
         dt: float = 0.1,
+        R: Union[float, torch.Tensor] = 20.0,
         lower_bound: float = None,
         is_inhibitory: bool = False,
         learning: bool = True,
@@ -2356,6 +2361,7 @@ class SRM0Node(NeuralPopulation):
             rho_0 (Union[float, torch.Tensor]): A float or tensor specifying the initial value of rho.
             d_thresh (Union[float, torch.Tensor]): A float or tensor specifying the distance threshold.
             dt (float): A float specifying the time step of the simulation.
+            R (Union[float, torch.Tensor]) : A float or tensor indicating the resistance of neuron.
             lower_bound (float): A float specifying the lower bound for the neuron potential.
             is_inhibitory (bool): A boolean indicating whether the neuron is inhibitory.
             learning (bool): A boolean indicating whether the neuron should learn.
@@ -2373,7 +2379,8 @@ class SRM0Node(NeuralPopulation):
             trace_scale=trace_scale,
             is_inhibitory=is_inhibitory,
             learning=learning,
-            dt=dt
+            dt=dt,
+            R=R
         )
 
         self.register_buffer("rest_pot", torch.tensor(rest_pot, dtype=torch.float))
@@ -2433,7 +2440,7 @@ class SRM0Node(NeuralPopulation):
         """
                 
         self.v = self.decay * (self.v - self.rest_pot) + self.rest_pot
-        self.v += (self.refrac_count <= 0).float() * self.eps_0 * x
+        self.v += (self.refrac_count <= 0).float() * self.eps_0 * x * self.R
         self.rho = self.rho_0 * torch.exp((self.v - self.threshold) / self.threshold)
         self.s_prob = 1.0 - torch.exp(-self.rho * self.dt)
         
