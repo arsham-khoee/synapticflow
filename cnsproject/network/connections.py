@@ -7,6 +7,8 @@ from typing import Union, Sequence
 
 import torch
 from torch.nn import Module, Parameter
+import torch.nn.functional as F
+from torch.nn.modules.utils import _pair, _triple
 
 from neural_populations import NeuralPopulation
 
@@ -370,7 +372,7 @@ class RandomConnection(AbstractConnection):
         pass
 
 
-class ConvolutionalConnection(AbstractConnection):
+class Conv1dConnection(AbstractConnection):
     """
     Specify a convolutional synaptic connection between neural populations.
 
@@ -382,32 +384,72 @@ class ConvolutionalConnection(AbstractConnection):
         self,
         pre: NeuralPopulation,
         post: NeuralPopulation,
-        lr: Union[float, Sequence[float]] = None,
+        kernel_size: int,
+        w: torch.Tensor = None,
         weight_decay: float = 0.0,
+        stride: int = 1,
+        padding: int = 0,
+        dilation = 0, 
         **kwargs
     ) -> None:
         super().__init__(
             pre=pre,
             post=post,
-            lr=lr,
             weight_decay=weight_decay,
             **kwargs
         )
-        """
-        TODO.
+        self.kernel_size = kernel_size
+        self.stride = stride
+        self.padding = padding
+        self.dilation = dilation
 
+        self.in_channels, input_size = (self.pre.shape[0], self.pre.shape[1])
+        self.out_channels, output_size = (self.post.shape[0], self.post.shape[1])
+
+        conv_size = (input_size - self.kernel_size + 2 * self.padding) / self.stride + 1
+        shape = (self.in_channels, self.out_channels, int(conv_size))
+
+        error = (
+            "Target dimensionality must be (out_channels, ?,"
+            "(input_size - filter_size + 2 * padding) / stride + 1,"
+        )
+
+        assert self.post.shape[0] == shape[1] and self.post.shape[1] == shape[2], error
+
+        if w is None:
+            if (self.w_min == float('-inf')).any() or (self.w_max == float('inf')).any():
+                w = torch.clamp(torch.rand(self.post.shape[0], self.pre.shape[0], self.kernel_size), self.w_min, self.w_max)
+            else:
+                w = self.w_min + torch.rand(self.post.shape[0], self.pre.shape[0], self.kernel_size) * (self.w_max - self.w_min)
+                print('w:' , w)
+        else:
+            if (self.w_min != float('-inf')).any() or (self.w_max != float('inf')).any():
+                w = torch.clamp(torch.as_tensor(w), self.w_min, self.w_max)
+
+        self.w = Parameter(w, requires_grad=False)
+
+        self.b = Parameter(
+            kwargs.get("b", torch.zeros(self.out_channels)), requires_grad=False
+        )
+
+        """
         1. Add more parameters if needed.
         2. Fill the body accordingly.
         """
 
     def compute(self, s: torch.Tensor) -> None:
+        return F.conv1d(
+            s.float(),
+            self.w,
+            self.kernel_size,
+            stride=self.stride,
+            padding=self.padding,
+            dilation=self.dilation,
+        )
         """
-        TODO.
-
         Implement the computation of post-synaptic population activity given the
         activity of the pre-synaptic population.
         """
-        pass
 
     def update(self, **kwargs) -> None:
         """
@@ -416,7 +458,7 @@ class ConvolutionalConnection(AbstractConnection):
         Update the connection weights based on the learning rule computations.
         You might need to call the parent method.
         """
-        pass
+        super().update(**kwargs)
 
     def reset_state_variables(self) -> None:
         """
@@ -424,9 +466,7 @@ class ConvolutionalConnection(AbstractConnection):
 
         Reset all the state variables of the connection.
         """
-        pass
-
-
+        super().reset_state_variables()
 class PoolingConnection(AbstractConnection):
     """
     Specify a pooling synaptic connection between neural populations.
