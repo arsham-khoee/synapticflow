@@ -8,18 +8,21 @@ The Exponential Leaky Integrated-and-Fire (ELIF) neuron model expands on the LIF
 
 ## How does it work?
 The ELIF neuron model is a variation of the LIF model that incorporates a subthreshold depolarizing current. ELIF neurons share similarities with LIF neurons in terms of having both a resting potential and a threshold potential, but their membrane potential dynamics differ slightly. Specifically, the membrane potential of an ELIF neuron can be expressed as:
+
 $$
 \begin{align*}
 \\
 &\tau_m\frac{du}{dt}\ = -[u(t) - u_{rest}] + \Delta_T exp(\frac{u(t) - \theta_{rh}}{\Delta_T}) + RI(t) &\text{if }\quad u(t) \leq u_{th}\\
 \end{align*}
 $$
+
 $$
 \begin{align*}
 &u(t) = u_{rest} &\text{otherwise}\\
 \\
 \end{align*}
 $$
+
 If the membrane potential $u$ exceeds the threshold potential $u_{th}$, then the neuron fires a spike, and the membrane potential is reset to the resting potential $u_{rest}$. If $u(t) \leq u_{th}$, the neuron remains in a subthreshold regime, and the dynamics are governed by a subthreshold depolarizing current term $\Delta_T exp(\frac{u(t) - \theta_{rh}}{\Delta_T})$.
 The ELIF model provides increased flexibility to the LIF model by enabling the generation of subthreshold depolarizations in response to input. It is also relatively easy to implement and is computationally efficient. However, like the LIF model, the ELIF model has limitations in its ability to accurately represent the intricate dynamics of biological neurons. Specifically, the model does not account for the impact of active membrane properties, such as ion channels, and the subthreshold dynamics are based solely on an exponential function.
 <br>
