@@ -101,7 +101,5 @@ All available attributes like spike trace and membrane potential are available b
 
 ## Reference
 
-<li> Wikipedia
-
-<li> Scholarpedia
+<li> Gerstner, Wulfram, et al. Neuronal dynamics: From single neurons to networks and models of cognition. Cambridge University Press, 2014.
 
