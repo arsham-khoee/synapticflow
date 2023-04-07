@@ -3,6 +3,7 @@
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.15.2/dist/katex.min.js"></script>
 <!-- To automatically render math in text elements -->
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.15.2/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
+
 # LIF
 
 ## Introduction
