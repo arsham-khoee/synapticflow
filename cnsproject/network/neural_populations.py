@@ -528,6 +528,7 @@ class IFPopulation(NeuralPopulation):
         lower_bound: float = None,
         sum_input: bool = False,
         trace_scale: Union[float, torch.Tensor] = 1.,
+        R: Union[float, torch.Tensor] = 20.,
         is_inhibitory: bool = False,
         learning: bool = True,
         **kwargs
@@ -563,6 +564,8 @@ class IFPopulation(NeuralPopulation):
             Scaling factor for spike trace (default value is 1.)
         is_inhibitory : bool, optional
             Whether the layer is inhibitory or not (default value is False)
+        R : Union[float, torch.Tensor], optional
+            Resistance of neuron. (default: 20.0)
         learning : bool, optional
             Whether the layer is capable of learning or not (default value is True)
         **kwargs : Any
@@ -589,6 +592,7 @@ class IFPopulation(NeuralPopulation):
         self.register_buffer("pot_threshold", torch.tensor(threshold, dtype=torch.float))
         self.register_buffer("refrac_length", torch.tensor(refrac_length))
         self.register_buffer("v", torch.FloatTensor()) # Neuron's potential
+        self.register_buffer("R", torch.tensor(R, dtype=torch.float)) # Resistance of neuron
         self.register_buffer("refrac_count", torch.FloatTensor()) # Refractor counter
         self.compute_decay() # Compute decays and set time steps
         self.reset_state_variables()
@@ -634,7 +638,7 @@ class IFPopulation(NeuralPopulation):
         -------
         None
         """
-        self.v += (self.refrac_count <= 0).float() * x 
+        self.v += (self.refrac_count <= 0).float() * x * self.R
 
     def compute_spike(self) -> None:
         """
@@ -910,7 +914,7 @@ class LIFPopulation(NeuralPopulation):
         self.v = self.rest_pot * torch.ones(*self.shape, device=self.v.device)
         self.refrac_count = torch.zeros_like(self.v, device=self.refrac_count.device)
 
-class BoostedLIFPopulation(NeuralPopulation):
+class BLIFPopulation(NeuralPopulation):
     """
     Boosted Leaky Integrate and Fire Neural Population
     """
@@ -1104,7 +1108,7 @@ class BoostedLIFPopulation(NeuralPopulation):
         self.v = torch.zeros(*self.shape, device=self.v.device)
         self.refrac_count = torch.zeros_like(self.v, device=self.refrac_count.device)
 
-class AdaptiveLIFPopulation(NeuralPopulation):
+class ALIFPopulation(NeuralPopulation):
     """
     Layer of Adaptive Leaky Integrate and Fire neurons.
     """
@@ -1332,6 +1336,7 @@ class ELIFPopulation(NeuralPopulation):
         lower_bound: float = None,
         sum_input: bool = False,
         trace_scale: Union[float, torch.Tensor] = 1.,
+        R: Union[float, torch.Tensor] = 20.,
         is_inhibitory: bool = False,
         learning: bool = True,
         **kwargs
@@ -1356,6 +1361,7 @@ class ELIFPopulation(NeuralPopulation):
         - sum_input (bool): A flag indicating whether to sum the input or not. Default is False.
         - trace_scale (Union[float, torch.Tensor]): A float or tensor representing the scaling factor for spike trace. Default is 1.
         - is_inhibitory (bool): A flag indicating whether neuron is inhibitory. Default is False.
+        - R (Union[float, torch.Tensor]): Resistance of neuron. (default: 20.0)
         - learning (bool): A flag indicating whether learning is enabled or disabled. Default is True.
         - **kwargs: Additional keyword arguments.
 
@@ -1382,6 +1388,7 @@ class ELIFPopulation(NeuralPopulation):
         self.register_buffer("pot_threshold", torch.tensor(threshold, dtype=torch.float)) # Spiking Threshold
         self.register_buffer("refrac_length", torch.tensor(refrac_length)) # Refractor length
         self.register_buffer("v", torch.FloatTensor()) # Neuron's potential
+        self.register_buffer("R", torch.tensor(R, dtype=torch.float)) # Resistance of neuron
         self.register_buffer("refrac_count", torch.FloatTensor()) # Refractor counter
         self.compute_decay() # Compute decays and set time steps
         self.reset_state_variables()
@@ -1426,7 +1433,7 @@ class ELIFPopulation(NeuralPopulation):
         None
         """
         # Compute new potential of neuron
-        self.v += ((x + self.rest_pot - self.v + self.delta_T * torch.exp((self.v - self.theta_rh)/ self.delta_T)) / self.tau_s * self.dt) * (self.refrac_count <= 0).float()
+        self.v += ((self.R * x + self.rest_pot - self.v + self.delta_T * torch.exp((self.v - self.theta_rh)/ self.delta_T)) / self.tau_s * self.dt) * (self.refrac_count <= 0).float()
 
     def compute_spike(self) -> None:
         """
@@ -1523,6 +1530,7 @@ class QLIFPopulation(NeuralPopulation):
         lower_bound: float = None,
         sum_input: bool = False,
         trace_scale: Union[float, torch.Tensor] = 1.,
+        R: Union[float, torch.Tensor] = 20.,
         is_inhibitory: bool = False,
         learning: bool = True,
         **kwargs
@@ -1549,6 +1557,7 @@ class QLIFPopulation(NeuralPopulation):
         - sum_input (bool): A flag indicating whether to sum the input or not. Default is False.
         - trace_scale (Union[float, torch.Tensor]): A float or tensor representing the scaling factor for spike trace. Default is 1.
         - is_inhibitory (bool): A flag indicating whether neuron is inhibitory. Default is False.
+        - R (Union[float, torch.Tensor]): Resistance of neuron. (default: 20.0)
         - learning (bool): A flag indicating whether learning is enabled or disabled. Default is True.
         - **kwargs: Additional keyword arguments.
         
@@ -1576,6 +1585,7 @@ class QLIFPopulation(NeuralPopulation):
         self.register_buffer("critical_pot", torch.tensor(critical_pot, dtype=torch.float))
         self.register_buffer("refrac_length", torch.tensor(refrac_length)) # Refractor length
         self.register_buffer("v", torch.FloatTensor()) # Neuron's potential
+        self.register_buffer("R", torch.tensor(R, dtype=torch.float)) # Resistance of neuron
         self.register_buffer("refrac_count", torch.FloatTensor()) # Refractor counter
         self.compute_decay() # Compute decays and set time steps
         self.reset_state_variables()
@@ -1620,7 +1630,7 @@ class QLIFPopulation(NeuralPopulation):
         None
         """
         # Compute new potential of neuron
-        self.v += (self.refrac_count <= 0).float() * (x + self.a0 * (self.v - self.rest_pot) * (self.v - self.critical_pot)) / self.tau_s
+        self.v += (self.refrac_count <= 0).float() * (self.R * x + self.a0 * (self.v - self.rest_pot) * (self.v - self.critical_pot)) / self.tau_s
 
     def compute_spike(self) -> None:
         """
@@ -2124,6 +2134,7 @@ class CLIFPopulation(NeuralPopulation):
         tc_i_decay: Union[float,torch.Tensor] = 2.0,
         lower_bound: float = None,
         sum_input: bool = False,
+        R: Union[float, torch.Tensor] = 20.0,
         trace_scale: Union[float, torch.Tensor] = 1.,
         is_inhibitory: bool = False,
         learning: bool = True,
@@ -2148,6 +2159,7 @@ class CLIFPopulation(NeuralPopulation):
             lower_bound (float): A float specifying the lower bound for the neuron potential.
             sum_input (bool): A boolean indicating whether to sum all input instead of taking the maximum.
             trace_scale (Union[float, torch.Tensor]): A float or tensor specifying the scaling factor for the spike trace.
+            R (Union[float, torch.Tensor]): A float or tensor representing the resistance of the neuron. Default is 20.0 .
             is_inhibitory (bool): A boolean indicating whether the neuron is inhibitory.
             learning (bool): A boolean indicating whether the neuron should learn.
 
@@ -2177,6 +2189,7 @@ class CLIFPopulation(NeuralPopulation):
         self.register_buffer("tc_i_decay", torch.tensor(tc_i_decay, dtype=torch.float)) # Time constant input current decay
         self.register_buffer("decay", torch.empty_like(self.tc_decay)) # Main decay which applies to neuron voltage
         self.register_buffer("i_decay", torch.empty_like(self.tc_i_decay)) # Main current decay which applies to input current
+        self.register_buffer("R", torch.tensor(R, dtype=torch.float)) # Resistance of neuron
         self.compute_decay() # Compute decays and set time steps
         self.reset_state_variables()
         self.lower_bound = lower_bound
@@ -2269,10 +2282,8 @@ class CLIFPopulation(NeuralPopulation):
         None
         """
         super().compute_decay()
-        self.decay = torch.exp(-self.dt / self.tc_decay)  # Neuron voltage decay (per timestep).
         self.i_decay = torch.exp(-self.dt / self.tc_i_decay) # Neuron current decay
-
-
+        
 
     def reset_state_variables(self) -> None:
         """
