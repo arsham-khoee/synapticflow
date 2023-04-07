@@ -54,5 +54,4 @@ print(model.v) # Model membrane potential
 <br>
   
 ## Reference
-<li> Wikipedia
-<li> Scholarpedia
+<li> Gerstner, Wulfram, et al. Neuronal dynamics: From single neurons to networks and models of cognition. Cambridge University Press, 2014.
