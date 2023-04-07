@@ -22,15 +22,10 @@ $$
 $$
 
 $$
-
 \begin{align*}
-
 &u(t) = u_{rest} &\text{otherwise}\\
-
 \\
-
 \end{align*}
-
 $$
 
 where $u(t)$ is the membrane potential, $\tau_m$ is the membrane time constant which is equal to $RC$, it is the characteristic time of the decay, $R$ is the membrane resistance, $C$ is the capacity of the capacitor, $I(t)$ is the synaptic input current, $u_{th}$ is the spiking threshold, and $u_{rest}$ is the resting potential.
@@ -40,37 +35,23 @@ The membrane equation is an *ordinary differential equation (ODE)* that illustra
 To solve this ODE, we can apply the forward Euler method to solve the ODE with a given initial value. We simulate the evolution of the membrane equation in discrete time steps with a sufficiently small $\Delta t$. We start by writing the time derivative $\frac{du}{dt}$ in the membrane equation without taking the limit $\Delta t \to 0$:
 
 $$
-
 \begin{align*}
-
 \\
-
 \tau_m\frac{ u(t+\Delta t)-u(t)}{\Delta t}\ = -[u(t) - u_{rest}] + RI(t)
-
 \\
-
 \\
-
 \end{align*}
-
 $$
 
 The equation can be transformed into the following well-formed equation:
 
 $$
-
 \begin{align*}
-
 \\
-
 u(t+\Delta t) = u(t)-\frac{\Delta t}{\tau_m} \left( [u(t) - u_{rest}] - RI(t) \right)
-
 \\
-
 \\
-
 \end{align*}
-
 $$
 
 The value of membrane potential $u(t+\Delta t)$ can be expressed in terms of its previous value $u(t)$ by simple algebraic manipulation. For *small enough* values of $\Delta t$, this provides a good approximation of the continuous-time integration.
