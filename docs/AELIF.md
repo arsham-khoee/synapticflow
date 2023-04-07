@@ -3,7 +3,7 @@
 # AELIF
 
 ## Introduction
-Adaptive Exponential Leaky Integrate-and-Fire (AELIF) model is an extension of the basic LIF model, incorporating additional features to represent the complex behavior of biological neurons better. The adaptive component allows the model to adjust the firing threshold in response to changes in input statistics, making it more biologically plausible and suitable for modeling neural systems that exhibit adaptive behavior. The AELIF model has been used to study a wide range of phenomena in neuroscience, including sensory processing, learning and memory, and the mechanisms underlying neurological disorders. Its flexibility and ability to capture the dynamics of biological neurons make it a valuable tool for understanding the intricate workings of the brain.
+The Adaptive Exponential Leaky Integrate-and-Fire (AELIF) model is an extension of the basic LIF model, incorporating additional features to represent the complex behavior of biological neurons better. The adaptive component allows the model to adjust the firing threshold in response to changes in input statistics, making it more biologically plausible and suitable for modeling neural systems that exhibit adaptive behavior. The AELIF model has been used to study a wide range of phenomena in neuroscience, including sensory processing, learning and memory, and the mechanisms underlying neurological disorders. Its flexibility and ability to capture the dynamics of biological neurons make it a valuable tool for understanding the intricate workings of the brain.
 
 <br>
 
