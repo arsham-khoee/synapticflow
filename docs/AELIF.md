@@ -8,64 +8,68 @@ Adaptive Exponential Leaky-Integrate-and-Fire (AELIF) is an extension of the cla
 <br>
 
 ## How does it work?
-The ALIF neuron is an extension of the LIF neuron that takes into account the adaptation of the neuron's firing threshold. The membrane equation for the ALIF neuron is given by:
+The adaptive exponential integrate-and-fire (AELIF) neuron is an extension of the LIF and ALIF models, which includes an exponential term that controls the neuron's adaptation. The membrane equation for AELIF is given by:
 
 $$
 \begin{align*}
 \\
-\tau_m\frac{du}{dt}\ =  -[u(t) - u_{rest}] - R\sum_{k} w_k + RI(t) \\
+\tau_m\frac{du}{dt}\ =  -[u(t) - u_{rest}] + \Delta_T exp(\frac{u(t) - \theta_{rh}}{\Delta_T}) - R\sum_{k} w_k + RI(t) \\
 \end{align*}
 $$
 
+where the exponential term with time constant $\Delta_T$ is responsible for the adaptation of the neuron, $\theta_{rh}$ is the rheobase threshold, and $\Delta_T$ is the slope factor. The AELIF model also includes a set of adaptation currents $w_k$ which are controlled by the second equation:
+
 $$
 \begin{align*}
-\tau_k\frac{dw_k}{dt}\ = a_k (u - u_{rest}) - w_k + b_k\tau_k \sum_{t {(f)}} \delta (t - t^{(f)}) \\
+\\
+\tau_k\frac{dw_k}{dt}\ = a_k (u - u_{rest}) - w_k + b_k\tau_k \sum_{t {(f)}} \delta (t - t^{(f)})
 \\
 \end{align*}
 $$
 
-where $u(t)$ is the membrane potential, $\tau_m$ is the membrane time constant, $R$ is the membrane resistance, $C$ is the membrane capacitance, $I(t)$ is the synaptic input current, $u_{rest}$ is the resting potential, $w(t)$ is the adaptation variable, $z(t)$ is the input from the adaptation current, $\Delta_{th}$ is the adaptation strength for the firing threshold, $\Delta_{w}$ is the adaptation strength for the adaptation variable, and $\tau_w$ is the time constant for the adaptation variable.
+where $\tau_k$ is the time constant of the $k^{th}$ adaptation current, $a_k$ and $b_k$ control the amplitude and decay rate of the adaptation current, respectively. The adaptation current is incremented by $b_k$ every time an action potential is fired at time $t^{(f)}$.
 
-The ALIF neuron has two dynamics: 
-- The membrane potential $u(t)$ and the adaptation variable $w(t)$.
-- The adaptation variable w(t) is increased after each spike and decays back to zero with a time constant $\tau_w$. 
-This increase in w(t) causes the firing threshold to increase over time, resulting in a slower firing rate.
-
-The ALIF neuron can be simulated using the forward Euler method as in the LIF neuron. However, since there are now two dynamics, we must solve two ODEs in each time step. This can be achieved by first updating the adaptation variable w(t) and then updating the membrane potential u(t).
+To solve this set of differential equations, we can use the forward Euler method or other numerical techniques. The AELIF model provides a more realistic representation of neuron behavior, including adaptation effects that are present in real neurons.
 
 <br>
 
 ## Strengths:
-<li>The adaptive threshold in ALIF model provides a more realistic representation of neuronal behavior compared to traditional LIF models, as it accounts for the varying response of neurons to input stimuli.
+<li>AELIF model combines the advantages of adaptive and non-adaptive spiking neural models, allowing it to produce complex spiking behaviors while still being computationally efficient.
 
-<li>The ALIF model is capable of producing more precise spike timing compared to the LIF model, which can be useful in modeling and understanding various neural processes.
+<li>AELIF model provides a good approximation of biological neurons that can adapt their firing rates in response to changing input patterns, making it suitable for modeling neural plasticity and learning.
 
-<li>The ALIF model is robust to changes in input statistics, making it more versatile and useful for a wider range of applications.
-## Weaknesses:
+<li>AELIF model has a low computational cost and can simulate large-scale neural networks efficiently.
 
 <br>
 
 ## Weaknesses:
-<li>The adaptive threshold in the ALIF model increases computational complexity compared to the LIF model, which may limit its use in certain applications.
+<li>AELIF model is a simplification of biological neurons and therefore may not capture all the complexities of neural dynamics.
 
-<li>The increased complexity of the ALIF model may make it harder to interpret and understand compared to simpler models like the LIF model.
+<li>AELIF model requires the tuning of several parameters to match experimental data, which can be time-consuming and difficult.
 
-<li>The performance of the ALIF model depends on the specific parameter values chosen, which may require careful tuning for optimal results.
+<li>AELIF model may not accurately model some forms of neural plasticity or learning that involve more complex mechanisms.
 
 <br>
 
 ## Usage
-To use a ALIF neuron, you need to create an object from the LIFPopulation class, which can be done using the following example code:
-```python
-neuron = ALIFPopulation(n=1)
-```
-When creating the object, you must specify the number of neurons (n) in that particular population of neurons.
 
-After creating the object, the forward method can be used to activate the neuron for a one-time step with an input x that represents the amount of input current in that time step:
+ AELIF Population model can be used by given code:
+ ```python
+ from synapticflow.network import neural_population
+ model = AELIFPopulation(n=10)
+ model.set_batch_size(10)
+ ```
 
-```python
-neuron.forward(4)
-```
+ Then you can stimulate each time step by calling `forward` function:
+ ```python
+ model.forward(torch.tensor([10 for _ in range(model.n)]))
+ ```
+
+ All available attributes like spike trace and membrane potential is available by `model` instance:
+ ```python
+ print(model.s) # Model spike trace
+ print(model.v) # Model membrane potential
+ ```
 
 <br>
 
