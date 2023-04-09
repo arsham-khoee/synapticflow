@@ -2,16 +2,16 @@
 <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=default'></script>
 
 
-# Izhikevich
+# AQLIF
 
 ## Introduction
 
-The Izhikevich neuron model is a simplified spiking neuron model that was proposed by Eugene Izhikevich in 2003. It is a two-variable model that captures the basic dynamics of cortical neurons, while being computationally efficient. The model has gained significant attention in computational neuroscience due to its ability to accurately replicate the spiking patterns of various types of neurons in the brain. In this model, the spiking behavior of a neuron is determined by the interplay of two variables, the membrane potential and a recovery variable, which represents the activity of the potassium ion channels.
+The Adaptive Quadratic Leaky Integrate and Fire neuron model is a simplified spiking neuron model. It is a two-variable model that captures the basic dynamics of cortical neurons, while being computationally efficient. The model has gained significant attention in computational neuroscience due to its ability to accurately replicate the spiking patterns of various types of neurons in the brain. In this model, the spiking behavior of a neuron is determined by the interplay of two variables, the membrane potential and a recovery variable, which represents the activity of the potassium ion channels.
 
 <br>
 
 ## How does it work?
-The Izhikevich neuron model is a simplified spiking neuron model that aims to capture the essential features of biological neurons while still being computationally efficient. The model consists of two coupled differential equations that describe the membrane potential and the recovery variable of the neuron. The membrane potential is given by the equation:
+The Adaptive Quadratic Leaky Integrate and Fire neuron model is a simplified spiking neuron model that aims to capture the essential features of biological neurons while still being computationally efficient. The model consists of two coupled differential equations that describe the membrane potential and the recovery variable of the neuron. The membrane potential is given by the equation:
 
 $$
 \begin{align*}
@@ -33,16 +33,16 @@ $$
 
 where $\tau_k$ is the time constant for the $k^{th}$ input synapse, $a_k$ and $b_k$ are parameters that determine the dynamics of the recovery variable, and $\sum_{t {(f)}} \delta (t - t^{(f)})$ is a sum over the spikes arriving at the synapse.
 
-The Izhikevich model has been shown to be capable of reproducing a wide variety of spiking behaviors observed in real neurons, including regular spiking, bursting, and fast spiking, among others. However, the model is still a simplification of the complex dynamics of real neurons, and certain aspects of neural computation may not be captured by the model. Additionally, the model requires careful parameter tuning to reproduce specific spiking behaviors, which can be a time-consuming process.
+The Adaptive Quadratic Leaky Integrate and Fire model has been shown to be capable of reproducing a wide variety of spiking behaviors observed in real neurons, including regular spiking, bursting, and fast spiking, among others. However, the model is still a simplification of the complex dynamics of real neurons, and certain aspects of neural computation may not be captured by the model. Additionally, the model requires careful parameter tuning to reproduce specific spiking behaviors, which can be a time-consuming process.
 
 <br>
 
 ## Strengths:
-<li>The Izhikevich model is computationally efficient and can simulate large networks of spiking neurons.
+<li>The AQLIF model is computationally efficient and can simulate large networks of spiking neurons.
 
 <li>The model can reproduce a wide range of spiking patterns observed in biological neurons, including regular spiking, fast spiking, and bursting.
 
-<li>The Izhikevich model has a simple mathematical formulation that is easy to implement in software and hardware.
+<li>The AQLIF model has a simple mathematical formulation that is easy to implement in software and hardware.
 
 <li>The model is based on biophysical principles and can replicate many features of real neurons, such as adaptation and rebound spiking.
 
@@ -51,23 +51,23 @@ The Izhikevich model has been shown to be capable of reproducing a wide variety 
 ## Weaknesses:
 <li>The model makes several simplifying assumptions about the behavior of neurons, such as the lack of dendritic and synaptic processing, which may limit its biological accuracy.
 
-<li>Although the Izhikevich model can generate diverse spiking patterns, it may not be able to capture more complex neural dynamics, such as oscillations or synchrony, observed in some neural systems.
+<li>Although the AQLIF model can generate diverse spiking patterns, it may not be able to capture more complex neural dynamics, such as oscillations or synchrony, observed in some neural systems.
 
 <li>The model's behavior is sensitive to its parameters, and finding appropriate values for these parameters can be challenging.
 
-<li>Although the Izhikevich model has been widely used in computational neuroscience, its predictions have not been extensively validated experimentally.
+<li>Although the AQLIF model has been widely used in computational neuroscience, its predictions have not been extensively validated experimentally.
 
 <br>
 
 ## Usage
 
- Izhikevich Population model can be used by the given code:
+ Adaptive Quadratic Leaky Integrate and Fire Population model can be used by the given code:
 
  ```python
 
  from synapticflow.network import neural_population
 
- model = Izhikevich(n=10)
+ model = AQLIFPopulation(n=10)
 
  model.set_batch_size(10)
 
