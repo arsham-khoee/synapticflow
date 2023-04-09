@@ -2,7 +2,7 @@
 <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=default'></script>
 
 
-# Spike Response Model 0 (SRM0)
+# SRM0
 
 ## Introduction
 The spike response model 0 (SRM0) is a simple yet powerful neuron model often used in computational neuroscience. It is based on the idea that neurons communicate through brief electrical spikes or action potentials, and captures the essential dynamics of spike generation in a mathematically tractable way. Unlike more complex models that require detailed knowledge of the underlying biophysical mechanisms, SRM0 only requires a few parameters to describe the basic properties of a neuron's firing behavior. This makes it an ideal tool for studying large-scale neural systems and their emergent properties. In this model, the neuron integrates incoming synaptic currents until its membrane potential reaches a threshold, at which point it generates a spike and resets to a baseline level. The timing and frequency of spikes are determined by the strength and timing of the incoming inputs, making SRM0 a powerful framework for exploring how network connectivity and input patterns shape neural activity.
