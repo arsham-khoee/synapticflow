@@ -157,7 +157,8 @@ class NeuralPopulation(torch.nn.Module):
         self.learning = learning
 
         self.register_buffer("s", torch.ByteTensor())
-        self.register_buffer("R", torch.tensor(R, dtype=tensor.float32))
+        self.s = torch.zeros(*self.shape, device=self.s.device, dtype=torch.bool)
+        self.register_buffer("R", torch.tensor(R))
         
         if self.sum_input:
             self.register_buffer("summed", torch.FloatTensor()) # Inputs summation
@@ -277,22 +278,6 @@ class NeuralPopulation(torch.nn.Module):
         self.learning = mode
         return super().train(mode)
 
-    def set_batch_size(self, batch_size) -> None:
-        """
-        Sets mini-batch size. Called when layer is added to a network.
-        
-        Parameters
-        ----------
-        batch_size : int,
-            Mini-batch size
-            
-        Returns
-        -------
-        None
-        """
-        self.batch_size = batch_size
-        self.s = torch.zeros(*self.shape, device=self.s.device, dtype=torch.bool)
-
 class InputPopulation(NeuralPopulation):
     """
     Neural population for user-defined spike pattern.
@@ -400,120 +385,6 @@ class InputPopulation(NeuralPopulation):
         """
         super().reset_state_variables()
 
-class McCullochPitts(NeuralPopulation):
-    """
-        A class representing a McCulloch-Pitts neuron population.
-
-        Args:
-            n (Optional[int]): The number of neurons in the population.
-            shape (Optional[Iterable[int]]): The shape of the input tensor. This
-                is used to determine the number of inputs to each neuron in the
-                population.
-            spike_trace (bool): Whether to compute spike traces for the neurons in
-                the population.
-            additive_spike_trace (bool): Whether to add spike traces over time
-                rather than replacing the old trace with the new one.
-            tau_s (Union[float, torch.Tensor]): The decay time constant for the
-                spike trace.
-            threshold (Union[float, torch.Tensor]): The spiking threshold for the
-                neurons in the population.
-            dt (float): The simulation time step.
-            lower_bound (float): The lower bound for the potential of the neurons
-                in the population.
-            sum_input (bool): Whether to sum the input across all dimensions or to
-                keep the input separate for each dimension.
-            trace_scale (Union[float, torch.Tensor]): A scaling factor for the
-                computed spike traces.
-            is_inhibitory (bool): Whether the population is inhibitory.
-            learning (bool): Whether the population is trainable.
-            **kwargs: Other arguments to pass to the base class constructor.
-
-        Returns:
-            None
-    """
-
-    def __init__(
-        self,
-        n: Optional[int] = None,
-        shape: Optional[Iterable[int]] = None,
-        spike_trace: bool = True,
-        additive_spike_trace: bool = False,
-        tau_s: Union[float, torch.Tensor] = 10.,
-        threshold: Union[float, torch.Tensor] = 1.0,
-        dt: float = 0.1,
-        R: Union[float, torch.Tensor] = 20,
-        lower_bound: float = None,
-        sum_input: bool = False,
-        trace_scale: Union[float, torch.Tensor] = 1.,
-        is_inhibitory: bool = False,
-        learning: bool = True,
-        **kwargs
-    ) -> None:
-        # Initializes the McCullochPitts neuron population.
-        super().__init__(
-            n=n,
-            shape=shape,
-            spike_trace=spike_trace,
-            additive_spike_trace=additive_spike_trace,
-            tau_s=tau_s,
-            sum_input=sum_input,
-            trace_scale=trace_scale,
-            is_inhibitory=is_inhibitory,
-            learning=learning,
-            dt=dt,
-            R=R
-        )
-        
-        self.register_buffer(
-            "threshold", torch.tensor(threshold, dtype=torch.float)
-        ) 
-        self.register_buffer("v", torch.FloatTensor())
-        self.compute_decay() # Compute decays and set time steps
-        self.reset_state_variables()
-        
-
-    def forward(self, x: torch.Tensor) -> None:
-        # Computes the output of the population for the given input.
-        self.compute_potential(x) # Compute new potential
-        
-        self.compute_spike() # Check if neuron is spiking
-        
-        self.refractory_and_reset() # Applies refractory and reset conditions
-        
-        super().forward(x)
-        
-
-    def compute_potential(self, x: torch.Tensor) -> None:
-        # Computes the potential of the neurons in the population for the given input.
-        if isinstance(x, torch.Tensor):
-            self.v = x
-        else:
-            self.v = torch.tensor([x])
-
-    def compute_spike(self) -> None:
-        # Computes the spikes of the neurons in the population based on their potential and threshold values.
-        self.s = self.v >= self.threshold
-
-    @abstractmethod
-    def refractory_and_reset(self) -> None:
-        # Applies the refractory period and resets the state variables of the neurons in the population.
-        super().refractory_and_reset()
-        
-
-    @abstractmethod
-    def compute_decay(self) -> None:
-        # Computes the decay constants for the neuron population.
-        super().compute_decay()
-
-    def reset_state_variables(self) -> None:
-        # Resets the state variables of the neurons in the population.
-        super().reset_state_variables()
-
-    def set_batch_size(self, batch_size: int) -> None:
-        # Sets the batch size of the population.
-        super().set_batch_size(batch_size=batch_size)
-        self.v = torch.zeros(*self.shape, device=self.v.device)
-
 class IFPopulation(NeuralPopulation):
     """
     A Integrate and Fire population layer
@@ -598,6 +469,8 @@ class IFPopulation(NeuralPopulation):
         self.register_buffer("refrac_length", torch.tensor(refrac_length))
         self.register_buffer("v", torch.FloatTensor()) # Neuron's potential
         self.register_buffer("refrac_count", torch.FloatTensor()) # Refractor counter
+        self.v = self.rest_pot * torch.ones(*self.shape, device=self.v.device)
+        self.refrac_count = torch.zeros_like(self.v, device=self.refrac_count.device)
         self.compute_decay() # Compute decays and set time steps
         self.reset_state_variables()
         self.lower_bound = lower_bound
@@ -698,23 +571,7 @@ class IFPopulation(NeuralPopulation):
         super().reset_state_variables()
         self.v.fill_(self.rest_pot) # Reset neuron voltages
         self.refrac_count.zero_() # Refractory period reset
-
-    def set_batch_size(self, batch_size: int) -> None:
-        """
-        Sets the batch size of the neuron.
         
-        Parameters:
-        ----------
-        batch_size : int
-            Batch size to be set.
-            
-        Returns:
-        -------
-        None
-        """
-        super().set_batch_size(batch_size=batch_size)
-        self.v = self.rest_pot * torch.ones(*self.shape, device=self.v.device)
-        self.refrac_count = torch.zeros_like(self.v, device=self.refrac_count.device)
 
 class LIFPopulation(NeuralPopulation):
     """
@@ -802,6 +659,8 @@ class LIFPopulation(NeuralPopulation):
         self.register_buffer("refrac_length", torch.tensor(refrac_length))
         self.register_buffer("v", torch.FloatTensor()) # Neuron's potential
         self.register_buffer("refrac_count", torch.FloatTensor()) # Refractor counter
+        self.v = self.rest_pot * torch.ones(*self.shape, device=self.v.device)
+        self.refrac_count = torch.zeros_like(self.v, device=self.refrac_count.device)
         self.register_buffer("tau_s", torch.tensor(tau_s, dtype=torch.float))  # Time constant of neuron voltage decay.
         self.compute_decay() # Compute decays and set time steps
         self.reset_state_variables()
@@ -901,22 +760,7 @@ class LIFPopulation(NeuralPopulation):
         self.v.fill_(self.rest_pot) # Reset neuron voltages
         self.refrac_count.zero_() # Refractory period reset
 
-    def set_batch_size(self, batch_size: int) -> None:
-        """
-        Sets the batch size of the neuron.
         
-        Parameters:
-        ----------
-        batch_size : int
-            New batch size
-        
-        Returns:
-        -------
-        None
-        """
-        super().set_batch_size(batch_size=batch_size)
-        self.v = self.rest_pot * torch.ones(*self.shape, device=self.v.device)
-        self.refrac_count = torch.zeros_like(self.v, device=self.refrac_count.device)
 
 class BLIFPopulation(NeuralPopulation):
     """
@@ -995,6 +839,8 @@ class BLIFPopulation(NeuralPopulation):
         self.register_buffer("refrac_length", torch.tensor(refrac_length))
         self.register_buffer("v", torch.FloatTensor()) # Neuron's potential
         self.register_buffer("refrac_count", torch.FloatTensor()) # Refractor counter
+        self.v = torch.zeros(*self.shape, device=self.v.device)
+        self.refrac_count = torch.zeros_like(self.v, device=self.refrac_count.device)
         self.register_buffer("tau_s", torch.tensor(tau_s, dtype=torch.float))  # Tau_s
         self.compute_decay() # Compute decays and set time steps
         self.reset_state_variables()
@@ -1095,22 +941,6 @@ class BLIFPopulation(NeuralPopulation):
         self.v.fill_(0) # Reset neuron voltages
         self.refrac_count.zero_() # Refractory period reset
 
-    def set_batch_size(self, batch_size: int) -> None:
-        """
-        Sets the batch size of the neuron.
-        
-        Parameters:
-        ----------
-        batch_size : int
-            Batch size to be set.
-            
-        Returns:
-        -------
-        None
-        """
-        super().set_batch_size(batch_size=batch_size)
-        self.v = torch.zeros(*self.shape, device=self.v.device)
-        self.refrac_count = torch.zeros_like(self.v, device=self.refrac_count.device)
 
 class ALIFPopulation(NeuralPopulation):
     """
@@ -1190,6 +1020,9 @@ class ALIFPopulation(NeuralPopulation):
         self.register_buffer("v", torch.FloatTensor()) # Neuron's potential
         self.register_buffer("w", torch.FloatTensor()) # Adaptation variable
         self.register_buffer("refrac_count", torch.FloatTensor()) # Refractor counter
+        self.v = self.rest_pot * torch.ones(*self.shape, device=self.v.device)
+        self.refrac_count = torch.zeros_like(self.v, device=self.refrac_count.device)
+        self.w = torch.zeros_like(self.v, device=self.w.device)
         self.register_buffer("a0", torch.tensor(a0, dtype=torch.float)) # a_0
         self.register_buffer("b", torch.tensor(b, dtype=torch.float)) # b
         self.compute_decay() # Compute decays and set time steps
@@ -1299,24 +1132,6 @@ class ALIFPopulation(NeuralPopulation):
         self.refrac_count.zero_() # Refractory period reset
         
 
-    def set_batch_size(self, batch_size: int) -> None:
-        """
-        Sets the batch size of the neuron.
-        
-        Parameters:
-        ----------
-        batch_size : int
-            Batch size to be set.
-            
-        Returns:
-        -------
-        None
-        """
-        super().set_batch_size(batch_size=batch_size)
-        self.v = self.rest_pot * torch.ones(*self.shape, device=self.v.device)
-        self.refrac_count = torch.zeros_like(self.v, device=self.refrac_count.device)
-        self.w = torch.zeros_like(self.v, device=self.w.device)
-
 class ELIFPopulation(NeuralPopulation):
     """
     Layer of Exponential Leaky Integrate and Fire neurons.
@@ -1393,6 +1208,8 @@ class ELIFPopulation(NeuralPopulation):
         self.register_buffer("refrac_length", torch.tensor(refrac_length)) # Refractor length
         self.register_buffer("v", torch.FloatTensor()) # Neuron's potential
         self.register_buffer("refrac_count", torch.FloatTensor()) # Refractor counter
+        self.v = self.reset_pot * torch.ones(*self.shape, device=self.v.device)
+        self.refrac_count = torch.zeros_like(self.v, device=self.refrac_count.device)
         self.compute_decay() # Compute decays and set time steps
         self.reset_state_variables()
         self.lower_bound = lower_bound
@@ -1480,22 +1297,6 @@ class ELIFPopulation(NeuralPopulation):
         """
         super().compute_decay()
         
-    def set_batch_size(self, batch_size: int) -> None:
-        """
-        Sets the batch size of the neuron.
-        
-        Parameters:
-        ----------
-        batch_size : int
-            Batch size to be set.
-            
-        Returns:
-        -------
-        None
-        """
-        super().set_batch_size(batch_size=batch_size)
-        self.v = self.reset_pot * torch.ones(*self.shape, device=self.v.device)
-        self.refrac_count = torch.zeros_like(self.v, device=self.refrac_count.device)
 
     def reset_state_variables(self) -> None:
         """
@@ -1584,6 +1385,8 @@ class QLIFPopulation(NeuralPopulation):
         self.register_buffer("refrac_length", torch.tensor(refrac_length)) # Refractor length
         self.register_buffer("v", torch.FloatTensor()) # Neuron's potential
         self.register_buffer("refrac_count", torch.FloatTensor()) # Refractor counter
+        self.v = self.reset_pot * torch.ones(*self.shape, device=self.v.device)
+        self.refrac_count = torch.zeros_like(self.v, device=self.refrac_count.device)
         self.compute_decay() # Compute decays and set time steps
         self.reset_state_variables()
         self.lower_bound = lower_bound
@@ -1671,22 +1474,6 @@ class QLIFPopulation(NeuralPopulation):
         """
         super().compute_decay()
         
-    def set_batch_size(self, batch_size: int) -> None:
-        """
-        Sets the batch size of the neuron.
-        
-        Parameters:
-        ----------
-        batch_size : int
-            Batch size to be set.
-            
-        Returns:
-        -------
-        None
-        """
-        super().set_batch_size(batch_size=batch_size)
-        self.v = self.reset_pot * torch.ones(*self.shape, device=self.v.device)
-        self.refrac_count = torch.zeros_like(self.v, device=self.refrac_count.device)
 
     def reset_state_variables(self) -> None:
         """
@@ -1784,6 +1571,9 @@ class AELIFPopulation(NeuralPopulation):
         self.register_buffer("v", torch.FloatTensor()) # Neuron's potential
         self.register_buffer("w", torch.FloatTensor()) # Adaptation variable
         self.register_buffer("refrac_count", torch.FloatTensor()) # Refractor counter
+        self.v = self.reset_pot * torch.ones(*self.shape, device=self.v.device)
+        self.refrac_count = torch.zeros_like(self.v, device=self.refrac_count.device)
+        self.w = torch.zeros_like(self.v, device=self.w.device)
         self.register_buffer("a0", torch.tensor(a0, dtype=torch.float)) # a_0
         self.register_buffer("b", torch.tensor(b, dtype=torch.float)) # b
         self.compute_decay() # Compute decays and set time steps
@@ -1873,24 +1663,6 @@ class AELIFPopulation(NeuralPopulation):
         None
         """
         super().compute_decay()
-        
-    def set_batch_size(self, batch_size: int) -> None:
-        """
-        Sets the batch size of the neuron.
-        
-        Parameters:
-        ----------
-        batch_size : int
-            Batch size to be set.
-            
-        Returns:
-        -------
-        None
-        """
-        super().set_batch_size(batch_size=batch_size)
-        self.v = self.reset_pot * torch.ones(*self.shape, device=self.v.device)
-        self.refrac_count = torch.zeros_like(self.v, device=self.refrac_count.device)
-        self.w = torch.zeros_like(self.v, device=self.w.device)
 
     def reset_state_variables(self) -> None:
         """
@@ -1988,6 +1760,9 @@ class AQLIFPopulation(NeuralPopulation):
         self.register_buffer("v", torch.FloatTensor()) # Neuron's potential
         self.register_buffer("w", torch.FloatTensor()) # Adaptation variable
         self.register_buffer("refrac_count", torch.FloatTensor()) # Refractor counter
+        self.v = self.reset_pot * torch.ones(*self.shape, device=self.v.device)
+        self.refrac_count = torch.zeros_like(self.v, device=self.refrac_count.device)
+        self.w = torch.zeros_like(self.v, device=self.w.device)
         self.register_buffer("a0", torch.tensor(a0, dtype=torch.float)) # a_0
         self.register_buffer("b", torch.tensor(b, dtype=torch.float)) # b
         self.compute_decay() # Compute decays and set time steps
@@ -2078,23 +1853,6 @@ class AQLIFPopulation(NeuralPopulation):
         """
         super().compute_decay()
         
-    def set_batch_size(self, batch_size: int) -> None:
-        """
-        Sets the batch size of the neuron.
-        
-        Parameters:
-        ----------
-        batch_size : int
-            Batch size to be set.
-            
-        Returns:
-        -------
-        None
-        """
-        super().set_batch_size(batch_size=batch_size)
-        self.v = self.reset_pot * torch.ones(*self.shape, device=self.v.device)
-        self.refrac_count = torch.zeros_like(self.v, device=self.refrac_count.device)
-        self.w = torch.zeros_like(self.v, device=self.w.device)
 
     def reset_state_variables(self) -> None:
         """
@@ -2181,6 +1939,9 @@ class CLIFPopulation(NeuralPopulation):
         self.register_buffer("v", torch.FloatTensor()) # Neuron's potential
         self.register_buffer("i", torch.FloatTensor()) # Neuron's current'
         self.register_buffer("refrac_count", torch.FloatTensor()) # Refractor counter
+        self.v = self.rest_pot * torch.ones(*self.shape, device=self.v.device)
+        self.refrac_count = torch.zeros_like(self.v, device=self.refrac_count.device)
+        self.i = torch.zeros_like(self.v, device=self.i.device)
         self.register_buffer("tc_decay", torch.tensor(tc_decay, dtype=torch.float)) # Time constant neuron voltage decay
         self.register_buffer("tc_i_decay", torch.tensor(tc_i_decay, dtype=torch.float)) # Time constant input current decay
         self.register_buffer("decay", torch.empty_like(self.tc_decay)) # Main decay which applies to neuron voltage
@@ -2292,23 +2053,6 @@ class CLIFPopulation(NeuralPopulation):
         self.v.fill_(self.rest_pot) # Reset neuron voltages
         self.refrac_count.zero_() # Refractory period reset
 
-    def set_batch_size(self, batch_size: int) -> None:
-        """
-        Sets the batch size of the neuron.
-        
-        Parameters:
-        ----------
-        batch_size : int
-            Batch size to be set.
-            
-        Returns:
-        -------
-        None
-        """
-        super().set_batch_size(batch_size=batch_size)
-        self.v = self.rest_pot * torch.ones(*self.shape, device=self.v.device)
-        self.refrac_count = torch.zeros_like(self.v, device=self.refrac_count.device)
-        self.i = torch.zeros_like(self.v, device=self.i.device)
 
 class SRM0Node(NeuralPopulation):
     """
@@ -2394,6 +2138,8 @@ class SRM0Node(NeuralPopulation):
         self.register_buffer("d_thresh", torch.tensor(d_thresh))
         self.register_buffer("v", torch.FloatTensor())
         self.register_buffer("refrac_count", torch.FloatTensor())
+        self.v = self.rest_pot * torch.ones(*self.shape, device=self.v.device)
+        self.refrac_count = torch.zeros_like(self.v, device=self.refrac_count.device)
         self.compute_decay() # Compute decays and set time steps
         self.reset_state_variables()
         self.lower_bound = lower_bound
@@ -2505,20 +2251,4 @@ class SRM0Node(NeuralPopulation):
         self.v.fill_(self.rest_pot) # Reset neuron voltages
         self.refrac_count.zero_() # Refractory period reset
 
-    def set_batch_size(self, batch_size: int) -> None:
-        """
-        Sets the batch size of the neuron.
-        
-        Parameters:
-        ----------
-        batch_size : int
-            Batch size to be set.
-            
-        Returns:
-        -------
-        None
-        """
-        super().set_batch_size(batch_size=batch_size)
-        self.v = self.rest_pot * torch.ones(*self.shape, device=self.v.device)
-        self.refrac_count = torch.zeros_like(self.v, device=self.refrac_count.device)        
 
