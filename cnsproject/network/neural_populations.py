@@ -1904,7 +1904,7 @@ class AELIFPopulation(NeuralPopulation):
         self.v.fill_(self.reset_pot) # Reset neuron voltages
         self.refrac_count.zero_() # Refractory period reset
 
-class AQLIF(NeuralPopulation):
+class AQLIFPopulation(NeuralPopulation):
     """
     Layer of Adaptive Quadratic Leaky Integrate and Fire neurons.
     """
