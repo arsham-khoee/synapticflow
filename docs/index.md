@@ -24,11 +24,16 @@ quickstart
 :caption: Network
 :hidden: 
 Network
+McCullochPitts
+IF
 LIF
 ALIF
 ELIF
-Adex
+AELIF
 QLIF
+Izhikevich
+BoostedLIF
+CurrentLIF
 SRM0
 ```
 
