@@ -24,7 +24,6 @@ quickstart
 :caption: Network
 :hidden: 
 Network
-McCullochPitts
 IF
 LIF
 ALIF
