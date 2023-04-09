@@ -1904,9 +1904,9 @@ class AELIFPopulation(NeuralPopulation):
         self.v.fill_(self.reset_pot) # Reset neuron voltages
         self.refrac_count.zero_() # Refractory period reset
 
-class Izhikevich(NeuralPopulation):
+class AQLIF(NeuralPopulation):
     """
-    Layer of Izhikevich neurons.
+    Layer of Adaptive Quadratic Leaky Integrate and Fire neurons.
     """
 
     def __init__(
