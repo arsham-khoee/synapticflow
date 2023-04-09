@@ -30,7 +30,7 @@ ALIF
 ELIF
 AELIF
 QLIF
-Izhikevich
+AQLIF
 BoostedLIF
 CurrentLIF
 SRM0
