@@ -54,7 +54,6 @@ where $u(t)$ is the membrane potential at time $t$, $u_{rest}$ is the resting po
  ```python
  from synapticflow.network import neural_population
  model = IFPopulation(n=10)
- model.set_batch_size(10)
  ```
 
  Then you can stimulate each time step by calling `forward` function:
