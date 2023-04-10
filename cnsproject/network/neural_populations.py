@@ -2129,7 +2129,7 @@ class SRM0Node(NeuralPopulation):
 
         self.register_buffer("rest_pot", torch.tensor(rest_pot, dtype=torch.float))
         self.register_buffer("reset_pot", torch.tensor(reset_pot, dtype=torch.float))
-        self.register_buffer("threshold", torch.tensor(threshold, dtype=torch.float))
+        self.register_buffer("pot_threshold", torch.tensor(threshold, dtype=torch.float))
         self.register_buffer("refrac_length", torch.tensor(refrac_length))
         self.register_buffer("tau_decay", torch.tensor(tau_decay))
         self.register_buffer("decay", torch.tensor(tau_decay))
@@ -2187,7 +2187,7 @@ class SRM0Node(NeuralPopulation):
                 
         self.v = self.decay * (self.v - self.rest_pot) + self.rest_pot
         self.v += (self.refrac_count <= 0).float() * self.eps_0 * x * self.R
-        self.rho = self.rho_0 * torch.exp((self.v - self.threshold) / self.threshold)
+        self.rho = self.rho_0 * torch.exp((self.v - self.pot_threshold) / self.pot_threshold)
         self.s_prob = 1.0 - torch.exp(-self.rho * self.dt)
         
 
