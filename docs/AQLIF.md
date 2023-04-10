@@ -69,8 +69,6 @@ The Adaptive Quadratic Leaky Integrate and Fire model has been shown to be capab
 
  model = AQLIFPopulation(n=10)
 
- model.set_batch_size(10)
-
  ```
 
  Then you can stimulate each time step by calling the `forward` function:
