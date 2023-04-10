@@ -57,7 +57,6 @@ To simulate the QLIF neuron model, we can use a similar approach to the LIF mode
  ```python
  from synapticflow.network import neural_population
  model = QLIFPopulation(n=10)
- model.set_batch_size(10)
  ```
 
  Then you can stimulate each time step by calling `forward` function:
