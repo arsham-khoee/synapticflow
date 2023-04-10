@@ -71,8 +71,6 @@ The residual factor $R$ can be used to control the firing rate of the neuron, wi
 
  model = BLIFPopulation(n=10)
 
- model.set_batch_size(10)
-
  ```
 
  Then you can stimulate each time step by calling the `forward` function:
