@@ -23,7 +23,6 @@ quickstart
 ```{toctree}
 :caption: Network
 :hidden: 
-Network
 IF
 LIF
 ALIF
