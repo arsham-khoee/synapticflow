@@ -42,7 +42,6 @@ ELIF Population model can be used by the given code:
 ```python
 from synapticflow.network import neural_population
 model = ELIFPopulation(n=10)
-model.set_batch_size(10)
 ```
 Then you can stimulate each time step by calling the `forward` function:
 ```python
