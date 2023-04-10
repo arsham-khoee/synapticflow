@@ -5,15 +5,13 @@
 # Current LIF
 
 ## Introduction
-The Current-based Leaky Integrate-and-Fire (LIF) neuron model is a simple yet widely used spiking neuron model in computational neuroscience. Unlike voltage-based LIF models, the current-based LIF model defines the membrane potential as a function of the input current, without taking into account the history of the membrane potential. This makes it computationally efficient and allows for the simulation of large-scale networks of spiking neurons. The current-based LIF model is commonly used in studies of neural coding, synaptic plasticity, and network dynamics, and has been implemented in many software tools for simulating spiking neural networks.
+The Current-based Leaky Integrate-and-Fire (CLIF) neuron model is a simple yet widely used spiking neuron model in computational neuroscience. Unlike voltage-based LIF models, the current-based LIF model defines the membrane potential as a function of the input current, without taking into account the history of the membrane potential. This makes it computationally efficient and allows for the simulation of large-scale networks of spiking neurons. The current-based LIF model is commonly used in studies of neural coding, synaptic plasticity, and network dynamics, and has been implemented in many software tools for simulating spiking neural networks.
 
 <br>
 
 ## How does it work?
 
-LIF stands for Leaky Integrate-and-Fire neuron model. It is a simplified version of the ALIF model. LIF neuron integrates incoming input current $I(t)$ over time and generates a spike when the membrane potential $u(t)$ reaches a certain threshold $u_{th}$. Similar to the ALIF model, the LIF neuron has a resting potential $u_{rest}$ and a membrane time constant $\tau_m$. However, the LIF neuron does not have the adaptation term and the threshold reset mechanism that the ALIF model has. Therefore, the membrane potential $u(t)$ of the LIF neuron obeys the following differential equation:
-
-<br>
+The Current-based Leaky Integrate-and-Fire stands for Leaky Integrate-and-Fire neuron model. The CLIF neuron just like the LIF neuron integrates incoming input current $I(t)$ over time and generates a spike when the membrane potential $u(t)$ reaches a certain threshold $u_{th}$. Similar to the ELIF and the LIF model, the CLIF neuron has a resting potential $u_{rest}$ and a membrane time constant $\tau_m$. The membrane potential $u(t)$ of the CLIF neuron obeys the following differential equation:
 
 $$
 \begin{align*}
@@ -31,18 +29,7 @@ $$
 \end{align*}
 $$
 
-The LIF neuron model is widely used in computational neuroscience and is computationally efficient due to its simplicity. However, it does not capture the dynamics of spiking behavior as accurately as more complex models like ALIF.
-
-<br>
-
-<div class="sidebar-logo-container">
-  <p align="center">
-    <img class="sidebar-logo only-light" src="_static/membrane.jpeg" alt="Light Membrane" style="width: 600px; padding: 25px;"/>
-    <img class="sidebar-logo only-dark" src="_static/dark-membrane.jpeg" alt="Dark Membrane" style="width: 600px; padding: 25px;"/>
-  </p>
-</div>
-
-<br>
+But the CLIF neuron has a big difference with the LIF and that is the amount of its input current because in it we multiply a decay factor in the input current of the previous state and add it to the new input.
 
 ## Strengths:
 
