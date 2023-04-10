@@ -86,8 +86,6 @@ The LIF neuron model is widely used in computational neuroscience and is computa
 
  model = CLIFPopulation(n=10)
 
- model.set_batch_size(10)
-
  ```
 
  Then you can stimulate each time step by calling the `forward` function:
