@@ -25,6 +25,8 @@ If you encounter any problems, want to share your thoughts or have any questions
 The following are the components included in SynapticFlow:
 <br>
 
+<div align="center">
+
 |        Component        |                        Description                        |
 |:-----------------------:|:---------------------------------------------------------:|
 |   synapticflow.network  | A spiking network components like neurons and connections |
@@ -34,3 +36,5 @@ The following are the components included in SynapticFlow:
 |  synapticflow.datasets  | Include MNIST, Fashion-MNIST, CIFAR-10 benchmark datasets |
 |   synapticflow.vision   |         Include vision components for neuroscience         |
 |    synapticflow.plot    |        Plot tools for neural networks visualization       |
+
+</div>
