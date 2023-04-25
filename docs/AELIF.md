@@ -48,7 +48,7 @@ where $\tau_k$ is the time constant of the $k^{th}$ adaptation current, $a_k$ an
 ## Usage
 AELIF Population model can be used by the given code:
 ```python
-from synapticflow.network import neural_population
+from synapticflow.network import neural_populations
 model = AELIFPopulation(n=10)
 ```
 Then you can stimulate each time step by calling the `forward` function:
