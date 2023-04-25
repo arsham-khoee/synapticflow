@@ -69,7 +69,7 @@ The residual factor $R$ can be used to control the firing rate of the neuron, wi
 
  from synapticflow.network import neural_populations
 
- model = BLIFPopulation(n=10)
+ model = neural_populations.BLIFPopulation(n=10)
 
  ```
 
