@@ -41,7 +41,7 @@ The ELIF model provides increased flexibility to the LIF model by enabling the g
 ELIF Population model can be used by the given code:
 ```python
 from synapticflow.network import neural_populations
-model = ELIFPopulation(n=10)
+model = neural_populations.ELIFPopulation(n=10)
 ```
 Then you can stimulate each time step by calling the `forward` function:
 ```python
