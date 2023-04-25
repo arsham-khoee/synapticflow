@@ -71,7 +71,7 @@ But the CLIF neuron has a big difference with the LIF and that is the amount of 
 
  from synapticflow.network import neural_populations
 
- model = CLIFPopulation(n=10)
+ model = neural_populations.CLIFPopulation(n=10)
 
  ```
 
