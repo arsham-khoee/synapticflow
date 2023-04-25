@@ -50,7 +50,7 @@ where $u$ is the membrane potential, $u_{rest}$ is the resting potential, $\tau_
  ALIF Population model can be used by the given code:
  ```python
  from synapticflow.network import neural_populations
- model = ALIFPopulation(n=10)
+ model = neural_populations.ALIFPopulation(n=10)
  ```
 
  Then you can stimulate each time step by calling the `forward` function:
