@@ -53,7 +53,7 @@ where $u(t)$ is the membrane potential at time $t$, $u_{rest}$ is the resting po
  IF Population model can be used by given code:
  ```python
  from synapticflow.network import neural_populations
- model = IFPopulation(n=10)
+ model = neural_populations.IFPopulation(n=10)
  ```
 
  Then you can stimulate each time step by calling `forward` function:
