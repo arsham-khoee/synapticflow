@@ -25,7 +25,7 @@ $$
 
  McCulloch-Pitts model can be used by given code:
  ```python
- from synapticflow.network import neural_population
+ from synapticflow.network import neural_populations
  model = McCullochPitts(n=10)
  model.set_batch_size(10)
  ```
