@@ -52,7 +52,7 @@ where $u(t)$ is the membrane potential at time $t$, $u_{rest}$ is the resting po
 
  IF Population model can be used by given code:
  ```python
- from synapticflow.network import neural_population
+ from synapticflow.network import neural_populations
  model = IFPopulation(n=10)
  ```
 
