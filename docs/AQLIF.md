@@ -67,7 +67,7 @@ The Adaptive Quadratic Leaky Integrate and Fire model has been shown to be capab
 
  from synapticflow.network import neural_populations
 
- model = AQLIFPopulation(n=10)
+ model = neural_populations.AQLIFPopulation(n=10)
 
  ```
 
