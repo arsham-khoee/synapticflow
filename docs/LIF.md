@@ -73,7 +73,7 @@ The LIF neuron model is widely used in computational neuroscience and is computa
 
  from synapticflow.network import neural_populations
 
- model = LIFPopulation(n=10)
+ model = neural_populations.LIFPopulation(n=10)
 
  ```
 
