@@ -26,13 +26,12 @@ Here, $V_{\text{reset}}$ represents the reset potential of the neuron, which is 
 
 The key parameters of `SRM0` are the membrane capacitance $C$, threshold voltage $\theta$, and reset voltage $V_{\text{reset}}$. By adjusting these parameters, researchers can explore how different input patterns and network topologies affect the firing behavior of the neuron. Additionally, the model can be extended to include more complex features such as refractoriness, synaptic plasticity, and noise, making it a versatile tool for studying neural systems across scales.
 
-
 ## Usage
 SRM0 model can be used by following code:
 
 ```python
-import synapticflow as sf
-model = sf.SRM0Node(n=10) # Creates a neural population with 10 neurons
+from synapticflow.network import neural_populations
+model = neural_populations.SRM0Node(n=10) # Creates a neural population with 10 neurons
 ```
 
 Then you can stimulate each time step by calling the forward function:
