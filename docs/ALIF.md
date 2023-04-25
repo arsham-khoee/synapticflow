@@ -49,7 +49,7 @@ where $u$ is the membrane potential, $u_{rest}$ is the resting potential, $\tau_
 
  ALIF Population model can be used by the given code:
  ```python
- from synapticflow.network import neural_population
+ from synapticflow.network import neural_populations
  model = ALIFPopulation(n=10)
  ```
 
