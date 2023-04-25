@@ -55,7 +55,7 @@ To simulate the QLIF neuron model, we can use a similar approach to the LIF mode
 
  QLIF Population model can be used by given code:
  ```python
- from synapticflow.network import neural_population
+ from synapticflow.network import neural_populations
  model = QLIFPopulation(n=10)
  ```
 
