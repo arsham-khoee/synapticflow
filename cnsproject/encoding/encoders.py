@@ -215,36 +215,6 @@ class BernoulliEncoder(AbstractEncoder):
         return spikes
 
 
-class PositionEncoder(AbstractEncoder):
-    """
-    Position coding.
-
-    Implement Position coding.
-    """
-
-    def __init__(
-        self,
-        time: int,
-        dt: Optional[float] = 1.0,
-        device: Optional[str] = "cpu",
-        **kwargs
-    ) -> None:
-        super().__init__(
-            time=time,
-            dt=dt,
-            device=device,
-            **kwargs
-        )
-
-    def __call__(self, data: torch.Tensor) -> None:
-        """
-        TODO.
-
-        Implement the computation for coding the data. Return resulting tensor.
-        """
-        pass
-
-
 class PoissonEncoder(AbstractEncoder):
     
     """
@@ -348,6 +318,55 @@ class RankOrderEncoder(AbstractEncoder):
         times[data != 0] = 1 / data[data != 0]
         times *= time / times.max() 
         times = torch.ceil(times).long()
+
+        spikes = torch.zeros(time, size, device=self.device).byte()
+        for i in range(size):
+            if 0 < times[i] <= time:
+                spikes[times[i] - 1, i] = 1
+
+        return spikes.reshape(time, *shape)
+
+
+class Timetofirstspike(AbstractEncoder):
+     
+    """
+    Parameters:
+    ----------
+    time : int
+        Length of encoded tensor.
+    dt : float, Optional
+        Simulation time step. The default is 1.0.
+    device : str, Optional
+        The device to do the computations. The default is "cpu".
+    
+    Returns:
+    -------
+    Tensor of shape ``[time, n_1, ..., n_k]`` of rank order-encoded spikes.
+
+    """
+
+    def __init__(
+        self,
+        time: int,
+        dt: Optional[float] = 1.0,
+        device: Optional[str] = "cpu",
+        **kwargs
+    ) -> None:
+        super().__init__(
+            time=time,
+            dt=dt,
+            device=device,
+            **kwargs
+        )
+        
+    def __call__(self, data: torch.Tensor) -> None:
+        shape, size = data.shape, data.numel()
+        data = data.flatten().to(self.device)
+        time = int(self.time / self.dt)
+
+        times = torch.zeros(size)
+        times[data != 0] = data[data != 0] / data.max()
+        times = torch.floor(times).long()
 
         spikes = torch.zeros(time, size, device=self.device).byte()
         for i in range(size):
