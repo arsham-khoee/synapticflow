@@ -106,37 +106,37 @@ And in the same way, you can use the visualization file to draw plots of the obt
   
 ## Parameters:
 
-  <b>n</b> (<span style="color: red;">int, optional</span>) - Number of neurons in this layer.
+  <b>n</b> (<span style="color: rgba(189, 46, 46, 0.823); font-style: italic; font-weight: 200;">int, optional</span>) - Number of neurons in this layer.
 
-  <b>shape</b> (<span style="color: red;">Iterable[int], optional</span>) - Shape of the input tensor to the layer.
+  <b>shape</b> (<span style="color: rgba(189, 46, 46, 0.823); font-style: italic; font-weight: 200;">Iterable[int], optional</span>) - Shape of the input tensor to the layer.
 
-  <b>spike_trace</b> (<span style="color: red;">bool, optional</span>) - Indicates whether to use synaptic traces or not.
+  <b>spike_trace</b> (<span style="color: rgba(189, 46, 46, 0.823); font-style: italic; font-weight: 200;">bool, optional</span>) - Indicates whether to use synaptic traces or not.
 
-  <b>additive_spike_trace</b> (<span style="color: red;">bool, optional</span>) - If true, uses additive spike traces instead of multiplicative ones.
+  <b>additive_spike_trace</b> (<span style="color: rgba(189, 46, 46, 0.823); font-style: italic; font-weight: 200;">bool, optional</span>) - If true, uses additive spike traces instead of multiplicative ones.
 
-  <b>tau_s</b> (<span style="color: red;">float or torch.Tensor, optional</span>) - Decay time constant for spike trace. Default : `10`
+  <b>tau_s</b> (<span style="color: rgba(189, 46, 46, 0.823); font-style: italic; font-weight: 200;">float or torch.Tensor, optional</span>) - Decay time constant for spike trace. Default : `10`
 
-  <b>threshold</b> (<span style="color: red;">float or torch.Tensor, optional</span>) - The spike threshold of the neuron.
+  <b>threshold</b> (<span style="color: rgba(189, 46, 46, 0.823); font-style: italic; font-weight: 200;">float or torch.Tensor, optional</span>) - The spike threshold of the neuron.
 
-  <b>rest_pot</b> (<span style="color: red;">float or torch.Tensor, optional</span>) - The resting potential of the neuron.
+  <b>rest_pot</b> (<span style="color: rgba(189, 46, 46, 0.823); font-style: italic; font-weight: 200;">float or torch.Tensor, optional</span>) - The resting potential of the neuron.
 
-  <b>reset_pot</b> (<span style="color: red;">float or torch.Tensor, optional</span>) - The reset potential of the neuron.
+  <b>reset_pot</b> (<span style="color: rgba(189, 46, 46, 0.823); font-style: italic; font-weight: 200;">float or torch.Tensor, optional</span>) - The reset potential of the neuron.
 
-  <b>refrac_length</b> (<span style="color: red;">float or torch.Tensor, optional</span>) - The refractory period length of the neuron in timesteps.
+  <b>refrac_length</b> (<span style="color: rgba(189, 46, 46, 0.823); font-style: italic; font-weight: 200;">float or torch.Tensor, optional</span>) - The refractory period length of the neuron in timesteps.
 
-  <b>dt</b> (<span style="color: red;">float, optional</span>) - The time step length.
+  <b>dt</b> (<span style="color: rgba(189, 46, 46, 0.823); font-style: italic; font-weight: 200;">float, optional</span>) - The time step length.
 
-  <b>lower_bound</b> (<span style="color: red;">float, optional</span>) - Minimum value for the membrane potential of the neuron.
+  <b>lower_bound</b> (<span style="color: rgba(189, 46, 46, 0.823); font-style: italic; font-weight: 200;">float, optional</span>) - Minimum value for the membrane potential of the neuron.
 
-  <b>sum_input</b> (<span style="color: red;">bool, optional</span>) - If true, sums input instead of averaging it.
+  <b>sum_input</b> (<span style="color: rgba(189, 46, 46, 0.823); font-style: italic; font-weight: 200;">bool, optional</span>) - If true, sums input instead of averaging it.
 
-  <b>trace_scale</b> (<span style="color: red;">float, optional</span>) - Scaling factor for the synaptic traces.
+  <b>trace_scale</b> (<span style="color: rgba(189, 46, 46, 0.823); font-style: italic; font-weight: 200;">float, optional</span>) - Scaling factor for the synaptic traces.
 
-  <b>is_inhibitory</b> (<span style="color: red;">bool, optional</span>) - Indicates whether the neuron is inhibitory or not.
+  <b>is_inhibitory</b> (<span style="color: rgba(189, 46, 46, 0.823); font-style: italic; font-weight: 200;">bool, optional</span>) - Indicates whether the neuron is inhibitory or not.
 
-  <b>tau_decay</b> (<span style="color: red;">float or torch.Tensor, optional</span>) - The time constant of the neuron voltage decay.
+  <b>tau_decay</b> (<span style="color: rgba(189, 46, 46, 0.823); font-style: italic; font-weight: 200;">float or torch.Tensor, optional</span>) - The time constant of the neuron voltage decay.
 
-  <b>learning</b> (<span style="color: red;">bool, optional</span>) - Indicates whether the neuron should update its weights during training.
+  <b>learning</b> (<span style="color: rgba(189, 46, 46, 0.823); font-style: italic; font-weight: 200;">bool, optional</span>) - Indicates whether the neuron should update its weights during training.
 
 ## Reference
 
