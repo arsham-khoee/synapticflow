@@ -103,6 +103,44 @@ And in the same way, you can use the visualization file to draw plots of the obt
 </p>
 
 <br>
+  
+## Parameters:
+    
+    - n : int, optional
+        Number of neurons in this layer.
+    - shape : Iterable[int], optional
+        Shape of the input tensor to the layer.
+    - spike_trace : bool, optional
+        Indicates whether to use synaptic traces or not.
+    - additive_spike_trace : bool, optional
+        If true, uses additive spike traces instead of multiplicative ones.
+    - tau_s : float or torch.Tensor, optional
+        Decay time constant for spike trace (default value is 10.)
+    - threshold : float or torch.Tensor, optional
+        The spike threshold of the neuron.
+    - rest_pot : float or torch.Tensor, optional
+        The resting potential of the neuron.
+    - reset_pot : float or torch.Tensor, optional
+        The reset potential of the neuron.
+    - refrac_length : float or torch.Tensor, optional
+        The refractory period length of the neuron in timesteps.
+    - dt : float, optional
+        The time step length.
+    - lower_bound : float, optional
+        Minimum value for the membrane potential of the neuron.
+    - sum_input : bool, optional
+        If true, sums input instead of averaging it.
+    - trace_scale : float, optional
+        Scaling factor for the synaptic traces.
+    - is_inhibitory : bool, optional
+        Indicates whether the neuron is inhibitory or not.
+    - tau_decay : float or torch.Tensor, optional
+        The time constant of the neuron voltage decay.
+    - learning : bool, optional
+        Indicates whether the neuron should update its weights during training.
+  
+    - Returns:
+        None
 
 ## Reference
 
