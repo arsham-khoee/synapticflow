@@ -396,7 +396,10 @@ class DSTDP(LearningRule):
         else:
             self.connection.w += delta_w
             
-        self.connection.d += delta_d
+        if self.boundry == 'soft':
+            self.connection.d += delta_d * ((self.connection.d - self.connection.d_min) * (self.connection.d_max - self.connection.d) / (self.connection.d_max - self.connection.d_min))
+        else:
+            self.connection.d += delta_d
         
         # Remove old memory
         self.delay_mem.masked_fill_(delta_time != 0, 0)
