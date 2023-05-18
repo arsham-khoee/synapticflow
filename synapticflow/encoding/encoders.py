@@ -64,11 +64,42 @@ class AbstractEncoder(ABC):
         pass
 
 
-class Time2FirstSpikeEncoder(AbstractEncoder):
+class NullEncoder(AbstractEncoder):
+    
     """
-    Time-to-First-Spike coding.
+    Pass through of the datum that was input.
+    """
 
-    Implement Time-to-First-Spike coding.
+    def __init__(self):
+        pass
+
+    def __call__(self, data: torch.Tensor) -> torch.Tensor:
+        return data
+    
+
+class SingleEncoder(AbstractEncoder):
+
+    """
+    Generates timing based single-spike encoding. Spike occurs earlier if the \
+    intensity of the input feature is higher. Features whose value is lower than \
+    the threshold remain silent.
+
+    Parameters:
+    ----------
+    time : int
+        Length of encoded tensor.
+    dt : float, Optional
+        Simulation time step. The default is 1.0.
+    device : str, Optional
+        The device to do the computations. The default is "cpu".
+    sparsity: float, Optional  
+        Sparsity of the input representation. 0 for no spikes and 1 \
+        for all spikes. The default is 0.5.
+    
+    Returns:
+    -------    
+    Tensor of shape ``[time, n_1, ..., n_k]``.
+
     """
 
     def __init__(
@@ -84,26 +115,35 @@ class Time2FirstSpikeEncoder(AbstractEncoder):
             device=device,
             **kwargs
         )
-        """
-        TODO.
+        
 
-        Add other attributes if needed and fill the body accordingly.
-        """
-
-    def __call__(self, data: torch.Tensor) -> None:
-        """
-        TODO.
-
-        Implement the computation for coding the data. Return resulting tensor.
-        """
-        pass
+    def __call__(self, data: torch.Tensor, sparsity = 0.5) -> torch.Tensor:
+        time_step = int(self.time / self.dt)
+        quantile = torch.quantile(data, 1 - sparsity)
+        spikes = torch.zeros([time_step, *data.shape], device=self.device)
+        spikes[0] = torch.where(data > quantile, torch.ones(data.shape), torch.zeros(data.shape))
+        return torch.Tensor(spikes)
 
 
-class PositionEncoder(AbstractEncoder):
+class RepeatEncoder(AbstractEncoder):
+    
     """
-    Position coding.
+    Repeats a tensor along a new dimension in the 0th position for \
+    ``int(time / dt)`` timesteps.
 
-    Implement Position coding.
+    Parameters:
+    ----------
+    time : int
+        Length of encoded tensor.
+    dt : float, Optional
+        Simulation time step. The default is 1.0.
+    device : str, Optional
+        The device to do the computations. The default is "cpu".
+
+    Returns:
+    -------    
+    Tensor of shape ``[time, n_1, ..., n_k]`` of repeated data along the 0-th dimension.
+
     """
 
     def __init__(
@@ -119,26 +159,140 @@ class PositionEncoder(AbstractEncoder):
             device=device,
             **kwargs
         )
-        """
-        TODO.
+        
 
-        Add other attributes if needed and fill the body accordingly.
-        """
+    def __call__(self, data: torch.Tensor) -> torch.Tensor:
+        
+        time = int(self.time / self.dt)
+        return data.repeat([time, 1])
 
-    def __call__(self, data: torch.Tensor) -> None:
-        """
-        TODO.
+    
+class BernoulliEncoder(AbstractEncoder):
+    
+    """
+    Generates Bernoulli-distributed spike trains based on input intensity. Inputs must \
+    be non-negative. Spikes correspond to successful Bernoulli trials, with success \
+    probability equal to (normalized in [0, 1]) input value.
 
-        Implement the computation for coding the data. Return resulting tensor.
-        """
-        pass
+    Parameters:
+    ----------
+    time : int
+        Length of encoded tensor.
+    dt : float, Optional
+        Simulation time step. The default is 1.0.
+    device : str, Optional
+        The device to do the computations. The default is "cpu".
+    max_prob : float, Optional
+        Maximum probability of spike per Bernoulli trial. The default is 1.0. 
+
+    Returns:
+    -------
+    Tensor of shape ``[time, n_1, ..., n_k]`` of Bernoulli-distributed spikes.
+    
+    """
+
+    def __init__(
+        self,
+        time: int,
+        dt: Optional[float] = 1.0,
+        device: Optional[str] = "cpu",
+        **kwargs
+    ) -> None:
+        super().__init__(
+            time=time,
+            dt=dt,
+            device=device,
+            **kwargs
+        )
+
+
+    def __call__(self, data: torch.Tensor, max_prob = 1.0) -> None:
+        time = int(self.time / self.dt)
+        data = data.flatten().to(self.device)
+        data /= data.max()
+        spikes = torch.bernoulli(max_prob * data.repeat([time, 1]))
+        spikes = spikes.view(time, *data.shape)
+        return spikes
 
 
 class PoissonEncoder(AbstractEncoder):
+    
     """
-    Poisson coding.
+    Generates Poisson-distributed spike trains based on input intensity. Inputs must be \
+    non-negative, and give the firing rate in Hz. Inter-spike intervals (ISIs) for \
+    non-negative data incremented by one to avoid zero intervals while maintaining ISI \
+    distributions.
 
-    Implement Poisson coding.
+    Parameters:
+    ----------
+    time : int
+        Length of encoded tensor.
+    dt : float, Optional
+        Simulation time step. The default is 1.0.
+    device : str, Optional
+        The device to do the computations. The default is "cpu".
+    
+    Returns:
+    -------
+    Tensor of shape ``[time, n_1, ..., n_k]`` of Poisson-distributed spikes.
+
+    """
+
+    def __init__(
+        self,
+        time: int,
+        dt: Optional[float] = 1.0,
+        device: Optional[str] = "cpu",
+        **kwargs
+    ) -> None:
+        super().__init__(
+            time=time,
+            dt=dt,
+            device=device
+        )
+
+    def __call__(self, data: torch.Tensor) -> torch.Tensor:
+
+        shape, size = data.shape, data.numel()
+        data = data.flatten().to(self.device)
+        time = int(self.time / self.dt)
+
+        rate = torch.zeros(size, device=self.device)
+        rate[data != 0] = 1 / data[data != 0] * (1000 / self.dt)
+
+        dist = torch.distributions.Poisson(rate=rate, validate_args=False)
+        intervals = dist.sample(sample_shape=torch.Size([time + 1]))
+        intervals[:, data != 0] += (intervals[:, data != 0] == 0).float()
+
+        times = torch.cumsum(intervals, dim=0).long()
+        times[times >= time + 1] = 0
+
+        spikes = torch.zeros(time + 1, size, device=self.device).byte()
+        spikes[times, torch.arange(size)] = 1
+        spikes = spikes[1:]
+
+        return spikes.view(time, *shape)
+    
+
+class RankOrderEncoder(AbstractEncoder):
+     
+    """
+    Encodes data via a rank order coding-like representation. One spike per neuron,
+    temporally ordered by decreasing intensity. Inputs must be non-negative.
+
+    Parameters:
+    ----------
+    time : int
+        Length of encoded tensor.
+    dt : float, Optional
+        Simulation time step. The default is 1.0.
+    device : str, Optional
+        The device to do the computations. The default is "cpu".
+    
+    Returns:
+    -------
+    Tensor of shape ``[time, n_1, ..., n_k]`` of rank order-encoded spikes.
+
     """
 
     def __init__(
@@ -154,16 +308,69 @@ class PoissonEncoder(AbstractEncoder):
             device=device,
             **kwargs
         )
-        """
-        TODO.
-
-        Add other attributes if needed and fill the body accordingly.
-        """
-
+        
     def __call__(self, data: torch.Tensor) -> None:
-        """
-        TODO.
+        shape, size = data.shape, data.numel()
+        data = data.flatten().to(self.device)
+        time = int(self.time / self.dt)
 
-        Implement the computation for coding the data. Return resulting tensor.
-        """
-        pass
+        times = torch.zeros(size)
+        times[data != 0] = 1 / data[data != 0]
+        times *= time / times.max() 
+        times = torch.ceil(times).long()
+
+        spikes = torch.zeros(time, size, device=self.device).byte()
+        for i in range(size):
+            if 0 < times[i] <= time:
+                spikes[times[i] - 1, i] = 1
+
+        return spikes.reshape(time, *shape)
+
+
+class Timetofirstspike(AbstractEncoder):
+     
+    """
+    Parameters:
+    ----------
+    time : int
+        Length of encoded tensor.
+    dt : float, Optional
+        Simulation time step. The default is 1.0.
+    device : str, Optional
+        The device to do the computations. The default is "cpu".
+    
+    Returns:
+    -------
+    Tensor of shape ``[time, n_1, ..., n_k]`` of rank order-encoded spikes.
+
+    """
+
+    def __init__(
+        self,
+        time: int,
+        dt: Optional[float] = 1.0,
+        device: Optional[str] = "cpu",
+        **kwargs
+    ) -> None:
+        super().__init__(
+            time=time,
+            dt=dt,
+            device=device,
+            **kwargs
+        )
+        
+    def __call__(self, data: torch.Tensor) -> None:
+        shape, size = data.shape, data.numel()
+        data = data.flatten().to(self.device)
+        time = int(self.time / self.dt)
+
+        times = torch.zeros(size)
+        times[data != 0] = data[data != 0] / data.max()
+        times = torch.floor(times).long()
+
+        spikes = torch.zeros(time, size, device=self.device).byte()
+        for i in range(size):
+            if 0 < times[i] <= time:
+                spikes[times[i] - 1, i] = 1
+
+        return spikes.reshape(time, *shape)
