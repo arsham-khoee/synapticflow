@@ -94,24 +94,6 @@ class AbstractConnection(ABC, torch.nn.Module):
         self.w_mem = torch.Tensor([])
 
     @abstractmethod
-    def compute(self, s: torch.Tensor) -> None:
-        """
-        Compute the post-synaptic neural population activity based on the given\
-        spikes of the pre-synaptic population.
-
-        Parameters
-        ----------
-        s : torch.Tensor
-            The pre-synaptic spikes tensor.
-
-        Returns
-        -------
-        None
-
-        """
-        pass
-
-    @abstractmethod
     def update(self, **kwargs) -> None:
         """
         Compute connection's learning rule and weight update.
@@ -189,43 +171,6 @@ class Connection(AbstractConnection):
             self.b = Parameter(b, requires_grad=False)
         else:
             self.b = None
-
-    def compute(self, s: torch.Tensor) -> torch.Tensor:
-
-        """
-        Compute the post-synaptic neural population activity based on the given\
-        spikes of the pre-synaptic population.
-
-        Parameters
-        ----------
-        s : torch.Tensor
-            The pre-synaptic spikes tensor.
-
-        Returns
-        -------
-        None
-
-        """
-
-        self.delay_mem = torch.cat((self.delay_mem, torch.masked_select(self.d, s.bool())), 0)
-        self.w_mem = torch.cat((self.w_mem, torch.masked_select(self.w, s.bool())), 0)
-
-        self.delay_mem = self.delay_mem.sub(torch.full((self.delay_mem.size()), 5))
-
-        exp = self.delay_mem <= 0
-        w_result = self.w_mem.dot(exp.float())
-
-        self.w_mem = torch.masked_select(self.w_mem, torch.logical_not(exp))
-        self.delay_mem = self.delay_mem > 0
-        
-
-        if self.b is None:
-            result = torch.ones(s.size(0), *self.post.shape) * w_result
-        else:
-            result = torch.ones(s.size(0), *self.post.shape) * w_result + self.b 
-
-        return result  
-        #return torch.ones(s.size(0), *self.post.shape) * w_result
 
     def reset_state_variables(self) -> None:
         """
@@ -305,42 +250,6 @@ class SparseConnection(AbstractConnection):
         self.sparse_mask[indicesx, indicesy] = 1
         self.w *= self.sparse_mask
     
-    def compute(self, s: torch.Tensor) -> torch.Tensor:
-
-        """
-        Compute the post-synaptic neural population activity based on the given\
-        spikes of the pre-synaptic population.
-
-        Parameters
-        ----------
-        s : torch.Tensor
-            The pre-synaptic spikes tensor.
-
-        Returns
-        -------
-        None
-
-        """
-
-        self.delay_mem = torch.cat((self.delay_mem, torch.masked_select(self.d, s.bool())), 0)
-        self.w_mem = torch.cat((self.w_mem, torch.masked_select(self.w, s.bool())), 0)
-
-        self.delay_mem = self.delay_mem.sub(torch.full((self.delay_mem.size()), 5))
-
-        exp = self.delay_mem <= 0
-        w_result = self.w_mem.dot(exp.float())
-
-        self.w_mem = torch.masked_select(self.w_mem, torch.logical_not(exp))
-        self.delay_mem = self.delay_mem > 0
-        
-
-        if self.b is None:
-            result = torch.ones(s.size(0), *self.post.shape) * w_result
-        else:
-            result = torch.ones(s.size(0), *self.post.shape) * w_result + self.b 
-
-        return result  
-        #return torch.ones(s.size(0), *self.post.shape) * w_result
 
     def reset_state_variables(self) -> None:
         """
