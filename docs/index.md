@@ -97,8 +97,6 @@ ELIF
 AELIF
 QLIF
 AQLIF
-BoostedLIF
-CurrentLIF
 SRM0
 ```
 
