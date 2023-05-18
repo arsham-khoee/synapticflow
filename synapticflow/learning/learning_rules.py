@@ -9,7 +9,7 @@ import numpy as np
 import torch
 import copy
 
-from ..network.connections import AbstractConnection, SparseConnection
+from ..network.connections import AbstractConnection, SparseConnection, RandomConnection
 
 
 class LearningRule(ABC):
@@ -48,6 +48,9 @@ class LearningRule(ABC):
         boundry: str = 'hard',
         **kwargs
     ) -> None:
+        
+        assert not isinstance(connection, RandomConnection), 'RandomConnection is not learnable!'
+        
         if lr is None:
             lr = [0., 0.]
         elif isinstance(lr, float) or isinstance(lr, int):

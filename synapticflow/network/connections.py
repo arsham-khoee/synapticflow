@@ -367,231 +367,77 @@ class SparseConnection(AbstractConnection):
         """
         super().update(**kwargs)
 
-class DenseConnection(AbstractConnection):
-    """
-    Specify a fully-connected synapse between neural populations.
-
-    Implement the dense connection pattern following the abstract connection\
-    template.
-    """
-
-    def __init__(
-        self,
-        pre: NeuralPopulation,
-        post: NeuralPopulation,
-        lr: Union[float, Sequence[float]] = None,
-        weight_decay: float = 0.0,
-        **kwargs
-    ) -> None:
-        super().__init__(
-            pre=pre,
-            post=post,
-            lr=lr,
-            weight_decay=weight_decay,
-            **kwargs
-        )
-        """
-        TODO.
-
-        1. Add more parameters if needed.
-        2. Fill the body accordingly.
-        """
-
-    def compute(self, s: torch.Tensor) -> None:
-        """
-        TODO.
-
-        Implement the computation of post-synaptic population activity given the
-        activity of the pre-synaptic population.
-        """
-        pass
-
-    def update(self, **kwargs) -> None:
-        """
-        TODO.
-
-        Update the connection weights based on the learning rule computations.\
-        You might need to call the parent method.
-        """
-        pass
-
-    def reset_state_variables(self) -> None:
-        """
-        TODO.
-
-        Reset all the state variables of the connection.
-        """
-        pass
-
 class RandomConnection(AbstractConnection):
-    """
-    Specify a random synaptic connection between neural populations.
-
-    Implement the random connection pattern following the abstract connection\
-    template.
-    """
-
     def __init__(
         self,
         pre: NeuralPopulation,
         post: NeuralPopulation,
-        lr: Union[float, Sequence[float]] = None,
-        weight_decay: float = 0.0,
+        w: torch.Tensor = None,
+        d: torch.Tensor = None,
+        d_min: float = 0.0,
+        d_max: float = 100.0,
+        mask: torch.ByteTensor = True,
         **kwargs
     ) -> None:
         super().__init__(
-            pre=pre,
-            post=post,
-            lr=lr,
-            weight_decay=weight_decay,
+            pre = pre,
+            post = post,
+            w = w,
+            d = d,
+            d_min = d_min,
+            d_max = d_max,
+            mask = mask,
             **kwargs
         )
-        """
-        TODO.
+        if w is None:
+            if (self.w_min == float('-inf')) or (self.w_max == float('inf')):
+                w = torch.clamp(torch.rand(pre.n, post.n), self.w_min, self.w_max)
+            else:
+                w = self.w_min + torch.rand(pre.n, post.n) * (self.w_max - self.w_min)
+        else:
+            if (self.w_min != float('-inf')).any() or (self.w_max != float('inf')).any():
+                w = torch.clamp(torch.as_tensor(w), self.w_min, self.w_max)
 
-        1. Add more parameters if needed.
-        2. Fill the body accordingly.
-        """
+        if d is None:
+            # if (self.d_min == 0.0) or (self.d_max == 100.0):
+            #     d = torch.clamp(torch.rand(pre.n, post.n), self.d_min, self.d_max)
+            # else:
+                d = self.d_min + torch.rand(pre.n, post.n) * (self.d_max - self.d_min)
+        else:
+            if (self.d_min != 0.0) or (self.d_max != 100.0):
+                d = torch.clamp(torch.as_tensor(d), self.d_min, self.d_max)        
 
-    def compute(self, s: torch.Tensor) -> None:
-        """
-        TODO.
+        self.w = Parameter(w, requires_grad=False)
+        self.d = Parameter(d, requires_grad=False)
 
-        Implement the computation of post-synaptic population activity given the
-        activity of the pre-synaptic population.
-        """
-        pass
-
-    def update(self, **kwargs) -> None:
-        """
-        TODO.
-
-        Update the connection weights based on the learning rule computations.\
-        You might need to call the parent method.
-        """
-        pass
+        b = kwargs.get("b", None)
+        if b is not None:
+            print(b)
+            self.b = Parameter(b, requires_grad=False)
+        else:
+            self.b = None
 
     def reset_state_variables(self) -> None:
         """
-        TODO.
-
-        Reset all the state variables of the connection.
+        Contains resetting logic for the connection.
         """
-        pass
+        super().reset_state_variables()
 
-class ConvolutionalConnection(AbstractConnection):
-    """
-    Specify a convolutional synaptic connection between neural populations.
-
-    Implement the convolutional connection pattern following the abstract\
-    connection template.
-    """
-
-    def __init__(
-        self,
-        pre: NeuralPopulation,
-        post: NeuralPopulation,
-        lr: Union[float, Sequence[float]] = None,
-        weight_decay: float = 0.0,
-        **kwargs
-    ) -> None:
-        super().__init__(
-            pre=pre,
-            post=post,
-            lr=lr,
-            weight_decay=weight_decay,
-            **kwargs
-        )
+    def normalize(self) -> None:
+        # language=rst
         """
-        TODO.
-
-        1. Add more parameters if needed.
-        2. Fill the body accordingly.
+        Normalize weights so each target neuron has sum of connection weights equal to
+        ``self.norm``.
         """
-
-    def compute(self, s: torch.Tensor) -> None:
-        """
-        TODO.
-
-        Implement the computation of post-synaptic population activity given the
-        activity of the pre-synaptic population.
-        """
-        pass
+        if self.norm is not None:
+            w_abs_sum = self.w.abs().sum(0).unsqueeze(0)
+            w_abs_sum[w_abs_sum == 0] = 1.0
+            self.w *= self.norm / w_abs_sum
 
     def update(self, **kwargs) -> None:
+        # language=rst
         """
-        TODO.
-
-        Update the connection weights based on the learning rule computations.
-        You might need to call the parent method.
+        Compute connection's update rule.
         """
-        pass
-
-    def reset_state_variables(self) -> None:
-        """
-        TODO.
-
-        Reset all the state variables of the connection.
-        """
-        pass
-
-class PoolingConnection(AbstractConnection):
-    """
-    Specify a pooling synaptic connection between neural populations.
-
-    Implement the pooling connection pattern following the abstract connection\
-    template. Consider a parameter for defining the type of pooling.
-
-    Note: The pooling operation does not support learning. You might need to\
-    make some modifications in the defined structure of this class.
-    """
-
-    def __init__(
-        self,
-        pre: NeuralPopulation,
-        post: NeuralPopulation,
-        lr: Union[float, Sequence[float]] = None,
-        weight_decay: float = 0.0,
-        **kwargs
-    ) -> None:
-        super().__init__(
-            pre=pre,
-            post=post,
-            lr=lr,
-            weight_decay=weight_decay,
-            **kwargs
-        )
-        """
-        TODO.
-
-        1. Add more parameters if needed.
-        2. Fill the body accordingly.
-        """
-
-    def compute(self, s: torch.Tensor) -> None:
-        """
-        TODO.
-
-        Implement the computation of post-synaptic population activity given the
-        activity of the pre-synaptic population.
-        """
-        pass
-
-    def update(self, **kwargs) -> None:
-        """
-        TODO.
-
-        Update the connection weights based on the learning rule computations.\
-        You might need to call the parent method.
-
-        Note: You should be careful with this method.
-        """
-        pass
-
-    def reset_state_variables(self) -> None:
-        """
-        TODO.
-
-        Reset all the state variables of the connection.
-        """
-        pass
+        super().update(**kwargs)
+        
