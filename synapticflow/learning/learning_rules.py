@@ -45,6 +45,7 @@ class LearningRule(ABC):
         lr: Optional[Union[float, Sequence[float]]] = None,
         weight_decay: float = 0.,
         reduction: Optional[callable] = None,
+        boundry: str = 'hard',
         **kwargs
     ) -> None:
         if lr is None:
@@ -53,6 +54,7 @@ class LearningRule(ABC):
             lr = [lr, lr]
 
         self.connection = connection
+        self.boundry = boundry
 
         self.lr = torch.tensor(lr, dtype=torch.float)
 
@@ -79,7 +81,7 @@ class LearningRule(ABC):
             self.connection.w *= self.weight_decay
         if (
             self.connection.w_min != -np.inf or self.connection.w_max != np.inf
-        ) and not isinstance(self, NoOp):
+        ) and not isinstance(self, NoOp) and (self.boundry == 'hard'):
             self.connection.w.clamp_(self.connection.w_min,
                                      self.connection.w_max)
         
@@ -145,6 +147,7 @@ class STDP(LearningRule):
         lr: Optional[Union[float, Sequence[float]]] = None,
         reduction: Optional[callable] = None,
         weight_decay: float = 0.,
+        boundry: str = 'hard',
         **kwargs
     ) -> None:
         super().__init__(
@@ -152,6 +155,7 @@ class STDP(LearningRule):
             lr=lr,
             reduction=reduction,
             weight_decay=weight_decay,
+            boundry=boundry,
             **kwargs
         )
         """
@@ -163,7 +167,10 @@ class STDP(LearningRule):
         
         dw = self.connection.pre.dt * (-self.lr[0] * self.connection.post.traces.view(*self.connection.post.shape, 1).matmul(self.connection.pre.s.view(1, *self.connection.pre.shape).float()).T + (self.lr[1] * self.connection.pre.traces.view(*self.connection.pre.shape, 1).matmul(self.connection.post.s.view(1, *self.connection.post.shape).float())))
         
-        self.connection.w += dw
+        if self.boundry == 'soft':
+            self.connection.w += (dw * ((self.connection.w - self.connection.w_min) * (self.connection.w_max - self.connection.w) / (self.connection.w_max - self.connection.w_min)))
+        else:
+            self.connection.w += dw
 
         super().update()
 
@@ -186,6 +193,7 @@ class FlatSTDP(LearningRule):
         lr: Optional[Union[float, Sequence[float]]] = None,
         reduction: Optional[callable] = None,
         weight_decay: float = 0.,
+        boundry: str = 'hard',
         window_steps: int = 10,
         **kwargs
     ) -> None:
@@ -194,6 +202,7 @@ class FlatSTDP(LearningRule):
             lr=lr,
             reduction=reduction,
             weight_decay=weight_decay,
+            boundry=boundry,
             **kwargs
         )
         self.window_steps = window_steps
@@ -230,7 +239,11 @@ class FlatSTDP(LearningRule):
         print(post_traces_sum)
        
         dw = self.connection.pre.dt * (-self.lr[0] * post_traces_sum.view(*self.connection.post.shape, 1).matmul(self.connection.pre.s.float().view(1, *self.connection.pre.shape)).T + self.lr[1] * pre_traces_sum.view(*self.connection.pre.shape, 1).matmul(self.connection.post.s.float().view(1, *self.connection.post.shape)))
-        self.connection.w += dw
+        
+        if self.boundry == 'soft':
+            self.connection.w += (dw * ((self.connection.w - self.connection.w_min) * (self.connection.w_max - self.connection.w) / (self.connection.w_max - self.connection.w_min)))
+        else:
+            self.connection.w += dw
 
         """
 
@@ -253,6 +266,7 @@ class RSTDP(LearningRule):
         lr: Optional[Union[float, Sequence[float]]] = None,
         reduction: Optional[callable] = None,
         weight_decay: float = 0.,
+        boundry: str = 'hard',
         tau_c: Union[float, torch.Tensor] = 0.1,
         **kwargs
     ) -> None:
@@ -261,6 +275,7 @@ class RSTDP(LearningRule):
             lr=lr,
             reduction=reduction,
             weight_decay=weight_decay,
+            boundry=boundry,
             **kwargs
         )
         self.c = torch.zeros(*connection.post.shape,*connection.pre.shape)
@@ -281,7 +296,13 @@ class RSTDP(LearningRule):
         
         
         dw = self.connection.pre.dt * (self.c * da)
-        self.connection.w += dw.T
+        dw = dw.T
+        
+        if self.boundry == 'soft':
+            self.connection.w += (dw * ((self.connection.w - self.connection.w_min) * (self.connection.w_max - self.connection.w) / (self.connection.w_max - self.connection.w_min)))
+        else:
+            self.connection.w += dw
+            
         """
 
         Implement the dynamics and updating rule. You might need to call the
@@ -289,46 +310,6 @@ class RSTDP(LearningRule):
         argument.
         """
         super().update()
-
-class FlatRSTDP(LearningRule):
-    """
-    Flattened Reward-modulated Spike-Time Dependent Plasticity learning rule.
-
-    Implement the dynamics of Flat-RSTDP learning rule. You might need to implement\
-    different update rules based on type of connection.
-    """
-
-    def __init__(
-        self,
-        connection: AbstractConnection,
-        lr: Optional[Union[float, Sequence[float]]] = None,
-        reduction: Optional[callable] = None,
-        weight_decay: float = 0.,
-        **kwargs
-    ) -> None:
-        super().__init__(
-            connection=connection,
-            lr=lr,
-            reduction=reduction,
-            weight_decay=weight_decay,
-            **kwargs
-        )
-        """
-        TODO.
-
-        Consider the additional required parameters and fill the body\
-        accordingly.
-        """
-
-    def update(self, **kwargs) -> None:
-        """
-        TODO.
-
-        Implement the dynamics and updating rule. You might need to call the
-        parent method. Make sure to consider the reward value as a given keyword
-        argument.
-        """
-        pass
 
 class DSTDP(LearningRule):
     """
@@ -342,6 +323,7 @@ class DSTDP(LearningRule):
         lr: Optional[Union[float, Sequence[float]]] = None,
         reduction: Optional[callable] = None,
         weight_decay: float = 0.,
+        boundry: str = 'hard',
         delay_learning: bool = False,
         A_positive: float = 1,
         A_negative: float = 1,
@@ -378,6 +360,7 @@ class DSTDP(LearningRule):
             lr=lr,
             reduction=reduction,
             weight_decay=weight_decay,
+            boundry=boundry
             **kwargs
         )
         
@@ -408,7 +391,11 @@ class DSTDP(LearningRule):
         delta_d = self.G(delta_time) * (float(self.delay_learning))
         
         # Apply modification on weights and delays
-        self.connection.w += delta_w
+        if self.boundry == 'soft':
+            self.connection.w += delta_w * ((self.connection.w - self.connection.w_min) * (self.connection.w_max - self.connection.w) / (self.connection.w_max - self.connection.w_min))
+        else:
+            self.connection.w += delta_w
+            
         self.connection.d += delta_d
         
         # Remove old memory
@@ -467,6 +454,7 @@ class MNSTDP(LearningRule):
         lr: Optional[Union[float, Sequence[float]]] = None,
         reduction: Optional[callable] = None,
         weight_decay: float = 0.,
+        boundry: str = 'hard',
         A_positive: float = 0.2,
         A_negative: float = 0.2,
         tau_positive: float = 0.01,
@@ -492,6 +480,7 @@ class MNSTDP(LearningRule):
             connection=connection,
             lr=lr,
             weight_decay=weight_decay,
+            boundry=boundry,
             reduction=reduction,
             **kwargs
         )
@@ -516,7 +505,10 @@ class MNSTDP(LearningRule):
         delta_w = self.F(delta_time) * (float(delta_time.any()))
         
         # Apply modification on weights and delays
-        self.connection.w += delta_w
+        if self.boundry == 'soft':
+            self.connection.w += delta_w * ((self.connection.w - self.connection.w_min) * (self.connection.w_max - self.connection.w) / (self.connection.w_max - self.connection.w_min))
+        else:
+            self.connection.w += delta_w
         
         # Remove old memory
         self.weight_mem.masked_fill_(delta_time != 0, 0)
@@ -557,6 +549,7 @@ class WeightDependent(LearningRule):
                  lr: Optional[Union[float, Sequence[float], Sequence[torch.Tensor]]] = None,
                  reduction: Optional[callable] = None,
                  weight_decay: float = 0.0,
+                 boundry: str = 'hard',
                  **kwargs
                  ) -> None:
         super().__init__(
@@ -564,6 +557,7 @@ class WeightDependent(LearningRule):
                          lr=lr,
                          reduction=reduction,
                          weight_decay=weight_decay,
+                         boundry=boundry
                          **kwargs)
         
         assert self.connection.pre.spike_trace, "Pre-synaptic population should record spike traces."
@@ -591,7 +585,9 @@ class WeightDependent(LearningRule):
             outer_product = self.reduction(torch.bmm(pre_trace, post_s), dim=0)
             update += self.lr[1] * outer_product * (self.w_max - self.connection.w)
             
-        self.connection.w += update
+        if self.boundry == 'soft':
+            self.connection.w += update * ((self.connection.w - self.w_min) * (self.w_max - self.connection.w) / (self.connection.w_max - self.connection.w_min))
+        else:
+            self.connection.w += update
         
         super().update()
-        
