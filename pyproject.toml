@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools", "poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "synapticflow"
+version = "0.0.4"
+authors = [
+    "Arsham Gholamzadeh Khoee <arsham.gh97@gmail.com>",
+    "Mobin Nesari <mobinnesari81@gmail.com>",
+    "Mohammad Mehdi Begmaz <mohammadmehdi.begmaz@gmail.com>",
+    "Negar Sourati <negarsourati@gmail.com>"
+]
+maintainers =[ 
+    "Arsham Gholamzadeh Khoee <arsham.gh97@gmail.com>",
+    "Mobin Nesari <mobinnesari81@gmail.com>",
+    "Mohammad Mehdi Begmaz <mohammadmehdi.begmaz@gmail.com>",
+    "Negar Sourati <negarsourati@gmail.com>"
+]
+description = "A powerful Python package for simulating spiking neural networks (SNNs) using PyTorch with GPU acceleration."
+readme = "README.md"
+keywords = ["Delay Learning", "RSTDP", "STDP", "Spiking Neural Network (SNN)"]
+requires-python = ">=3.9"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+
+[project.urls]
+"Repository" = "https://github.com/arsham-khoee/synapticflow"
+"Documentation" = "https://synapticflow.readthedocs.io/en/latest/"
+
+[tool.poetry.dependencies]
+torch = "<=1.13.1"

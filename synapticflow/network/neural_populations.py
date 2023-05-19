@@ -143,6 +143,7 @@ class NeuralPopulation(torch.nn.Module):
         self.spike_trace = spike_trace
         self.additive_spike_trace = additive_spike_trace
         self.sum_input = sum_input # Whether to sum all inputs
+        self.batch_size = 1
 
         if self.spike_trace:
             self.register_buffer("traces", torch.zeros(*self.shape))

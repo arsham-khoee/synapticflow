@@ -1,12 +1,7 @@
-from pathlib import Path
+from synapticflow.network.neural_populations import *
+from synapticflow.network.connections import *
+from synapticflow.encoding.encoders import *
+from synapticflow.learning.learning_rules import *
+from synapticflow.plotting.visualization import *
 
-from . import (
-    utils,
-    network,
-    learning,
-    encoding,
-    decision,
-    plotting,
-)
-
-ROOT_DIR = Path(__file__).parents[0].parents[0]
+__version__ = '0.0.4'
