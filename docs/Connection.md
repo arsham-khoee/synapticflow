@@ -1,4 +1,4 @@
-# Connection:
+# Connection
 
 ## Introduction:
 Neural population connection, also known as synaptic connectivity, is a crucial aspect of building biologically-plausible spiking neural networks (SNNs). In the brain, neurons communicate with one another through the release of chemical neurotransmitters across synapses. These synapses can be excitatory, causing the receiving neuron to increase its firing rate, or inhibitory, causing the receiving neuron to decrease its firing rate. The precise pattern of connectivity between neurons within a neural population plays a significant role in shaping the network's emergent behavior and ultimately determines its computational capabilities. Therefore, understanding and implementing various types of neural population connections is essential for accurately modeling the brain's functionality and developing sophisticated SNN algorithms for a wide range of applications.
