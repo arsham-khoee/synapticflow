@@ -205,12 +205,12 @@ class Connection(AbstractConnection):
         super().update(**kwargs)
 
     def compute(self, s: torch.Tensor) -> None:
+        spike_trace = torch.flatten(s)
         if self.b is None:
-            post = s.view(s.size(0), -1).float() @ self.w
+            post = spike_trace.view(1, -1).float() @ self.w
         else:
-            post = s.view(s.size(0), -1).float() @ self.w + self.b
-        
-        return post.view(s.size(0), *self.post.shape)
+            post = spike_trace.view(1, -1).float() @ self.w + self.b
+        return post.view(*self.post.shape)
 
 class SparseConnection(AbstractConnection):
     def __init__(self, 
@@ -293,12 +293,12 @@ class SparseConnection(AbstractConnection):
         super().update(**kwargs)
         
     def compute(self, s: torch.Tensor) -> None:
+        spike_trace = torch.flatten(s)
         if self.b is None:
-            post = s.view(s.size(0), -1).float() @ self.w
+            post = spike_trace.view(1, -1).float() @ self.w
         else:
-            post = s.view(s.size(0), -1).float() @ self.w + self.b
-        
-        return post.view(s.size(0), *self.post.shape)
+            post = spike_trace.view(1, -1).float() @ self.w + self.b
+        return post.view(*self.post.shape)
 
 class RandomConnection(AbstractConnection):
     def __init__(
@@ -376,10 +376,10 @@ class RandomConnection(AbstractConnection):
         
     def compute(self, s: torch.Tensor) -> None:
         
+        spike_trace = torch.flatten(s)
         if self.b is None:
-            post = s.view(s.size(0), -1).float() @ self.w
+            post = spike_trace.view(1, -1).float() @ self.w
         else:
-            post = s.view(s.size(0), -1).float() @ self.w + self.b
-        
-        return post.view(s.size(0), *self.post.shape)
+            post = spike_trace.view(1, -1).float() @ self.w + self.b
+        return post.view(*self.post.shape)
         
