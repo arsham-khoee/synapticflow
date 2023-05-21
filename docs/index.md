@@ -94,6 +94,12 @@ Plot
 ```
 
 ```{toctree}
+:caption: Connection
+:hidden: 
+Connection
+```
+
+```{toctree}
 :caption: Network
 :hidden: 
 IF
