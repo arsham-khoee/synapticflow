@@ -186,10 +186,10 @@ model = sf.LIFPopulation(n=5)
 input_current = [torch.tensor([5,4,3,2,1]) for _ in range(1000)]
 sf.plot_neuron(neural_population=model, input_current=input_current, dt=model.dt, threshold=model.pot_threshold, colors=['red', 'green', 'blue', 'orange', 'brown'])
 ```
-<img src="neuron1.png">
-<img src="neuron2.png">
-<img src="neuron3.png">
-<img src="neuron4.png">
+<img src="_static/neuron1.png">
+<img src="_static/neuron2.png">
+<img src="_static/neuron3.png">
+<img src="_static/neuron4.png">
 
 ## plot_periodic:
 ```python
