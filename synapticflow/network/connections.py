@@ -122,6 +122,14 @@ class AbstractConnection(ABC, torch.nn.Module):
 
         """
     
+    @abstractmethod
+    def compute(self, s: torch.Tensor) -> None:
+        """
+        Compute pre-activations of downstream neurons given spikes of upstream neurons.
+
+        :param s: Incoming spikes.
+        """
+    
 class Connection(AbstractConnection):
     def __init__(
         self,
@@ -195,6 +203,14 @@ class Connection(AbstractConnection):
         Compute connection's update rule.
         """
         super().update(**kwargs)
+
+    def compute(self, s: torch.Tensor) -> None:
+        if self.b is None:
+            post = s.view(s.size(0), -1).float() @ self.w
+        else:
+            post = s.view(s.size(0), -1).float() @ self.w + self.b
+        
+        return post.view(s.size(0), *self.post.shape)
 
 class SparseConnection(AbstractConnection):
     def __init__(self, 
@@ -275,6 +291,14 @@ class SparseConnection(AbstractConnection):
         Compute connection's update rule.
         """
         super().update(**kwargs)
+        
+    def compute(self, s: torch.Tensor) -> None:
+        if self.b is None:
+            post = s.view(s.size(0), -1).float() @ self.w
+        else:
+            post = s.view(s.size(0), -1).float() @ self.w + self.b
+        
+        return post.view(s.size(0), *self.post.shape)
 
 class RandomConnection(AbstractConnection):
     def __init__(
@@ -349,4 +373,13 @@ class RandomConnection(AbstractConnection):
         Compute connection's update rule.
         """
         super().update(**kwargs)
+        
+    def compute(self, s: torch.Tensor) -> None:
+        
+        if self.b is None:
+            post = s.view(s.size(0), -1).float() @ self.w
+        else:
+            post = s.view(s.size(0), -1).float() @ self.w + self.b
+        
+        return post.view(s.size(0), *self.post.shape)
         
