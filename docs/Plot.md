@@ -34,7 +34,7 @@ X3 = torch.sin(torch.linspace(1, 3, steps=100))
 X = [torch.tensor([X1[i], X2[i], X3[i]]) for i in range(len(X1))]
 sf.plot_current(X, 0.1, default_colors=['red', 'green', 'blue'])
 ```
-<img src="cur_plot.png">
+<img src="_static/cur_plot.png">
 
 ## plot_potential:
 ```python
@@ -73,7 +73,7 @@ for i in range(len(X)):
 sf.plot_potential(voltages, dt=0.1, default_colors=['red', 'green', 'blue'], legend=True)
 ```
 
-<img src="pot_plot.png">
+<img src="_static/pot_plot.png">
 
 ## raster_plot:
 
@@ -99,7 +99,7 @@ while(tim > 0):
     spikes.append(model.s)
 sf.raster_plot(spikes, dt=model.dt, legend=True)
 ```
-<img src="raster_plot.png">
+<img src="_static/raster_plot.png">
 
 
 ## plot_activity:
@@ -128,7 +128,7 @@ while(tim > 0):
     spikes.append(model.s)
 sf.plot_activity(spikes, dt=model.dt, legend=True, default_colors=['red', 'green', 'blue'])
 ```
-<img src="act_plot.png">
+<img src="_static/act_plot.png">
 
 ## plot_refractory_count:
 
@@ -158,7 +158,7 @@ while (tim > 0):
     tim -= model.dt
 sf.plot_refractory_count(refracts, dt=model.dt, legend=True, default_colors=['red', 'green', 'blue'])
 ```
-<img src="refract_plot.png">
+<img src="_static/refract_plot.png">
 
 ## plot_neuron:
 ```python
@@ -235,7 +235,7 @@ while (tim > 0):
     data[10-tim] = d
 sf.plot_periodic(data, dt=0.1)
 ```
-<img src="per_plot.png">
+<img src="_static/per_plot.png">
 
 ## plot_weights:
 ```python
@@ -262,4 +262,4 @@ for i in range(10000):
 
 sf.plot_weights(weights, dt=n1.dt)
 ```
-<img src="wei_plot.png">
+<img src="_static/wei_plot.png">
