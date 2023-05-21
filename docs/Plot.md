@@ -1,4 +1,4 @@
-# Visualization:
+# Visualization
 
 ## Introduction:
 Data visualization is an essential tool for any neuroscientist who wishes to gain insights into complex phenomena. In the field of computational neuroscience, where large quantities of data are generated through simulations or experiments, effective visualization techniques are especially important for understanding and communicating results. Plots and charts can help reveal patterns and relationships that might be difficult to discern from raw data alone. They can also aid in hypothesis testing and model validation. In this section, we will explore some common types of plots used in computational neuroscience and the insights they can provide.
