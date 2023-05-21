@@ -232,6 +232,8 @@ class SparseConnection(AbstractConnection):
                          d_max=d_max,
                          mask=mask,
                          **kwargs)
+        
+        torch.manual_seed(random_seed)
         if w is None:
             if (self.w_min == float('-inf')) or (self.w_max == float('inf')):
                 w = torch.clamp(torch.rand(pre.n, post.n), self.w_min, self.w_max)
