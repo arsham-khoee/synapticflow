@@ -88,6 +88,12 @@ quickstart
 ```
 
 ```{toctree}
+:caption: Plotting
+:hidden: 
+Plot
+```
+
+```{toctree}
 :caption: Network
 :hidden: 
 IF
