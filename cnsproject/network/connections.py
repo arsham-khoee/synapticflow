@@ -494,10 +494,10 @@ class Conv2dConnection(AbstractConnection):
             weight_decay=weight_decay,
             **kwargs
         )
-        self.kernel_size = _pair(kernel_size)
-        self.stride = _pair(stride)
-        self.padding = _pair(padding)
-        self.dilation = _pair(dilation)
+        self.kernel_size = kernel_size
+        self.stride = stride
+        self.padding = padding
+        self.dilation = dilation
 
         self.in_channels, input_height, input_width = (self.pre.shape[0], self.pre.shape[1], self.pre.shape[2])
         self.out_channels, output_height, output_width = (self.post.shape[0], self.post.shape[1], self.post.shape[2])
@@ -505,9 +505,7 @@ class Conv2dConnection(AbstractConnection):
         height = (input_height - self.kernel_size[0] + 2 * self.padding[0]) / self.stride[0] + 1
         width =  (input_width - self.kernel_size [1]+ 2 * self.padding[1]) / self.stride[1] + 1
         shape = (self.in_channels, self.out_channels, int(height), int(width))
-        print(shape)
-        print('height', height)
-        print('width', width)
+        
         error = (
             "Target dimensionality must be (out_channels, ?,"
             "(input_height - filter_height + 2 * padding_height) / stride_height + 1,"
@@ -515,14 +513,13 @@ class Conv2dConnection(AbstractConnection):
         )
 
 
-        print(self.post.shape[0] == shape[1] , self.post.shape[1] == shape[2] , self.post.shape[2] == shape[3])
+        #print(self.post.shape[0] == shape[1] , self.post.shape[1] == shape[2] , self.post.shape[2] == shape[3])
         assert self.post.shape[0] == shape[1] and self.post.shape[1] == shape[2] and self.post.shape[2] == shape[3], error
         if w is None:
             if (self.w_min == float('-inf')).any() or (self.w_max == float('inf')).any():
                 w = torch.clamp(torch.rand(self.post.shape[0], self.pre.shape[0], *self.kernel_size), self.w_min, self.w_max)
             else:
                 w = self.w_min + torch.rand(self.post.shape[0], self.pre.shape[0], *self.kernel_size) * (self.w_max - self.w_min)
-                print('w:' , w)
         else:
             if (self.w_min != float('-inf')).any() or (self.w_max != float('inf')).any():
                 w = torch.clamp(torch.as_tensor(w), self.w_min, self.w_max)
@@ -539,7 +536,6 @@ class Conv2dConnection(AbstractConnection):
         """
 
     def compute(self, s: torch.Tensor) -> None:
-        print('b', self.b)
         return F.conv2d(
             s.float(),
             self.w,
