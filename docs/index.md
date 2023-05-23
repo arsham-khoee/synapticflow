@@ -100,6 +100,12 @@ Connection
 ```
 
 ```{toctree}
+:caption: Encoding
+:hidden: 
+Encoding
+```
+
+```{toctree}
 :caption: Network
 :hidden: 
 IF
