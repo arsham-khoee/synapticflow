@@ -1,4 +1,4 @@
-# Encoders:
+# Encoders
 
 ## Introduction
 Encoding input data into spike trains is one of the most important tasks in building Spiking Neural Networks (SNNs). A good encoding scheme can greatly improve the accuracy and efficiency of an SNN, while a poor one can introduce noise and reduce performance. There are several approaches to encoding, including rate coding, temporal coding, and population coding, each with its own advantages and disadvantages. Rate coding involves using the firing rate of neurons to represent the magnitude of the input, while temporal coding represents information through the precise timing of individual spikes. Population coding combines both rate and temporal coding across multiple neurons to represent complex inputs. In this SNN package, we provide various encoding techniques and tools that enable users to efficiently encode their input data into spiking events and achieve optimal performance in their neural networks.
