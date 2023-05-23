@@ -158,7 +158,7 @@ class Connection(AbstractConnection):
             else:
                 w = self.w_min + torch.rand(pre.n, post.n) * (self.w_max - self.w_min)
         else:
-            if (self.w_min != float('-inf')).any() or (self.w_max != float('inf')).any():
+            if (self.w_min != float('-inf')) or (self.w_max != float('inf')):
                 w = torch.clamp(torch.as_tensor(w), self.w_min, self.w_max)
 
         if d is None:
@@ -240,7 +240,7 @@ class SparseConnection(AbstractConnection):
             else:
                 w = self.w_min + torch.rand(pre.n, post.n) * (self.w_max - self.w_min)
         else:
-            if (self.w_min != float('-inf')).any() or (self.w_max != float('inf')).any():
+            if (self.w_min != float('-inf')) or (self.w_max != float('inf')):
                 w = torch.clamp(torch.as_tensor(w), self.w_min, self.w_max)
 
         if d is None:
@@ -330,7 +330,7 @@ class RandomConnection(AbstractConnection):
             else:
                 w = self.w_min + torch.rand(pre.n, post.n) * (self.w_max - self.w_min)
         else:
-            if (self.w_min != float('-inf')).any() or (self.w_max != float('inf')).any():
+            if (self.w_min != float('-inf')) or (self.w_max != float('inf')):
                 w = torch.clamp(torch.as_tensor(w), self.w_min, self.w_max)
 
         if d is None:
