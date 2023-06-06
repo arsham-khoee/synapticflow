@@ -165,10 +165,23 @@ class STDP(LearningRule):
         Consider the additional required parameters and fill the body\
         accordingly.
         """
+        assert (self.connection.pre.spike_trace and self.connection.post.spike_trace), "Both pre- and post-synaptic nodes must record spike traces"
 
     def update(self, **kwargs) -> None:
         
-        dw = self.connection.pre.dt * (-self.lr[0] * self.connection.post.traces.view(*self.connection.post.shape, 1).matmul(self.connection.pre.s.view(1, *self.connection.pre.shape).float()).T + (self.lr[1] * self.connection.pre.traces.view(*self.connection.pre.shape, 1).matmul(self.connection.post.s.view(1, *self.connection.post.shape).float())))
+        batch_size = self.connection.pre.batch_size
+        
+        if self.lr[0].any():
+            pre_s = self.connection.pre.s.view(batch_size, -1).unsqueeze(2).float()
+            post_traces = self.connection.post.traces.view(batch_size, -1).unsqueeze(1) * self.lr[0]
+            dw = -1 * self.reduction(torch.bmm(pre_s, post_traces), dim=0)
+            del pre_s, post_traces
+            
+        if self.lr[1].any():
+            post_s = self.connection.post.s.view(batch_size, -1).unsqueeze(1).float() * self.lr[1]
+            pre_traces = self.connection.pre.traces.view(batch_size, -1).unsqueeze(2)
+            dw = self.reduction(torch.bmm(pre_traces, post_s), dim=0)
+            del pre_traces, post_s
         
         if self.boundry == 'soft':
             self.connection.w += (dw * ((self.connection.w - self.connection.w_min) * (self.connection.w_max - self.connection.w) / (self.connection.w_max - self.connection.w_min)))
@@ -254,6 +267,93 @@ class FlatSTDP(LearningRule):
         parent method.
         """
         super().update()
+
+
+class MSTDP(LearningRule):
+    def __init__(
+        self,
+        connection: AbstractConnection,
+        lr: Optional[Union[float, Sequence[float]]] = None,
+        reduction: Optional[callable] = None,
+        weight_decay: float = 0.,
+        boundry: str = 'hard',
+        **kwargs
+    ) -> None:
+        super().__init__(
+            connection=connection,
+            lr=lr,
+            reduction=reduction,
+            weight_decay=weight_decay,
+            boundry=boundry,
+            **kwargs
+        )
+        """
+        Consider the additional required parameters and fill the body\
+        accordingly.
+        """
+        self.tc_plus = torch.tensor(kwargs.get("tc_plus", 20.0))
+        self.tc_minus = torch.tensor(kwargs.get("tc_minus", 20.0))
+        
+    def update(self, **kwargs) -> None:
+        batch_size = self.connection.pre.batch_size
+        
+        if not hasattr(self, "p_plus"):
+            self.p_plus = torch.zeros(
+                batch_size,
+                self.pre.n,
+                device=self.pre.s.device,
+            )
+        
+        if not hasattr(self, "p_minus"):
+            self.p_minus = torch.zeros(
+                batch_size,
+                self.post.n,
+                device=self.post.s.device
+            )
+            
+        if not hasattr(self, "eligibility"):
+            self.eligibility = torch.zeros(
+                batch_size,
+                *self.connection.w.shape,
+                device=self.connection.w.device
+            )
+            
+        pre_s = self.connection.pre.s.view(batch_size, -1).float()
+        post_s = self.connection.post.s.view(batch_size, -1).float()
+            
+        reward = kwargs["reward"]
+        a_plus = kwargs.get("a_plus", 1.0)
+        if isinstance(a_plus, dict):
+            for k, v in a_plus.items():
+                a_plus[k] = torch.tensor(v, device=self.connection.w.device)
+        else:
+            a_plus = torch.tensor(a_plus, device=self.connection.w.device)
+            
+        a_minus = kwargs.get("a_minus", -1.0)
+        if isinstance(a_minus, dict):
+            for k, v in a_minus.items():
+                a_minus[k] = torch.tensor(v, device=self.connection.w.device)
+        else:
+            a_minus = torch.tensor(a_minus, device=self.connection.w.device)
+            
+        update = reward * self.eligibility
+        dw = self.lr[0] * self.reduction(update, dim=0)
+        
+        self.p_plus *= torch.exp(-self.connection.pre.dt / self.tc_plus)
+        self.p_plus += a_plus * pre_s
+        
+        self.p_minus *= torch.exp(-self.connection.pre.dt / self.tc_minus)
+        self.p_minus += a_minus * post_s
+        
+        self.eligibility = torch.bmm(
+            self.p_plus.unsqueeze(2), post_s.unsqueeze(1)
+        ) + torch.bmm(pre_s.unsqueeze(2), self.p_minus.unsqueeze(1))
+        
+        if self.boundry == 'soft':
+            self.connection.w += (dw * ((self.connection.w - self.connection.w_min) * (self.connection.w_max - self.connection.w) / (self.connection.w_max - self.connection.w_min)))
+        else:
+            self.connection.w += dw
+        
 
 class RSTDP(LearningRule):
     """
