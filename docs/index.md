@@ -100,6 +100,12 @@ Connection
 ```
 
 ```{toctree}
+:caption: Learning Rules
+:hidden: 
+Learning_Rules
+```
+
+```{toctree}
 :caption: Encoding
 :hidden: 
 Encoding
