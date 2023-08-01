@@ -269,3 +269,88 @@ class FlatRSTDP(LearningRule):
         argument.
         """
         pass
+
+class TRIPLET_STDP(LearningRule):
+        
+    def __init__(self,
+        connection: AbstractConnection,
+        lr: Optional[Union[float, Sequence[float]]] = None,
+        reduction: Optional[callable] = None,
+        weight_decay: float = 0.,
+        boundary: str = 'hard',
+        **kwargs) -> None:
+        super().__init__(connection=connection,
+            lr=lr,
+            reduction=reduction,
+            weight_decay=weight_decay,
+            boundary=boundary,
+            **kwargs)
+        
+        self.A2_plus = torch.tensor(kwargs.get("A2_plus", 7.5e-10))
+        self.A3_plus = torch.tensor(kwargs.get("A3_plus", 9.3e-3))
+        self.A2_minus = torch.tensor(kwargs.get("A2_minus", 7e-3))
+        self.A3_minus = torch.tensor(kwargs.get("A3_minus", 2.3e-4))
+
+        self.tc_plus = torch.tensor(kwargs.get("tc_plus", 16.8))
+        self.tc_minus = torch.tensor(kwargs.get("tc_minus", 33.7))
+        self.tc_x = torch.tensor(kwargs.get("tc_x", 101))
+        self.tc_y = torch.tensor(kwargs.get("tc_y", 125))
+        
+    def update(self, **kwargs) -> None:
+        batch_size = self.connection.pre.batch_size
+        
+        if not hasattr(self, "o_1"):
+            self.o_1 = torch.zeros(
+                batch_size,
+                self.connection.post.n,
+                device=self.connection.pre.s.device,
+            )
+        
+        if not hasattr(self, "o_2"):
+            self.o_2 = torch.zeros(
+                batch_size,
+                self.connection.post.n,
+                device=self.connection.post.s.device
+            )
+
+        if not hasattr(self, "r_1"):
+            self.r_1 = torch.zeros(
+                batch_size,
+                self.connection.pre.n,
+                device=self.connection.post.s.device
+            )
+        
+        if not hasattr(self, "r_2"):
+            self.r_2 = torch.zeros(
+                batch_size,
+                self.connection.pre.n,
+                device=self.connection.post.s.device
+            )
+            
+        pre_s = self.connection.pre.s.view(batch_size, -1).float()
+        post_s = self.connection.post.s.view(batch_size, -1).float()
+        print(pre_s)
+        print(post_s)
+        update = -1 * self.lr[1] * self.o_1 * (self.A2_minus + self.A3_minus * self.r_2) + self.lr[0] * self.r_1 * (self.A2_plus + self.A3_plus * self.o_2)
+        print(f"decrease: {- 1* self.lr[1] * self.o_1 * (self.A2_minus + self.A3_minus * self.r_2)}")
+        print(f"increase: {self.lr[0] * self.r_1 * (self.A2_plus + self.A3_plus * self.o_2)}")
+        dw =  self.reduction(update, dim = 0)
+        
+        self.r_1 *= torch.exp(-self.connection.pre.dt / self.tc_plus)
+        self.r_1 += pre_s
+
+        self.r_2 *= torch.exp(-self.connection.pre.dt / self.tc_x)
+        self.r_2 += pre_s
+
+        self.o_1 *= torch.exp(-self.connection.post.dt / self.tc_minus)
+        self.o_1 += post_s
+
+        self.o_2 *= torch.exp(-self.connection.post.dt / self.tc_y)
+        self.o_2 += post_s
+
+        if self.boundary == 'soft':
+            self.connection.w += (dw * ((self.connection.w - self.connection.w_min) * (self.connection.w_max - self.connection.w) / (self.connection.w_max - self.connection.w_min)))
+        else:
+            self.connection.w += dw
+        return dw
+
