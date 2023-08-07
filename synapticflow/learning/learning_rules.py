@@ -329,11 +329,7 @@ class TRIPLET_STDP(LearningRule):
             
         pre_s = self.connection.pre.s.view(batch_size, -1).float()
         post_s = self.connection.post.s.view(batch_size, -1).float()
-        print(pre_s)
-        print(post_s)
         update = -1 * self.lr[1] * self.o_1 * (self.A2_minus + self.A3_minus * self.r_2) + self.lr[0] * self.r_1 * (self.A2_plus + self.A3_plus * self.o_2)
-        print(f"decrease: {- 1* self.lr[1] * self.o_1 * (self.A2_minus + self.A3_minus * self.r_2)}")
-        print(f"increase: {self.lr[0] * self.r_1 * (self.A2_plus + self.A3_plus * self.o_2)}")
         dw =  self.reduction(update, dim = 0)
         
         self.r_1 *= torch.exp(-self.connection.pre.dt / self.tc_plus)
