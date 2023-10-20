@@ -6,12 +6,11 @@ hide-toc: true
 
 ## Introduction 
 
-<a class="reference external image-reference" href="https://snntorch.readthedocs.io/en/latest/?badge=latest"><img alt="https://github.com/jeshraghian/snntorch/actions/workflows/build.yml/badge.svg" src="https://github.com/jeshraghian/snntorch/actions/workflows/build.yml/badge.svg" /></a>
-<a class="reference external image-reference" href="https://snntorch.readthedocs.io/en/latest/?badge=latest"><img alt="Documentation Status" src="https://readthedocs.org/projects/snntorch/badge/?version=latest" /></a>
-<a class="reference external image-reference" href="https://discord.gg/cdZb5brajb"><img alt="Discord" src="https://img.shields.io/discord/906036932725841941" /></a>
-<a class="reference external image-reference" href="https://pypi.python.org/pypi/snntorch"><img alt="https://img.shields.io/pypi/v/snntorch.svg" src="https://img.shields.io/pypi/v/snntorch.svg" /></a>
-<a class="reference external image-reference" href="https://anaconda.org/conda-forge/snntorch"><img alt="https://img.shields.io/conda/vn/conda-forge/snntorch.svg" src="https://img.shields.io/conda/vn/conda-forge/snntorch.svg" /></a>
-<a class="reference external image-reference" href="https://pepy.tech/project/snntorch"><img alt="https://static.pepy.tech/personalized-badge/snntorch?period=total&amp;units=international_system&amp;left_color=grey&amp;right_color=orange&amp;left_text=Downloads" src="https://static.pepy.tech/personalized-badge/snntorch?period=total&amp;units=international_system&amp;left_color=grey&amp;right_color=orange&amp;left_text=Downloads" /></a>
+<a class="reference external image-reference" href="https://github.com/arsham-khoee/synapticflow"><img alt="https://github.com/jeshraghian/snntorch/actions/workflows/build.yml/badge.svg" src="https://github.com/jeshraghian/snntorch/actions/workflows/build.yml/badge.svg" /></a>
+<a class="reference external image-reference" href="https://synapticflow.readthedocs.io/en/latest"><img alt="Documentation Status" src="https://readthedocs.org/projects/snntorch/badge/?version=latest" /></a>
+<a class="reference external image-reference" href="https://discord.gg/p6XwtccA"><img alt="Discord" src="https://img.shields.io/discord/906036932725841941" /></a>
+<a class="reference external image-reference" href="https://pypi.org/project/synapticflow"><img alt="https://img.shields.io/pypi/v/snntorch.svg" src="https://img.shields.io/pypi/v/snntorch.svg" /></a>
+<a class="reference external image-reference" href=" https://www.pepy.tech/projects/synapticflow"><img alt="https://static.pepy.tech/personalized-badge/snntorch?period=total&amp;units=international_system&amp;left_color=grey&amp;right_color=orange&amp;left_text=Downloads" src="https://static.pepy.tech/personalized-badge/snntorch?period=total&amp;units=international_system&amp;left_color=grey&amp;right_color=orange&amp;left_text=Downloads" /></a>
 
 
 <div class="sidebar-logo-container">
